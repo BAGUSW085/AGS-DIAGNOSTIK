@@ -1,0 +1,14 @@
+.git
+.gitignore
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/*.pyo
+frontend/build
+frontend/.dart_tool
+project_bengkel_masa_depan_siap_pakai
+manual repair suzuki vitara/*.pdf
+bin
+*.zip
+*.log

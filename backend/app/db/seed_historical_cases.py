@@ -1,0 +1,317 @@
+"""
+Seed Data Kasus Historis Diagnosis Berbobot (K001 - K012)
+Sesuai format Excel referensi bengkel:
+- 11 Kasus Nyata Mobil Indonesia (Avanza, Brio, Xpander, Ertiga, Yaris, Mobilio, Innova, Xenia, CR-V)
+- Live Data Scanner (STFT, LTFT, RPM, O2, MAP, MAF, ECT)
+- Diagnosis Akhir & Tindakan Perbaikan
+- Panduan Langkah Resmi Manual Repair Book Terintegrasi
+"""
+
+import asyncio
+import logging
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from app.core.config import settings
+from app.models import HistoricalCase
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
+
+HISTORICAL_CASES_DATA = [
+    {
+        "case_code": "K001",
+        "brand": "Toyota",
+        "model": "Avanza",
+        "year": 2015,
+        "engine_capacity": "1.3",
+        "complaint": "Mesin brebet saat idle",
+        "symptom": "Idle tidak stabil, RPM naik turun, tenaga sedikit berkurang",
+        "dtc": "P0171",
+        "stft": 18.0,
+        "ltft": 12.0,
+        "rpm": 750.0,
+        "o2_voltage": "0,15–0,85 V",
+        "map_kpa": 38.0,
+        "maf_gps": 2.8,
+        "ect_c": 88.0,
+        "inspection_findings": "Cek selang vakum ditemukan retak; fuel pressure normal; busi normal",
+        "final_diagnosis": "Kebocoran vakum pada intake",
+        "repair_action": "Ganti selang vakum yang retak dan lakukan reset fuel trim",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1A (Fuel & Air Metering) & Bab 1D (Intake Manifold). Standar MAP: 30-45 kPa idle, MAF: 2.0-3.2 g/s. Fuel trim normal: -10% s/d +10%. Ganti selang vakum, torsi klem 4 N·m, reset learned values ECU.",
+    },
+    {
+        "case_code": "K002",
+        "brand": "Honda",
+        "model": "Brio",
+        "year": 2017,
+        "engine_capacity": "1.2",
+        "complaint": "Mesin pincang saat idle",
+        "symptom": "RPM rendah, mesin bergetar, normal saat rpm dinaikkan",
+        "dtc": "P0171",
+        "stft": 16.0,
+        "ltft": 10.0,
+        "rpm": 720.0,
+        "o2_voltage": "0,18–0,82 V",
+        "map_kpa": 40.0,
+        "maf_gps": 2.6,
+        "ect_c": 90.0,
+        "inspection_findings": "Ditemukan selang PCV bocor; throttle body cukup bersih; tekanan bahan bakar normal",
+        "final_diagnosis": "Kebocoran udara melalui selang PCV",
+        "repair_action": "Ganti selang PCV dan lakukan pemeriksaan ulang",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1B (Positive Crankcase Ventilation PCV). Periksa katup one-way valve PCV (kocok: harus bunyi klik bebas). Ganti selang karet penghubung intake, kencangkan klem.",
+    },
+    {
+        "case_code": "K003",
+        "brand": "Mitsubishi",
+        "model": "Xpander",
+        "year": 2019,
+        "engine_capacity": "1.5",
+        "complaint": "Check engine menyala",
+        "symptom": "Konsumsi BBM meningkat, respons mesin kurang baik",
+        "dtc": "P0131",
+        "stft": 14.0,
+        "ltft": 8.0,
+        "rpm": 800.0,
+        "o2_voltage": "0,10–0,35 V",
+        "map_kpa": 39.0,
+        "maf_gps": 3.0,
+        "ect_c": 91.0,
+        "inspection_findings": "Tegangan O2 sensor cenderung rendah dan lambat berubah; kabel/soket normal",
+        "final_diagnosis": "Sensor O2 lemah/bermasalah",
+        "repair_action": "Ganti sensor O2 dan lakukan reset ECU",
+        "system_category": "Bahan Bakar",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1A-140 (Heated Oxygen Sensor HO2S). Sinyal terminal ECM C37-11 (OX1) normal osilasi 0.1-0.9V (>1 Hz pada 2500 RPM). Tahanan heater: 11-16 Ohm (20°C). Torsi pasang: 44 N·m.",
+    },
+    {
+        "case_code": "K004",
+        "brand": "Toyota",
+        "model": "Avanza",
+        "year": 2016,
+        "engine_capacity": "1.3",
+        "complaint": "Mesin brebet dan boros",
+        "symptom": "Idle kurang stabil, akselerasi terasa berat",
+        "dtc": "P0171",
+        "stft": 20.0,
+        "ltft": 15.0,
+        "rpm": 780.0,
+        "o2_voltage": "0,12–0,78 V",
+        "map_kpa": 42.0,
+        "maf_gps": 2.5,
+        "ect_c": 89.0,
+        "inspection_findings": "Selang intake setelah MAF ditemukan longgar; tidak ditemukan kebocoran bahan bakar",
+        "final_diagnosis": "Kebocoran udara setelah MAF",
+        "repair_action": "Kencangkan sambungan intake dan lakukan pengecekan ulang",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1D (Air Induction Duct). Seluruh udara setelah sensor MAF wajib melewati sensor tanpa celah palsu. Kencangkan klem rubber duct torsi 3.5 N·m, cek karet bellows dari retak getas.",
+    },
+    {
+        "case_code": "K005",
+        "brand": "Suzuki",
+        "model": "Ertiga",
+        "year": 2018,
+        "engine_capacity": "1.4",
+        "complaint": "Mesin susah hidup pagi hari",
+        "symptom": "Starter lama, setelah hidup mesin normal",
+        "dtc": "Tidak ada",
+        "stft": 5.0,
+        "ltft": 3.0,
+        "rpm": 850.0,
+        "o2_voltage": "0,10–0,85 V",
+        "map_kpa": 36.0,
+        "maf_gps": 3.2,
+        "ect_c": 48.0,
+        "inspection_findings": "ECT terbaca lebih tinggi dari kondisi aktual saat mesin dingin; sensor dan soket diperiksa",
+        "final_diagnosis": "Sensor ECT tidak akurat",
+        "repair_action": "Ganti sensor ECT dan lakukan verifikasi suhu melalui scanner",
+        "system_category": "Pendingin",
+        "affected_system": "Bahan Bakar",
+        "group_category": "Pendukung",
+        "manual_book_ref": "Suzuki Grand Vitara JB420 / Ertiga Manual Bab 1A-108. Terminal ECM C37-24 (THW). Tahanan sensor ECT: 20°C = 2.21-2.69 kOhm (tegangan ~3.0V); 80°C = 290-354 Ohm (tegangan ~0.5V). Torsi 15 N·m.",
+    },
+    {
+        "case_code": "K006",
+        "brand": "Toyota",
+        "model": "Yaris",
+        "year": 2014,
+        "engine_capacity": "1.5",
+        "complaint": "Mesin kehilangan tenaga",
+        "symptom": "Akselerasi lambat, RPM sulit naik, check engine menyala",
+        "dtc": "P0101",
+        "stft": 4.0,
+        "ltft": 6.0,
+        "rpm": 780.0,
+        "o2_voltage": "0,15–0,85 V",
+        "map_kpa": 45.0,
+        "maf_gps": 1.8,
+        "ect_c": 90.0,
+        "inspection_findings": "MAF kotor; setelah dibersihkan nilai airflow kembali normal",
+        "final_diagnosis": "Sensor MAF kotor",
+        "repair_action": "Bersihkan MAF menggunakan cleaner khusus dan reset DTC",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1A-62. Tegangan MAF output terminal C37-26: Kunci ON mesin mati = 0.9-1.2V (0 g/s), Idle hangat = 1.3-1.8V (2.0-3.5 g/s). Semprot kawat platinum dengan MAF cleaner tanpa disentuh lap.",
+    },
+    {
+        "case_code": "K007",
+        "brand": "Honda",
+        "model": "Mobilio",
+        "year": 2016,
+        "engine_capacity": "1.5",
+        "complaint": "RPM idle terlalu tinggi",
+        "symptom": "RPM bertahan sekitar 1.500 rpm, turun sedikit setelah mesin panas",
+        "dtc": "P0507",
+        "stft": 8.0,
+        "ltft": 6.0,
+        "rpm": 1500.0,
+        "o2_voltage": "0,20–0,80 V",
+        "map_kpa": 55.0,
+        "maf_gps": 5.5,
+        "ect_c": 87.0,
+        "inspection_findings": "Ditemukan kebocoran pada gasket throttle body; sistem pengapian normal",
+        "final_diagnosis": "Kebocoran udara pada throttle body",
+        "repair_action": "Ganti gasket throttle body dan lakukan idle relearn",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1A-173 (Idle Speed Control). Target idle: 750 ± 50 RPM. Ganti gasket throttle body dengan part baru, torsi baut 10 N·m. Jalankan prosedur Idle Air Volume Learning via scanner / kunci kontak.",
+    },
+    {
+        "case_code": "K008",
+        "brand": "Mitsubishi",
+        "model": "Xpander",
+        "year": 2020,
+        "engine_capacity": "1.5",
+        "complaint": "Check engine dan mesin tidak stabil",
+        "symptom": "Idle bergetar, akselerasi tersendat",
+        "dtc": "P0172",
+        "stft": -15.0,
+        "ltft": -10.0,
+        "rpm": 760.0,
+        "o2_voltage": "0,65–0,90 V",
+        "map_kpa": 35.0,
+        "maf_gps": 4.5,
+        "ect_c": 92.0,
+        "inspection_findings": "Injektor silinder tertentu ditemukan menetes; tekanan bahan bakar normal",
+        "final_diagnosis": "Campuran terlalu kaya akibat injektor bocor",
+        "repair_action": "Perbaiki/ganti injektor dan lakukan pemeriksaan fuel trim",
+        "system_category": "Bahan Bakar",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1G (Fuel Injector & Delivery Pipe). Tahanan coil injektor: 11.5 - 14.5 Ohm (20°C). Tekanan fuel rail 300 - 350 kPa. Uji kebocoran test bench: maksimal 1 tetes per 2 menit saat bertekanan mati.",
+    },
+    {
+        "case_code": "K009",
+        "brand": "Toyota",
+        "model": "Innova",
+        "year": 2017,
+        "engine_capacity": "2.0",
+        "complaint": "Mesin brebet saat AC hidup",
+        "symptom": "Idle turun saat AC aktif, mesin hampir mati",
+        "dtc": "Tidak ada",
+        "stft": 7.0,
+        "ltft": 4.0,
+        "rpm": 680.0,
+        "o2_voltage": "0,15–0,85 V",
+        "map_kpa": 42.0,
+        "maf_gps": 3.0,
+        "ect_c": 90.0,
+        "inspection_findings": "Throttle body kotor; idle control membutuhkan penyesuaian; tidak ditemukan kebocoran vakum",
+        "final_diagnosis": "Throttle body kotor",
+        "repair_action": "Bersihkan throttle body dan lakukan idle relearn",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1A-88. Bersihkan kerak deposit karbon di katup kupu-kupu dan dinding bore throttle body dengan Electronic Throttle Cleaner. Idle Relearn: kunci kontak ON 10 detik, starter idle 10 menit tanpa AC.",
+    },
+    {
+        "case_code": "K010",
+        "brand": "Daihatsu",
+        "model": "Xenia",
+        "year": 2015,
+        "engine_capacity": "1.3",
+        "complaint": "Check engine menyala dan boros",
+        "symptom": "Idle normal tetapi konsumsi BBM meningkat",
+        "dtc": "P0171",
+        "stft": 17.0,
+        "ltft": 13.0,
+        "rpm": 760.0,
+        "o2_voltage": "0,15–0,80 V",
+        "map_kpa": 41.0,
+        "maf_gps": 2.7,
+        "ect_c": 89.0,
+        "inspection_findings": "Ditemukan retakan kecil pada selang intake; setelah ditutup sementara fuel trim turun",
+        "final_diagnosis": "Kebocoran udara pada sistem intake",
+        "repair_action": "Ganti selang intake dan lakukan reset fuel trim",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1D (Intake Hose). Cek retak halus pada lipatan selang bergelombang. Ganti part orisinil, kencangkan klem dengan obeng kembang torsi merata, reset nilai adaptasi fuel trim.",
+    },
+    {
+        "case_code": "K012",
+        "brand": "Honda",
+        "model": "Crv",
+        "year": 2015,
+        "engine_capacity": "1.8",
+        "complaint": "Mesin pincang",
+        "symptom": "Mesin agak pincang atau bergetar saat rpm rendah",
+        "dtc": "P0171",
+        "stft": 10.0,
+        "ltft": 10.0,
+        "rpm": None,
+        "o2_voltage": None,
+        "map_kpa": None,
+        "maf_gps": None,
+        "ect_c": None,
+        "inspection_findings": "setelah dilakukan pemeriksaan , indikasi trotelnya kotor dan perlu dibersihkan ",
+        "final_diagnosis": "trotel body kotor",
+        "repair_action": "dibersihkan dengan injeksi cleaner",
+        "system_category": "Udara",
+        "affected_system": None,
+        "group_category": "Pembakaran",
+        "manual_book_ref": "Manual Repair Bab 1A-88 & 1A-173 (Throttle Body Service). Bersihkan katup throttle dengan injection cleaner khusus, semprot kain microfiber dan seka perlahan, kalibrasi ulang posisi nol idle.",
+    },
+]
+
+
+async def seed_historical_cases(session: AsyncSession) -> int:
+    """Isi data kasus historis jika belum ada."""
+    existing_count = (await session.execute(select(HistoricalCase.id).limit(1))).scalar_one_or_none()
+    if existing_count is not None:
+        logger.info("Tabel historical_cases sudah berisi data. Seeder kasus dilewati.")
+        return 0
+
+    inserted = 0
+    for case_dict in HISTORICAL_CASES_DATA:
+        case_obj = HistoricalCase(**case_dict)
+        session.add(case_obj)
+        inserted += 1
+
+    await session.flush()
+    logger.info("Berhasil mengimpor %d kasus historis dari dataset referensi Excel.", inserted)
+    return inserted
+
+
+async def main() -> None:
+    engine = create_async_engine(settings.DATABASE_URL, echo=False)
+    async_session = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        async with session.begin():
+            await seed_historical_cases(session)
+    await engine.dispose()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

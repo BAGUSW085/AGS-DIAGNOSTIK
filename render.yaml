@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: agos-smart-diagnostik
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PROJECT_NAME
+        value: AGOS SMART DIAGNOSTIK by Agos Corporation

@@ -1,0 +1,21 @@
+name: bengkel_masa_depan
+description: Aplikasi Android APK & POS Bengkel Masa Depan (Smart Diagnostic, RAG Manual JB420, & Kasir PPN 11%)
+publish_to: 'none'
+version: 1.1.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.1
+  provider: ^6.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

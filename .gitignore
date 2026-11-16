@@ -1,0 +1,19 @@
+# Python & Virtual Env
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.pyc
+
+# Flutter build artifacts
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins*
+
+# Local archive / raw large PDFs (database & JSON catalog sudah ter-seed di backend/)
+project_bengkel_masa_depan_siap_pakai/
+manual repair suzuki vitara/*.pdf
+bin/
+*.zip
+*.log
+/bengkel.db
+/bengkel_masa_depan.db
