@@ -19,17 +19,48 @@ html, body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Pastikan seluruh anak CSS Grid & Flexbox dapat menyusut sesuai lebar layar HP (360px+) */
+/* Pastikan container utama & grid item tidak meluber melebihi layar,
+   TANPA meremukkan elemen di dalam .flex (agar tombol & pill tetap horizontal rapi) */
 main,
 section.tab-pane,
-.grid > *,
-.flex > * {
+.grid > * {
   min-width: 0;
   max-width: 100%;
 }
 
+input,
+select,
+textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Lindungi nav tab, tombol pill komponen, dan tombol header agar teksnya selalu horizontal & tidak turun per huruf */
+.nav-tab,
+.mob-nav-tab,
+[id^="man-pill-"],
+#btn-toggle-orientation {
+  white-space: nowrap;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  flex-shrink: 0;
+}
+
 header.sticky {
   padding-top: var(--safe-top);
+}
+
+/* Saat HP diputar Horizontal / Landscape, hemat tinggi header agar konten & gambar lebih lega */
+@media (max-height: 520px) and (orientation: landscape) {
+  header.sticky .agos-header-row {
+    height: 2.75rem !important;
+  }
+  header.sticky nav {
+    padding-bottom: 0.35rem !important;
+  }
+  main {
+    padding-top: 0.65rem !important;
+  }
 }
 
 #mobile-bottom-nav {
@@ -78,7 +109,24 @@ header.sticky {
 }
 
 /* ============================================================================
-   ATURAN KHUSUS LAYAR HP ANDROID (< 640px) — ANTI-AMBURADUL (BAGIAN 6 PROMPT)
+   GAMBAR SIMULASI SVG TAMPIL PENUH 100% (FULL-VIEW TANPA DIGESER & TETAP JELAS)
+   ============================================================================ */
+.agos-svg-scroll-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.agos-svg-scroll-wrap svg {
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: block;
+}
+
+/* ============================================================================
+   ATURAN KHUSUS LAYAR HP PORTRAIT (< 640px)
    ============================================================================ */
 @media (max-width: 639px) {
   input[type="text"],
@@ -86,20 +134,14 @@ header.sticky {
   select,
   textarea {
     font-size: 16px !important;
-    min-height: 44px;
+    min-height: 42px;
   }
 
-  button,
-  .mob-nav-tab {
-    min-height: 44px;
+  p, td {
+    overflow-wrap: break-word;
   }
 
-  h1, h2, h3, h4, p, span, td, div {
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-
-  /* Ubah 5 Tabel Lebar Menjadi Kartu Bertumpuk Rapi di Layar HP */
+  /* Ubah 5 Tabel Lebar Menjadi Kartu Horizontal Rapi di Layar HP Portrait */
   table.agos-mobile-cards,
   table.agos-mobile-cards thead,
   table.agos-mobile-cards tbody,
@@ -123,13 +165,13 @@ header.sticky {
   }
 
   table.agos-mobile-cards tbody td {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: 108px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.5rem;
     padding: 0.35rem 0 !important;
     border-bottom: 1px dashed rgba(51, 65, 85, 0.5);
-    text-align: right !important;
+    text-align: left !important;
     font-size: 12.5px !important;
     max-width: 100% !important;
     white-space: normal !important;
@@ -146,23 +188,8 @@ header.sticky {
     font-size: 11px;
     color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
     text-align: left;
-    flex-shrink: 0;
-    max-width: 42%;
-  }
-
-  /* SVG Diagram Container di HP agar tetap terbaca jelas & proporsional */
-  .agos-svg-scroll-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-    padding-bottom: 4px;
-  }
-
-  .agos-svg-scroll-wrap svg {
-    min-width: 520px;
-    height: auto;
   }
 }
 
@@ -179,17 +206,22 @@ html.agos-mobile-sim table.agos-mobile-cards thead {
   display: none;
 }
 html.agos-mobile-sim table.agos-mobile-cards tbody td {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.5rem;
+  text-align: left !important;
   white-space: normal !important;
 }
 html.agos-mobile-sim .agos-svg-scroll-wrap {
-  overflow-x: auto;
+  width: 100%;
   max-width: 100%;
+  overflow: hidden;
 }
 html.agos-mobile-sim .agos-svg-scroll-wrap svg {
-  min-width: 520px;
-  height: auto;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: block;
 }

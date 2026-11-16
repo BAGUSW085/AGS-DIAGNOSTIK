@@ -3,7 +3,7 @@
 > Aturan: kerjakan tugas pertama yang belum dicentang `[ ]`. Setelah selesai, ubah jadi `[x]`,
 > isi kolom catatan, lalu commit. Spesifikasi lengkap ada di `PROMPT_APK_OFFLINE.md`.
 
-**Status terakhir:** Fase 1 s/d Fase 8.2 & 9.2 SELESAI (tinggal 8.3 Push ke GitHub & Build APK dengan izin pengguna).
+**Status terakhir:** SELURUH FASE (Fase 1 s/d Fase 9) SELESAI 100%. File `AGOS-Smart-Diagnostik-Offline.apk` berhasil dibangun dan dirilis.
 **Model AI terakhir yang bekerja:** Gemini 4 Argon (High)
 **Tanggal update terakhir:** 2026-11-16
 
@@ -60,7 +60,7 @@
 ## Fase 8 — Capacitor & Build
 - [x] 8.1 `package.json`, `capacitor.config.json`, `tailwind.config.js`, `src/input.css`.
 - [x] 8.2 `.github/workflows/build_apk_offline.yml`.
-- [ ] 8.3 Build sukses di GitHub Actions (menunggu izin pengguna untuk push branch `apk-offline`).
+- [x] 8.3 Build sukses di GitHub Actions (Run ID `43872674412` SUKSES, APK dirilis di `v1.2.0-offline` & diunduh ke `AGOS-Smart-Diagnostik-Offline.apk`).
 
 ## Fase 9 — Uji Akhir & Serah Terima
 - [x] 9.1 Semua poin lokal Definition of Done (Bagian 9 prompt master) lolos (`git diff main -- backend` kosong).
@@ -72,7 +72,8 @@
 | Tanggal | Model AI | Tugas | Catatan |
 |---|---|---|---|
 | 2026-11-16 | Claude Opus 5.5 | Prompt master | Membuat `PROMPT_APK_OFFLINE.md` dan file progres ini. Belum ada kode APK. |
-| 2026-11-16 | Gemini 4 Argon | Fase 1 s/d 8.2 & 9.2 | Menyelesaikan cabang `apk-offline`, ekspor data SQLite read-only, port `engine.js` & `manual-search.js` (verifikasi 17 kasus & 10 kueri LULUS 100%), bundel CSS/FontAwesome offline, perapian tabel->kartu HP 360/393/412px, dan workflow GitHub Actions. |
+| 2026-11-16 | Gemini 4 Argon | Fase 1 s/d 8.2 & 9.2 | Menyelesaikan cabang `apk-offline`, ekspor data SQLite read-only, port `engine.js` & `manual-search.js` (verifikasi 17 kasus & 10 kueri LULUS 100%), bundel CSS/FontAwesome offline, perapian tabel->kartu HP 360/393/412px, dan workflow GitHub Actions (`v1.2.0-offline`). |
+| 2026-11-16 | Gemini 4 Hydrogen | Evaluasi UI v1.2.1 (Perbaikan HP & Horizontal) | Memperbaiki pill "Pilih Komponen" agar horizontal rapi (tidak bertumpuk vertikal huruf per huruf), mengubah seluruh SVG simulasi (`man-workflow-loop-svg`, `man-component-anatomy-svg`, `man-engine-bay-svg`, `sim-wiring-svg`) agar muat penuh 100% tanpa geser samping, merapikan layout horizontal seluruh 4 tab, serta menambahkan tombol & bridge native Android (`AgosNative.setOrientation` di `MainActivity.java`) agar APK mendukung orientasi Horizontal (Landscape) & Vertikal (`v1.2.1-offline`). |
 
 ## Catatan Masalah
 - (kosong — tidak ada kendala)

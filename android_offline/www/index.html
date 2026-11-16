@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover">
   <meta name="theme-color" content="#020617">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,44 +21,49 @@
   <header class="bg-slate-950/95 backdrop-blur border-b border-slate-800 sticky top-0 z-50 shadow-md">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
       <!-- ROW 1: BRAND LOGO + TITLE + OFFLINE STATUS -->
-      <div class="h-14 sm:h-16 flex items-center justify-between gap-2">
-        <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-brand-500/25 shrink-0">
-            <i class="fa-solid fa-car-burst text-white text-base sm:text-lg"></i>
+      <div class="agos-header-row h-12 sm:h-14 flex items-center justify-between gap-2">
+        <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-brand-500/25 shrink-0">
+            <i class="fa-solid fa-car-burst text-white text-sm sm:text-base"></i>
           </div>
           <div class="min-w-0">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-sm sm:text-lg font-extrabold tracking-tight text-white truncate">AGOS DIAGNOSTIK</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-mono font-semibold shrink-0">APK Offline v1.2</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[13px] sm:text-base font-extrabold tracking-tight text-white whitespace-nowrap">AGOS DIAGNOSTIK</span>
+              <span class="hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-mono font-semibold shrink-0">APK Offline v1.2.1</span>
             </div>
             <p class="text-[11px] text-slate-400 truncate hidden md:block">AGOS SMART DIAGNOSTIK by Agos Corporation • 100% Offline Android AI</p>
           </div>
         </div>
 
-        <!-- ACTION CLUSTER: OFFLINE STATUS BADGE -->
+        <!-- ACTION CLUSTER: TOMBOL ORIENTASI HORIZONTAL/VERTIKAL & STATUS OFFLINE -->
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <div class="flex items-center space-x-1.5 text-[11px] sm:text-xs text-emerald-400 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-full shrink-0">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span id="server-status-text" class="font-semibold">Mode Offline</span>
+          <button type="button" id="btn-toggle-orientation" onclick="toggleAppOrientation()" class="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-cyan-300 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/80 px-2.5 py-1.5 rounded-full shrink-0 active:scale-95 transition whitespace-nowrap" title="Putar Layar Horizontal (Landscape) / Vertikal (Portrait)">
+            <i class="fa-solid fa-mobile-screen-button rotate-90 text-cyan-400" id="icon-orientation"></i>
+            <span id="label-orientation">Horizontal</span>
+          </button>
+          <div class="flex items-center space-x-1.5 text-[11px] sm:text-xs text-emerald-400 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+            <span id="server-status-text" class="font-semibold hidden sm:inline">Mode Offline</span>
+            <span class="font-semibold sm:hidden">Offline</span>
           </div>
         </div>
       </div>
 
-      <!-- ROW 2: DESKTOP/TABLET NAVIGATION TABS (ON MOBILE, REPLACED BY ANDROID BOTTOM NAV BAR) -->
-      <nav class="hidden sm:flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-3">
-        <button onclick="switchTab('diagnostic')" id="tab-btn-diagnostic" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg text-white bg-brand-600 transition flex items-center gap-1.5 shadow-sm active:scale-95">
+      <!-- ROW 2: DESKTOP/LANDSCAPE NAVIGATION TABS (ON PORTRAIT, REPLACED BY ANDROID BOTTOM NAV BAR) -->
+      <nav class="hidden sm:flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2">
+        <button onclick="switchTab('diagnostic')" id="tab-btn-diagnostic" class="nav-tab shrink-0 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg text-white bg-brand-600 transition flex items-center gap-1.5 shadow-sm active:scale-95">
           <i class="fa-solid fa-microchip text-xs"></i>
           <span>Diagnosa Cepat</span>
         </button>
-        <button onclick="switchTab('database')" id="tab-btn-database" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
+        <button onclick="switchTab('database')" id="tab-btn-database" class="nav-tab shrink-0 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
           <i class="fa-solid fa-database text-xs"></i>
           <span>Data Kasus</span>
         </button>
-        <button onclick="switchTab('manuals')" id="tab-btn-manuals" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
+        <button onclick="switchTab('manuals')" id="tab-btn-manuals" class="nav-tab shrink-0 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
           <i class="fa-solid fa-book-open text-xs"></i>
           <span>Manual & Wiring</span>
         </button>
-        <button onclick="switchTab('tools')" id="tab-btn-tools" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
+        <button onclick="switchTab('tools')" id="tab-btn-tools" class="nav-tab shrink-0 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
           <i class="fa-solid fa-screwdriver-wrench text-amber-400 text-xs"></i>
           <span>Tool Diagnostik</span>
         </button>
@@ -90,7 +95,7 @@
         </summary>
         <div class="px-4 pb-3.5 pt-1 border-t border-slate-700/60">
           <p class="text-[11px] text-slate-400 mb-2">Ketuk salah satu kasus di bawah untuk mengisi form diagnosa secara otomatis:</p>
-          <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 sm:flex-wrap">
+          <div class="flex flex-wrap gap-2">
             <button onclick="loadSample('K001')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
               <span class="w-2 h-2 rounded-full bg-red-400"></span> K001: Avanza Brebet (P0171)
             </button>
@@ -120,10 +125,10 @@
       </details>
 
       <!-- FORM DIAGNOSA INPUT (DUAL-PANEL) -->
-      <form id="form-diagnostic" onsubmit="event.preventDefault(); executeSearch();" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <form id="form-diagnostic" onsubmit="event.preventDefault(); executeSearch();" class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
         <!-- PANEL KIRI: DATA TEKS KENDARAAN & GEJALA (7 COLS) -->
-        <div class="lg:col-span-7 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+        <div class="md:col-span-7 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
           <div class="flex items-center justify-between border-b border-slate-700 pb-3">
             <h2 class="text-sm font-semibold text-white flex items-center gap-2">
               <i class="fa-solid fa-file-waveform text-brand-500"></i>
@@ -132,16 +137,16 @@
             <span class="text-xs text-slate-400">Bobot Teks: 85%</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-            <div class="sm:col-span-4">
+          <div class="grid grid-cols-2 sm:grid-cols-12 gap-3">
+            <div class="col-span-1 sm:col-span-4">
               <label class="block text-xs font-medium text-slate-300 mb-1">Merk Kendaraan (0.10)</label>
               <input type="text" id="input-brand" placeholder="Toyota, Honda, Wuling..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition">
             </div>
-            <div class="sm:col-span-4">
+            <div class="col-span-1 sm:col-span-4">
               <label class="block text-xs font-medium text-slate-300 mb-1">Model / Varian (0.15)</label>
               <input type="text" id="input-model" placeholder="Avanza, Cortez Turbo..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition">
             </div>
-            <div class="grid grid-cols-2 gap-2 sm:col-span-4">
+            <div class="col-span-2 sm:col-span-4 grid grid-cols-2 gap-2">
               <div>
                 <label class="block text-xs font-medium text-slate-300 mb-1">Tahun</label>
                 <input type="number" id="input-year" placeholder="2018" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition">
@@ -211,7 +216,7 @@
         </div>
 
         <!-- PANEL KANAN: LIVE DATA SCANNER OBD-II (5 COLS) -->
-        <div class="lg:col-span-5 bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-4">
+        <div class="md:col-span-5 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
           <div class="flex items-center justify-between border-b border-slate-700 pb-3">
             <h2 class="text-sm font-semibold text-white flex items-center gap-2">
               <i class="fa-solid fa-gauge-high text-cyan-400"></i>
@@ -220,7 +225,7 @@
             <span class="text-xs text-slate-400">Bobot Live: 15% (Tol.)</span>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 gap-2.5">
             <div>
               <label class="block text-xs text-slate-300 mb-1">STFT (%) <span class="text-slate-400">(±5%)</span></label>
               <input type="number" step="0.1" id="input-stft" placeholder="e.g. 18.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
@@ -342,12 +347,12 @@
             <!-- KARTU KIRI: AKAR MASALAH KERUSAKAN TERSTRUKTUR -->
             <div class="bg-slate-900/90 border border-amber-500/30 p-4 rounded-xl flex flex-col justify-between space-y-3">
               <div class="space-y-2.5">
-                <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
                   <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     Akar Masalah Kerusakan
                   </h4>
-                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800/60">
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800/60 whitespace-nowrap">
                     Evaluasi Terstruktur
                   </span>
                 </div>
@@ -363,12 +368,12 @@
             <!-- KARTU KANAN: TINDAKAN PERBAIKAN YANG TERBUKTI (MULTI-OPSI INTERAKTIF) -->
             <div class="bg-slate-900/90 border border-emerald-500/30 p-4 rounded-xl flex flex-col justify-between space-y-3">
               <div class="space-y-2.5">
-                <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
                   <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-check-double"></i>
                     Tindakan Perbaikan yang Terbukti
                   </h4>
-                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 whitespace-nowrap">
                     Pilih Opsi Tindakan
                   </span>
                 </div>
@@ -405,7 +410,7 @@
           </div>
 
           <!-- SENSOR SPECIFICATIONS & WIRING PINOUT (DUAL GRID) -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <!-- TABEL STANDAR SENSOR -->
             <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl space-y-2">
@@ -471,8 +476,8 @@
                 <p class="text-xs text-slate-400 mt-0.5">Jumlah jalur kabel &amp; bentuk soket otomatis mengikuti konstruksi asli tiap sensor (2, 3, 4, 5, hingga 6 kabel)</p>
               </div>
 
-              <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                <select id="sim-circuit-select" onchange="changeSimCircuit(this.value)" class="w-full sm:w-auto min-w-0 max-w-full bg-slate-950 text-white border border-slate-700 rounded-lg px-2.5 py-2 text-xs font-semibold focus:border-brand-500 focus:outline-none truncate">
+              <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 w-full sm:w-auto">
+                <select id="sim-circuit-select" onchange="changeSimCircuit(this.value)" class="w-full sm:w-auto sm:max-w-[260px] min-w-0 max-w-full bg-slate-950 text-white border border-slate-700 rounded-lg px-2.5 py-2 text-xs font-semibold focus:border-brand-500 focus:outline-none truncate">
                   <option value="auto">Otomatis Sesuai Hasil Diagnosa Ini</option>
                   <option value="fan_4w">Relay Kipas Radiator (4 Kabel: Relay 1 &amp; 2 + ECT + Massa — P0480)</option>
                   <option value="o2_4w">Sensor O2 / HO2S (4 Kabel: 2 Heater + Sinyal + Massa)</option>
@@ -484,7 +489,7 @@
                 </select>
 
                 <button type="button" id="sim-btn-fault-mode" onclick="toggleSimFaultMode()" class="w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-semibold border border-emerald-500/50 bg-emerald-500/15 text-emerald-400 transition text-center shrink-0 active:scale-95">
-                  Mode: Jalur Normal (OK)
+                  Mode: Normal (OK)
                 </button>
               </div>
             </div>
@@ -493,10 +498,10 @@
             <div id="sim-step-buttons" class="grid grid-cols-1 sm:grid-cols-4 gap-2"></div>
 
             <!-- DIAGRAM SKEMATIK WIRING DINAMIS + PENAMPANG SOKET & DIGITAL MULTIMETER -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
 
               <!-- SKEMATIK SVG DINAMIS (8 KOLOM) -->
-              <div class="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between">
+              <div class="md:col-span-8 bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between">
                 <div class="flex flex-wrap items-center justify-between px-2 pt-0.5 text-xs text-slate-400 gap-1">
                   <span class="font-mono text-cyan-400 font-semibold" id="sim-ecm-header">MODUL ECM / ECU</span>
                   <span class="text-amber-400 font-mono text-xs" id="sim-active-wire-badge">Diuji: -</span>
@@ -514,7 +519,7 @@
               </div>
 
               <!-- PENAMPANG FISIK SOKET + LAYAR MULTIMETER DIGITAL & VONIS ALUR (4 KOLOM) -->
-              <div class="lg:col-span-4 bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between space-y-2.5">
+              <div class="md:col-span-4 bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between space-y-2.5">
 
                 <!-- PENAMPANG DEPAN SOKET FISIK (CONNECTOR FACE VIEW) -->
                 <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5">
@@ -570,10 +575,10 @@
         </div>
 
         <!-- DUAL TABLE: TOP MATCHES & SYSTEM SUMMARY -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
           <!-- TABEL RANKING TOP 10 KASUS (8 COLS) -->
-          <div class="lg:col-span-8 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
+          <div class="md:col-span-8 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
             <div class="flex items-center justify-between border-b border-slate-700 pb-2">
               <h3 class="text-sm font-semibold text-white flex items-center gap-2">
                 <i class="fa-solid fa-ranking-star text-amber-400"></i>
@@ -582,7 +587,7 @@
               <span class="text-xs text-slate-400" id="ranked-count-label">20 Kasus Terurut</span>
             </div>
 
-            <div class="overflow-x-auto max-h-96">
+            <div class="overflow-x-auto sm:max-h-96">
               <table class="w-full text-left text-xs agos-mobile-cards">
                 <thead class="text-slate-400 bg-slate-900/60 sticky top-0 border-b border-slate-700">
                   <tr>
@@ -602,7 +607,7 @@
           </div>
 
           <!-- TABEL RINGKASAN SKOR PER SISTEM (4 COLS - J3:M12) -->
-          <div class="lg:col-span-4 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
+          <div class="md:col-span-4 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
             <div class="flex items-center justify-between border-b border-slate-700 pb-2">
               <h3 class="text-sm font-semibold text-white flex items-center gap-2">
                 <i class="fa-solid fa-diagram-project text-cyan-400"></i>
@@ -694,43 +699,48 @@
           <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">1.381 Chunks Offline</span>
         </div>
 
-        <!-- QUICK EXPLORER DTC CARDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-1">
-            <div class="text-xs text-slate-400">Total Kode DTC Resmi</div>
-            <div class="text-2xl font-bold text-white font-mono">189 DTC</div>
-            <div class="text-[11px] text-slate-400">P0030 s/d P2196 (Powertrain & Body)</div>
+        <!-- QUICK EXPLORER DTC CARDS (HORIZONTAL 3 KOLOM RAPI DI HP) -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-4">
+          <div class="bg-slate-900 p-2.5 sm:p-4 rounded-xl border border-slate-700 space-y-0.5">
+            <div class="text-[10px] sm:text-xs text-slate-400">Kode DTC Resmi</div>
+            <div class="text-sm sm:text-2xl font-bold text-white font-mono whitespace-nowrap">189 DTC</div>
+            <div class="text-[10px] sm:text-[11px] text-slate-400">P0030–P2196</div>
           </div>
-          <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-1">
-            <div class="text-xs text-slate-400">Dokumen Manual Resmi</div>
-            <div class="text-2xl font-bold text-white font-mono">Vol 1 & Vol 2</div>
-            <div class="text-[11px] text-slate-400">1.488 Halaman (Bab 0 s/d Bab 10)</div>
+          <div class="bg-slate-900 p-2.5 sm:p-4 rounded-xl border border-slate-700 space-y-0.5">
+            <div class="text-[10px] sm:text-xs text-slate-400">Manual Resmi</div>
+            <div class="text-sm sm:text-2xl font-bold text-white font-mono whitespace-nowrap">Vol 1–2</div>
+            <div class="text-[10px] sm:text-[11px] text-slate-400">1.488 Hal.</div>
           </div>
-          <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-1">
-            <div class="text-xs text-slate-400">Coupler Pinout Terpetakan</div>
-            <div class="text-2xl font-bold text-white font-mono">7 Konektor</div>
-            <div class="text-[11px] text-slate-400">C37, E23, E92, E93, G30, G31, G32</div>
+          <div class="bg-slate-900 p-2.5 sm:p-4 rounded-xl border border-slate-700 space-y-0.5">
+            <div class="text-[10px] sm:text-xs text-slate-400">Pinout Soket</div>
+            <div class="text-sm sm:text-2xl font-bold text-white font-mono whitespace-nowrap">7 Soket</div>
+            <div class="text-[10px] sm:text-[11px] text-slate-400">C37–G32</div>
           </div>
         </div>
 
         <!-- SEARCH MANUAL RAG -->
         <div class="flex flex-col sm:flex-row gap-2.5">
-          <input type="text" id="manual-search-query" onkeydown="if(event.key==='Enter') searchManualRAG()" placeholder="Ketik kata kunci komponen atau DTC: maf, o2, ect, map, ckp, throttle, koil, P0171, P0037..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
-          <button onclick="searchManualRAG();" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2 shrink-0">
+          <input type="text" id="manual-search-query" onkeydown="if(event.key==='Enter') searchManualRAG()" placeholder="Ketik kata kunci komponen atau DTC: maf, o2, ect, map, ckp, throttle, koil, P0171, P0037..." class="flex-1 min-w-0 w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+          <button onclick="searchManualRAG();" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2 shrink-0 whitespace-nowrap">
             <i class="fa-solid fa-magnifying-glass"></i> Cari Manual
           </button>
         </div>
 
-        <!-- PILIH CEPAT KOMPONEN SIMULASI -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1.5 sm:flex-wrap pt-1">
-          <span class="text-xs font-semibold text-slate-400 shrink-0 mr-1"><i class="fa-solid fa-sliders text-cyan-400 mr-1"></i>Pilih Komponen:</span>
-          <button onclick="selectManualComponent('maf')" id="man-pill-maf" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap active:scale-95"></button>
-          <button onclick="selectManualComponent('o2')" id="man-pill-o2" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap active:scale-95"></button>
-          <button onclick="selectManualComponent('ect')" id="man-pill-ect" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap active:scale-95"></button>
-          <button onclick="selectManualComponent('map')" id="man-pill-map" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap active:scale-95"></button>
-          <button onclick="selectManualComponent('ckp')" id="man-pill-ckp" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap active:scale-95"></button>
-          <button onclick="selectManualComponent('throttle')" id="man-pill-throttle" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap active:scale-95"></button>
-          <button onclick="selectManualComponent('coil')" id="man-pill-coil" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition whitespace-nowrap active:scale-95"></button>
+        <!-- PILIH CEPAT KOMPONEN SIMULASI (TOMBOL PILL HORIZONTAL RAPI & TIDAK TURUN KE BAWAH) -->
+        <div class="bg-slate-900/70 border border-slate-700/80 rounded-xl p-3 space-y-2">
+          <div class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-cyan-400"></i>
+            <span>Pilih Komponen Sensor &amp; Aktuator:</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="selectManualComponent('maf')" id="man-pill-maf" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95"></button>
+            <button onclick="selectManualComponent('o2')" id="man-pill-o2" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95"></button>
+            <button onclick="selectManualComponent('ect')" id="man-pill-ect" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95"></button>
+            <button onclick="selectManualComponent('map')" id="man-pill-map" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95"></button>
+            <button onclick="selectManualComponent('ckp')" id="man-pill-ckp" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95"></button>
+            <button onclick="selectManualComponent('throttle')" id="man-pill-throttle" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95"></button>
+            <button onclick="selectManualComponent('coil')" id="man-pill-coil" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95"></button>
+          </div>
         </div>
 
         <!-- RINGKASAN KOMPONEN AKTIF -->
@@ -756,8 +766,8 @@
 
         <!-- 1. SIMULASI ALUR KERJA SISTEM (4 TAHAP BERANTAI) -->
         <div class="bg-slate-900/90 border-2 border-cyan-500/30 rounded-2xl p-4 space-y-4">
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-800 pb-3">
-            <div>
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">INTERAKTIF</span>
                 <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">
@@ -769,27 +779,27 @@
               </p>
             </div>
 
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-3 w-full sm:w-auto">
-              <div class="flex flex-col min-w-0 flex-1">
-                <div class="flex items-center justify-between text-xs mb-1">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-3 w-full md:w-[320px] lg:w-auto shrink-0">
+              <div class="flex flex-col min-w-0 lg:min-w-[200px] flex-1">
+                <div class="flex flex-wrap items-center justify-between gap-1 text-xs mb-1">
                   <span id="man-slider-label" class="font-semibold text-slate-400">Bukaan Gas / Beban:</span>
-                  <span id="man-slider-value-badge" class="font-mono font-bold text-cyan-400">25%</span>
+                  <span id="man-slider-value-badge" class="font-mono font-bold text-cyan-400 shrink-0 whitespace-nowrap">25%</span>
                 </div>
                 <input id="man-work-slider" type="range" min="0" max="100" value="25" oninput="onManualSliderChange(this.value)"
                   class="w-full accent-cyan-500 cursor-pointer h-2 rounded-lg">
               </div>
 
-              <div class="h-7 w-px bg-slate-800 hidden sm:block"></div>
+              <div class="h-7 w-px bg-slate-800 hidden lg:block"></div>
 
-              <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
+              <div class="grid grid-cols-2 lg:flex lg:items-center gap-2">
                 <button onclick="toggleManualAutoPlaySteps()" id="man-btn-autoplay"
-                  class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                  class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95">
                   <span id="man-autoplay-icon">▶</span>
                   <span id="man-autoplay-text">Putar Alur</span>
                 </button>
 
                 <button onclick="toggleManualFaultMode()" id="man-btn-fault-toggle"
-                  class="px-3 py-2 rounded-lg bg-slate-900 hover:bg-rose-950/60 text-rose-400 border border-rose-500/40 text-xs font-bold transition text-center active:scale-95">
+                  class="px-3 py-2 rounded-lg bg-slate-900 hover:bg-rose-950/60 text-rose-400 border border-rose-500/40 text-xs font-bold transition text-center whitespace-nowrap active:scale-95">
                   ⚡ Mode Rusak
                 </button>
               </div>
@@ -804,8 +814,8 @@
         </div>
 
         <!-- 2. BENTUK FISIK & ANATOMI SENSOR + 3. PETA LOKASI RUANG MESIN -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div class="lg:col-span-6 bg-slate-900/90 border border-slate-700 rounded-xl p-4 flex flex-col justify-between space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div class="md:col-span-6 bg-slate-900/90 border border-slate-700 rounded-xl p-4 flex flex-col justify-between space-y-3">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 block">2. Simulasi Bentuk Fisik & Anatomi Dalam Sensor</span>
@@ -834,7 +844,7 @@
             </div>
           </div>
 
-          <div class="lg:col-span-6 bg-slate-900/90 border border-slate-700 rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="md:col-span-6 bg-slate-900/90 border border-slate-700 rounded-xl p-4 flex flex-col justify-between space-y-3">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-amber-400 block">3. Simulasi Peta Lokasi di Ruang Mesin (Engine Bay)</span>
@@ -850,7 +860,7 @@
             <div id="man-engine-bay-legend" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"></div>
 
             <div class="bg-slate-950 border border-slate-800 rounded-lg p-3 space-y-1">
-              <div class="flex items-center justify-between text-xs">
+              <div class="flex flex-wrap items-center justify-between gap-1 text-xs">
                 <span class="font-bold text-amber-400" id="man-loc-exact-title"></span>
                 <span class="font-mono text-slate-400" id="man-loc-torque-info"></span>
               </div>
@@ -860,15 +870,15 @@
         </div>
 
         <!-- 4. SPESIFIKASI SEDERHANA, 5. PINOUT SOKET, 6. GEJALA & CEK CEPAT -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div class="lg:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div class="md:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
             <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">
               4. Spesifikasi Standar Sederhana
             </div>
             <div id="man-simple-specs-list" class="space-y-2"></div>
           </div>
 
-          <div class="lg:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
+          <div class="md:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">5. Susunan Pinout Soket & Kabel</span>
               <span id="man-pinout-count-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300"></span>
@@ -876,7 +886,7 @@
             <div id="man-simple-pinout-list" class="space-y-1.5"></div>
           </div>
 
-          <div class="lg:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
+          <div class="md:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
             <div class="text-xs font-bold uppercase tracking-wider text-rose-400">
               6. Gejala Rusak & Cara Cek Cepat
             </div>
@@ -898,7 +908,7 @@
     <!-- TAB 4: PERALATAN & KALKULATOR DIAGNOSTIK TEKNIS BENGKEL        -->
     <!-- ============================================================== -->
     <section id="tab-content-tools" class="tab-pane space-y-6 hidden">
-      <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-6">
+      <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-6">
         <div class="border-b border-slate-700 pb-3 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">
@@ -907,7 +917,7 @@
             </h2>
             <p class="text-xs text-slate-400">Suite kalkulator analisis sinyal sensor, penganalisa fuel trim, uji vakum MAP, voltage drop, &amp; pinout OBD-II.</p>
           </div>
-          <div class="flex items-center gap-2 text-xs">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
             <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-cyan-400 font-mono">
               <i class="fa-solid fa-microchip"></i> Workshop Tech Suite
             </span>
@@ -918,16 +928,16 @@
         </div>
 
         <!-- GRID 2 KOLOM: FUEL TRIM ANALYZER & MAP VACUUM GAUGE -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <!-- TOOL 1: FUEL TRIM INTELLIGENCE ANALYZER -->
           <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-4 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
               <h3 class="text-sm font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-fire-flame-curved text-amber-400"></i>
                 Penganalisis Fuel Trim (STFT + LTFT)
               </h3>
-              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded">
+              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded whitespace-nowrap">
                 OBD-II Live PID 06 &amp; 07
               </span>
             </div>
@@ -988,12 +998,12 @@
 
           <!-- TOOL 2: MAP SENSOR & VAKUM INTAKE CONVERTER & HEALTH ANALYZER -->
           <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-4 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
               <h3 class="text-sm font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-gauge text-cyan-400"></i>
                 Kalkulator Vakum Intake &amp; Sensor MAP
               </h3>
-              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded">
+              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded whitespace-nowrap">
                 Manifold Pressure kPa ↔ inHg
               </span>
             </div>
@@ -1011,11 +1021,11 @@
 
             <!-- KOTAK STATUS KESEHATAN MESIN (ENGINE VACUUM HEALTH) -->
             <div id="tool-map-verdict-box" class="bg-emerald-950/40 border border-emerald-800/70 rounded-xl p-3.5 text-xs space-y-2">
-              <div class="flex items-center justify-between">
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
                 <span class="font-bold text-emerald-300 flex items-center gap-1.5" id="tool-map-status-title">
                   <i class="fa-solid fa-circle-check"></i> Kondisi Vakum Mesin Normal &amp; Sehat
                 </span>
-                <span class="font-mono text-emerald-400 text-xs font-semibold" id="tool-map-range-label">Standar 26 - 36 kPa (19 - 22 inHg)</span>
+                <span class="font-mono text-emerald-400 text-xs font-semibold whitespace-nowrap" id="tool-map-range-label">Standar 26 - 36 kPa (19 - 22 inHg)</span>
               </div>
               <p class="text-slate-300 leading-relaxed" id="tool-map-desc">
                 Tekanan manifold berada pada rentang ideal mesin 4-silinder idle hangat. Rapatan klep katup, kompresi silinder, dan seal intake manifold dalam kondisi prima.
@@ -1039,16 +1049,16 @@
         </div>
 
         <!-- GRID 2 KOLOM: VOLTAGE DROP CALCULATOR & OBD-II 16-PIN DLC PINOUT -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <!-- TOOL 3: VOLTAGE DROP & GROUND CIRCUIT TEST CALCULATOR -->
           <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-4 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
               <h3 class="text-sm font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-bolt text-cyan-400"></i>
                 Kalkulator Voltage Drop &amp; Titik Ground
               </h3>
-              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded">
+              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded whitespace-nowrap">
                 Standar SAE J1113 Multimeter
               </span>
             </div>
@@ -1073,11 +1083,11 @@
             </div>
 
             <div id="tool-vdrop-verdict-box" class="bg-emerald-950/40 border border-emerald-800/70 rounded-xl p-3.5 text-xs space-y-1.5">
-              <div class="flex items-center justify-between">
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
                 <span class="font-bold text-emerald-300 flex items-center gap-1.5" id="tool-vdrop-status">
                   <i class="fa-solid fa-circle-check"></i> Penurunan Tegangan LULUS Standar OEM
                 </span>
-                <span class="font-mono font-bold text-emerald-400 text-sm" id="tool-vdrop-val">Drop: 0.15 V</span>
+                <span class="font-mono font-bold text-emerald-400 text-sm whitespace-nowrap" id="tool-vdrop-val">Drop: 0.15 V</span>
               </div>
               <p class="text-slate-300 leading-relaxed" id="tool-vdrop-desc">
                 Resistansi kabel dan soket terminal dalam batas aman. Jalur ground/daya tidak memiliki resistansi kontak tinggi yang mengganggu pembacaan ECM.
@@ -1103,39 +1113,39 @@
 
           <!-- TOOL 4: OBD-II 16-PIN DLC CONNECTOR PINOUT & DIAGNOSTIC GUIDE -->
           <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-4 space-y-3">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
               <h3 class="text-sm font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-plug text-cyan-400"></i>
                 Diagram Port OBD-II DLC 16-Pin (SAE J1962)
               </h3>
-              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded">
+              <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-800/60 px-2 py-0.5 rounded whitespace-nowrap">
                 Standard Diagnostic Port
               </span>
             </div>
 
             <!-- ILUSTRASI KONEKTOR DLC 16-PIN -->
-            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center space-y-2">
-              <div class="overflow-x-auto no-scrollbar py-1 max-w-full flex justify-center">
-                <div class="inline-block p-2 bg-slate-900 border-2 border-slate-700 rounded-lg shadow-inner shrink-0">
-                  <div class="grid grid-cols-8 gap-1.5 mb-1.5">
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 1: OEM Discretionary">1</div>
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 2: J1850 Bus+">2</div>
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 3: OEM Discretionary">3</div>
-                    <div class="w-7 h-7 rounded bg-emerald-950 border border-emerald-700 text-[10px] font-mono font-bold flex items-center justify-center text-emerald-300" title="Pin 4: Chassis Ground (0V)">4</div>
-                    <div class="w-7 h-7 rounded bg-emerald-950 border border-emerald-700 text-[10px] font-mono font-bold flex items-center justify-center text-emerald-300" title="Pin 5: Signal Ground (0V)">5</div>
-                    <div class="w-7 h-7 rounded bg-cyan-950 border border-cyan-700 text-[10px] font-mono font-bold flex items-center justify-center text-cyan-300" title="Pin 6: CAN High (2.5-3.5V)">6</div>
-                    <div class="w-7 h-7 rounded bg-amber-950 border border-amber-700 text-[10px] font-mono font-bold flex items-center justify-center text-amber-300" title="Pin 7: K-Line ISO 9141 (12V)">7</div>
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 8: OEM Discretionary">8</div>
+            <div class="bg-slate-950 p-2.5 sm:p-3 rounded-xl border border-slate-800 text-center space-y-2">
+              <div class="py-1 max-w-full flex justify-center">
+                <div class="inline-block p-1.5 sm:p-2 bg-slate-900 border-2 border-slate-700 rounded-lg shadow-inner shrink-0">
+                  <div class="grid grid-cols-8 gap-1 sm:gap-1.5 mb-1 sm:mb-1.5">
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 1: OEM Discretionary">1</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 2: J1850 Bus+">2</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 3: OEM Discretionary">3</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-emerald-950 border border-emerald-700 text-[10px] font-mono font-bold flex items-center justify-center text-emerald-300" title="Pin 4: Chassis Ground (0V)">4</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-emerald-950 border border-emerald-700 text-[10px] font-mono font-bold flex items-center justify-center text-emerald-300" title="Pin 5: Signal Ground (0V)">5</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-cyan-950 border border-cyan-700 text-[10px] font-mono font-bold flex items-center justify-center text-cyan-300" title="Pin 6: CAN High (2.5-3.5V)">6</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-amber-950 border border-amber-700 text-[10px] font-mono font-bold flex items-center justify-center text-amber-300" title="Pin 7: K-Line ISO 9141 (12V)">7</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 8: OEM Discretionary">8</div>
                   </div>
-                  <div class="grid grid-cols-8 gap-1.5">
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 9: OEM Discretionary">9</div>
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 10: J1850 Bus-">10</div>
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 11: OEM Discretionary">11</div>
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 12: OEM Discretionary">12</div>
-                    <div class="w-7 h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 13: OEM Discretionary">13</div>
-                    <div class="w-7 h-7 rounded bg-cyan-950 border border-cyan-700 text-[10px] font-mono font-bold flex items-center justify-center text-cyan-300" title="Pin 14: CAN Low (1.5-2.5V)">14</div>
-                    <div class="w-7 h-7 rounded bg-amber-950 border border-amber-700 text-[10px] font-mono font-bold flex items-center justify-center text-amber-300" title="Pin 15: L-Line ISO 9141">15</div>
-                    <div class="w-7 h-7 rounded bg-rose-950 border border-rose-700 text-[10px] font-mono font-bold flex items-center justify-center text-rose-300" title="Pin 16: +12V Baterai (+B)">16</div>
+                  <div class="grid grid-cols-8 gap-1 sm:gap-1.5">
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 9: OEM Discretionary">9</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 10: J1850 Bus-">10</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 11: OEM Discretionary">11</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 12: OEM Discretionary">12</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-slate-800 text-[10px] font-mono font-bold flex items-center justify-center text-slate-400" title="Pin 13: OEM Discretionary">13</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-cyan-950 border border-cyan-700 text-[10px] font-mono font-bold flex items-center justify-center text-cyan-300" title="Pin 14: CAN Low (1.5-2.5V)">14</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-amber-950 border border-amber-700 text-[10px] font-mono font-bold flex items-center justify-center text-amber-300" title="Pin 15: L-Line ISO 9141">15</div>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded bg-rose-950 border border-rose-700 text-[10px] font-mono font-bold flex items-center justify-center text-rose-300" title="Pin 16: +12V Baterai (+B)">16</div>
                   </div>
                 </div>
               </div>
@@ -1162,7 +1172,7 @@
               </h3>
               <p class="text-xs text-slate-400">Langsung cari kode DTC tanpa perlu mengisi form diagnosa penuh untuk melihat penyebab resmi, pinout ECU, &amp; langkah perbaikan.</p>
             </div>
-            <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:flex-wrap">
+            <div class="flex flex-wrap gap-1.5">
               <button type="button" onclick="quickLookupDtc('P0480')" class="shrink-0 px-2.5 py-1 bg-slate-800 hover:bg-brand-600 rounded text-xs font-mono text-cyan-300 hover:text-white transition whitespace-nowrap active:scale-95">P0480</button>
               <button type="button" onclick="quickLookupDtc('C1021')" class="shrink-0 px-2.5 py-1 bg-slate-800 hover:bg-brand-600 rounded text-xs font-mono text-cyan-300 hover:text-white transition whitespace-nowrap active:scale-95">C1021</button>
               <button type="button" onclick="quickLookupDtc('P0756')" class="shrink-0 px-2.5 py-1 bg-slate-800 hover:bg-brand-600 rounded text-xs font-mono text-cyan-300 hover:text-white transition whitespace-nowrap active:scale-95">P0756</button>
@@ -2136,12 +2146,14 @@
       const sysTbody = document.getElementById('table-system-summaries');
       sysTbody.innerHTML = data.system_summaries.map(s => `
         <tr class="hover:bg-slate-700/40 transition">
-          <td data-label="Sistem" class="py-1.5 px-2 font-medium text-white flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full ${s.top_score >= 60 ? 'bg-emerald-400' : s.top_score > 0 ? 'bg-amber-400' : 'bg-slate-600'}"></span>
-            ${esc(s.system_name)}
+          <td data-label="Sistem" class="py-1.5 px-2 font-medium text-white">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0 ${s.top_score >= 60 ? 'bg-emerald-400' : s.top_score > 0 ? 'bg-amber-400' : 'bg-slate-600'}"></span>
+              <span>${esc(s.system_name)}</span>
+            </span>
           </td>
           <td data-label="Skor Max" class="py-1.5 px-2 text-right font-mono font-semibold ${s.top_score >= 60 ? 'text-emerald-400' : 'text-slate-400'}">${s.top_score}%</td>
-          <td data-label="Diagnosis Teratas" class="py-1.5 px-2 text-slate-400 truncate max-w-[140px] text-[11px]" title="${esc(s.top_diagnosis)}">${esc(s.top_diagnosis)}</td>
+          <td data-label="Diagnosis Teratas" class="py-1.5 px-2 text-slate-400 sm:truncate sm:max-w-[160px] text-[11px]" title="${esc(s.top_diagnosis)}">${esc(s.top_diagnosis)}</td>
         </tr>
       `).join('');
 
@@ -2812,11 +2824,11 @@
       isSimFaultMode = !isSimFaultMode;
       const btn = document.getElementById('sim-btn-fault-mode');
       if (isSimFaultMode) {
-        btn.textContent = 'Mode: Simulasi Kabel Putus / Rusak (NG)';
-        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-500/60 bg-red-500/20 text-red-400 transition';
+        btn.textContent = 'Mode: Kabel Putus (NG)';
+        btn.className = 'w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-semibold border border-red-500/60 bg-red-500/20 text-red-400 transition text-center shrink-0 active:scale-95';
       } else {
-        btn.textContent = 'Mode: Jalur Normal (OK)';
-        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border border-emerald-500/50 bg-emerald-500/15 text-emerald-400 transition';
+        btn.textContent = 'Mode: Normal (OK)';
+        btn.className = 'w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-semibold border border-emerald-500/50 bg-emerald-500/15 text-emerald-400 transition text-center shrink-0 active:scale-95';
       }
       renderWiringSimulator();
     }
@@ -2866,15 +2878,16 @@
       document.getElementById('sim-sensor-header').textContent = c.sensorHeader;
 
       const stepContainer = document.getElementById('sim-step-buttons');
-      stepContainer.className = `grid grid-cols-1 sm:grid-cols-${c.steps.length} gap-2`;
+      const simStepCols = { 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-4' };
+      stepContainer.className = `grid grid-cols-2 ${simStepCols[c.steps.length] || 'sm:grid-cols-4'} gap-2`;
       stepContainer.innerHTML = c.steps.map((st, idx) => {
         const active = idx === currentSimStep;
         const cls = active
-          ? 'text-left p-2.5 rounded-lg border border-amber-500 bg-amber-500/15 text-xs transition shadow-sm'
-          : 'text-left p-2.5 rounded-lg border border-slate-800 bg-slate-950/80 text-slate-300 hover:border-slate-700 text-xs transition';
+          ? 'text-left p-2.5 rounded-lg border border-amber-500 bg-amber-500/15 text-xs transition shadow-sm whitespace-normal'
+          : 'text-left p-2.5 rounded-lg border border-slate-800 bg-slate-950/80 text-slate-300 hover:border-slate-700 text-xs transition whitespace-normal';
         return `<button type="button" onclick="selectSimStep(${idx})" class="${cls}">
-          <div class="font-bold truncate ${active ? 'text-amber-300' : 'text-white'}">${esc(st.title)}</div>
-          <div class="text-slate-400 font-mono truncate text-xs mt-0.5">${esc(st.sub)}</div>
+          <div class="font-bold leading-snug ${active ? 'text-amber-300' : 'text-white'}">${esc(st.title)}</div>
+          <div class="text-slate-400 font-mono text-[11px] leading-snug mt-0.5">${esc(st.sub)}</div>
         </button>`;
       }).join('');
 
@@ -2946,9 +2959,9 @@
         <rect x="490" y="12" width="140" height="24" rx="8" fill="#1e293b"/>
         <text x="560" y="28" text-anchor="middle" fill="#34d399" font-size="12" font-weight="bold" font-family="monospace">${esc(c.sensorTitle)}</text>
 
-        <rect x="518" y="48" width="98" height="175" rx="8" fill="#1e293b" stroke="#475569" stroke-dasharray="4 2"/>
-        <text x="567" y="128" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="bold">${esc(c.sensorTitle)}</text>
-        <text x="567" y="146" text-anchor="middle" fill="#94a3b8" font-size="11">${esc(c.sensorSub)}</text>
+        <rect x="514" y="48" width="106" height="175" rx="8" fill="#1e293b" stroke="#475569" stroke-dasharray="4 2"/>
+        <text x="567" y="128" text-anchor="middle" fill="#f8fafc" font-size="11.5" font-weight="bold">${esc(c.sensorTitle)}</text>
+        <text x="567" y="146" text-anchor="middle" fill="#94a3b8" font-size="9.5">${esc(c.sensorSub)}</text>
 
         ${wiresSvg}
         ${faultSvg}
@@ -3718,9 +3731,9 @@
     </defs>`;
 
     function manSvgLbl(x1, y1, x2, y2, text, anchor) {
-      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fbbf24" stroke-width="1"/>
-        <circle cx="${x1}" cy="${y1}" r="2.5" fill="#fbbf24"/>
-        <text x="${x2 + (anchor === 'end' ? -4 : 4)}" y="${y2 + 4}" text-anchor="${anchor || 'start'}" fill="#fde68a" font-size="10.5" font-weight="700">${text}</text>`;
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fbbf24" stroke-width="1.2"/>
+        <circle cx="${x1}" cy="${y1}" r="2.8" fill="#fbbf24"/>
+        <text x="${x2 + (anchor === 'end' ? -4 : 4)}" y="${y2 + 4}" text-anchor="${anchor || 'start'}" fill="#fde68a" font-size="11" font-weight="700">${text}</text>`;
     }
 
     function manSvgConn(x, y, w, h, n) {
@@ -3767,10 +3780,10 @@
         clearInterval(manAutoPlayTimer);
         manAutoPlayTimer = null;
         document.getElementById('man-autoplay-icon').textContent = '▶';
-        document.getElementById('man-autoplay-text').textContent = 'Putar Alur Kerja';
+        document.getElementById('man-autoplay-text').textContent = 'Putar Alur';
       } else {
         document.getElementById('man-autoplay-icon').textContent = '⏸';
-        document.getElementById('man-autoplay-text').textContent = 'Hentikan Animasi';
+        document.getElementById('man-autoplay-text').textContent = 'Stop Alur';
         manAutoPlayTimer = setInterval(() => {
           manActiveStepIdx = (manActiveStepIdx + 1) % 4;
           renderManualComponentSimulator();
@@ -3783,12 +3796,74 @@
       if (!svg) return;
       const mainColor = manIsFaultMode ? '#f43f5e' : (manSliderPct > 65 ? '#38bdf8' : '#10b981');
       const dashClass = manSliderPct > 60 && !manIsFaultMode ? 'flow-dash-fast' : 'flow-dash';
+      const isCompact = window.innerWidth < 640 || document.documentElement.classList.contains('agos-mobile-sim');
 
+      if (isCompact) {
+        svg.setAttribute('viewBox', '0 0 520 264');
+        const nodeConfigs = [
+          { idx: 0, x: 10,  y: 10,  w: 228, h: 98, title: 'TAHAP 1: INPUT FISIK',   sub: simData.steps[0].sub },
+          { idx: 1, x: 282, y: 10,  w: 228, h: 98, title: 'TAHAP 2: PROSES SENSOR', sub: simData.steps[1].sub },
+          { idx: 2, x: 10,  y: 132, w: 228, h: 98, title: 'TAHAP 3: KALKULASI ECU', sub: simData.steps[2].sub },
+          { idx: 3, x: 282, y: 132, w: 228, h: 98, title: 'TAHAP 4: AKSI AKTUATOR', sub: simData.steps[3].sub }
+        ];
+
+        const col12 = (manActiveStepIdx === 0 || manActiveStepIdx === 1) ? '#fbbf24' : mainColor;
+        const col23 = (manActiveStepIdx === 1 || manActiveStepIdx === 2) ? '#fbbf24' : mainColor;
+        const col34 = (manActiveStepIdx === 2 || manActiveStepIdx === 3) ? '#fbbf24' : mainColor;
+
+        const arrowsHtml = `
+          <line x1="238" y1="59" x2="282" y2="59" stroke="#1e293b" stroke-width="6"/>
+          <line x1="238" y1="59" x2="282" y2="59" stroke="${col12}" stroke-width="3.5" class="${dashClass}"/>
+          <polygon points="280,59 271,53 271,65" fill="${col12}"/>
+
+          <path d="M 396 108 L 396 120 L 124 120 L 124 132" fill="none" stroke="#1e293b" stroke-width="5"/>
+          <path d="M 396 108 L 396 120 L 124 120 L 124 132" fill="none" stroke="${col23}" stroke-width="3" class="${dashClass}"/>
+          <polygon points="124,132 119,124 129,124" fill="${col23}"/>
+
+          <line x1="238" y1="181" x2="282" y2="181" stroke="#1e293b" stroke-width="6"/>
+          <line x1="238" y1="181" x2="282" y2="181" stroke="${col34}" stroke-width="3.5" class="${dashClass}"/>
+          <polygon points="280,181 271,175 271,187" fill="${col34}"/>
+        `;
+
+        const nodesHtml = nodeConfigs.map(n => {
+          const isSel = manActiveStepIdx === n.idx;
+          const strokeCol = isSel ? '#fbbf24' : (manIsFaultMode ? '#f43f5e' : '#334155');
+          const bgCol = isSel ? '#1e293b' : '#0f172a';
+          const cleanTitle = simData.steps[n.idx].title.replace(/^[0-9]+\.\s*/, '');
+          return `
+            <g onclick="selectManualWorkStep(${n.idx})" style="cursor:pointer">
+              <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="12"
+                fill="${bgCol}" stroke="${strokeCol}" stroke-width="${isSel ? 2.8 : 1.8}"/>
+              <rect x="${n.x + 10}" y="${n.y + 8}" width="${n.w - 20}" height="20" rx="5"
+                fill="${isSel ? '#f59e0b' : '#1e293b'}"/>
+              <text x="${n.x + n.w / 2}" y="${n.y + 22}" text-anchor="middle"
+                fill="${isSel ? '#020617' : '#38bdf8'}" font-size="10.5" font-weight="800">${n.title}</text>
+              <text x="${n.x + n.w / 2}" y="${n.y + 52}" text-anchor="middle"
+                fill="#f8fafc" font-size="11" font-weight="800">${cleanTitle}</text>
+              <rect x="${n.x + 10}" y="${n.y + 64}" width="${n.w - 20}" height="26" rx="6" fill="#020617" stroke="#1e293b"/>
+              <text x="${n.x + n.w / 2}" y="${n.y + 81}" text-anchor="middle"
+                fill="${manIsFaultMode ? '#fda4af' : '#34d399'}" font-size="10" font-weight="700" font-family="monospace">${n.sub}</text>
+            </g>
+          `;
+        }).join('');
+
+        const feedbackHtml = `
+          <rect x="70" y="238" width="380" height="20" rx="6" fill="#090d16" stroke="#334155"/>
+          <text x="260" y="252" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700">
+            ↺ SIKLUS UMPAN BALIK MESIN (CLOSED-LOOP REAL-TIME)
+          </text>
+        `;
+
+        svg.innerHTML = arrowsHtml + nodesHtml + feedbackHtml;
+        return;
+      }
+
+      svg.setAttribute('viewBox', '0 0 880 215');
       const nodeConfigs = [
-        { idx: 0, x: 18,  w: 185, title: 'TAHAP 1: INPUT FISIK', sub: simData.steps[0].sub },
-        { idx: 1, x: 238, w: 185, title: 'TAHAP 2: PROSES SENSOR', sub: simData.steps[1].sub },
-        { idx: 2, x: 458, w: 185, title: 'TAHAP 3: KALKULASI ECU', sub: simData.steps[2].sub },
-        { idx: 3, x: 678, w: 185, title: 'TAHAP 4: AKSI AKTUATOR', sub: simData.steps[3].sub }
+        { idx: 0, x: 12,  w: 198, title: 'TAHAP 1: INPUT FISIK', sub: simData.steps[0].sub },
+        { idx: 1, x: 232, w: 198, title: 'TAHAP 2: PROSES SENSOR', sub: simData.steps[1].sub },
+        { idx: 2, x: 452, w: 198, title: 'TAHAP 3: KALKULASI ECU', sub: simData.steps[2].sub },
+        { idx: 3, x: 672, w: 198, title: 'TAHAP 4: AKSI AKTUATOR', sub: simData.steps[3].sub }
       ];
 
       const arrowsHtml = [0, 1, 2].map(i => {
@@ -3810,22 +3885,22 @@
           <g onclick="selectManualWorkStep(${n.idx})" style="cursor:pointer">
             <rect x="${n.x}" y="28" width="${n.w}" height="132" rx="14"
               fill="${bgCol}" stroke="${strokeCol}" stroke-width="${isSel ? 3 : 2}"/>
-            <rect x="${n.x + 12}" y="40" width="${n.w - 24}" height="22" rx="6"
+            <rect x="${n.x + 10}" y="40" width="${n.w - 20}" height="22" rx="6"
               fill="${isSel ? '#f59e0b' : '#1e293b'}"/>
             <text x="${n.x + n.w / 2}" y="55" text-anchor="middle"
               fill="${isSel ? '#020617' : '#38bdf8'}" font-size="10" font-weight="800">${n.title}</text>
             <text x="${n.x + n.w / 2}" y="96" text-anchor="middle"
-              fill="#f8fafc" font-size="12" font-weight="800">${simData.steps[n.idx].title.replace(/^[0-9]+\.\s*/, '')}</text>
-            <rect x="${n.x + 12}" y="112" width="${n.w - 24}" height="34" rx="7" fill="#020617" stroke="#1e293b"/>
+              fill="#f8fafc" font-size="11.5" font-weight="800">${simData.steps[n.idx].title.replace(/^[0-9]+\.\s*/, '')}</text>
+            <rect x="${n.x + 10}" y="112" width="${n.w - 20}" height="34" rx="7" fill="#020617" stroke="#1e293b"/>
             <text x="${n.x + n.w / 2}" y="133" text-anchor="middle"
-              fill="${manIsFaultMode ? '#fda4af' : '#34d399'}" font-size="11" font-weight="700" font-family="monospace">${n.sub}</text>
+              fill="${manIsFaultMode ? '#fda4af' : '#34d399'}" font-size="9.8" font-weight="700" font-family="monospace">${n.sub}</text>
           </g>
         `;
       }).join('');
 
       const feedbackHtml = `
         <path d="M 770 160 L 770 192 L 110 192 L 110 160" fill="none" stroke="${mainColor}" stroke-width="2" class="${dashClass}" opacity="0.75"/>
-        <rect x="315" y="179" width="250" height="22" rx="6" fill="#090d16" stroke="#334155"/>
+        <rect x="275" y="179" width="330" height="22" rx="6" fill="#090d16" stroke="#334155"/>
         <text x="440" y="194" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700">
           ↺ SIKLUS UMPAN BALIK MESIN (CLOSED-LOOP REAL-TIME)
         </text>
@@ -4136,9 +4211,9 @@
         if (!btn) return;
         btn.textContent = MANUAL_COMPONENTS[id].shortLabel;
         if (id === manCurrentCompId) {
-          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-600 text-white border border-cyan-400 shadow-sm transition';
+          btn.className = 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-600 text-white border border-cyan-400 shadow-sm transition active:scale-95';
         } else {
-          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white hover:bg-slate-800 transition';
+          btn.className = 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-slate-300 border border-slate-700 hover:text-white hover:bg-slate-800 transition active:scale-95';
         }
       });
 
@@ -4146,11 +4221,11 @@
       document.getElementById('man-slider-value-badge').textContent = simData.sliderBadge;
       const faultBtn = document.getElementById('man-btn-fault-toggle');
       if (manIsFaultMode) {
-        faultBtn.className = 'px-3 py-1.5 rounded-lg bg-rose-600 text-white border border-rose-400 text-xs font-bold transition';
-        faultBtn.textContent = '✓ Mode Sensor Rusak Aktif (Klik Reset)';
+        faultBtn.className = 'shrink-0 whitespace-nowrap px-3 py-2 rounded-lg bg-rose-600 text-white border border-rose-400 text-xs font-bold transition text-center active:scale-95';
+        faultBtn.textContent = '✓ Mode Rusak Aktif';
       } else {
-        faultBtn.className = 'px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/60 text-rose-400 border border-rose-500/40 text-xs font-bold transition';
-        faultBtn.textContent = '⚡ Simulasi Sensor Rusak';
+        faultBtn.className = 'shrink-0 whitespace-nowrap px-3 py-2 rounded-lg bg-slate-900 hover:bg-rose-950/60 text-rose-400 border border-rose-500/40 text-xs font-bold transition text-center active:scale-95';
+        faultBtn.textContent = '⚡ Mode Rusak';
       }
 
       document.getElementById('man-comp-badge').textContent = comp.badge;
@@ -4180,9 +4255,9 @@
         return `
           <div onclick="selectManualWorkStep(${idx})"
             class="cursor-pointer rounded-xl p-3 border transition ${isSel ? 'bg-cyan-950/40 border-amber-400 shadow-sm' : 'bg-slate-950 border-slate-800 hover:border-cyan-500/50'}">
-            <div class="flex items-center justify-between gap-1 mb-1">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
               <span class="text-xs font-bold ${isSel ? 'text-amber-300' : 'text-cyan-400'}">${st.title}</span>
-              <span class="text-xs font-mono px-1.5 py-0.5 rounded bg-slate-900 text-emerald-400">${st.sub}</span>
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 text-emerald-400 max-w-full break-words">${st.sub}</span>
             </div>
             <p class="text-xs text-slate-300 leading-relaxed">${st.detail}</p>
           </div>
@@ -4193,26 +4268,26 @@
       renderManEngineBaySvg(manCurrentCompId);
 
       document.getElementById('man-simple-specs-list').innerHTML = comp.specs.map(s => `
-        <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
+        <div class="flex flex-wrap items-center justify-between gap-1.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs">
           <span class="text-slate-400">${s.label}</span>
-          <span class="font-mono font-bold text-emerald-400 text-right">${s.val}</span>
+          <span class="font-mono font-bold text-emerald-400">${s.val}</span>
         </div>
       `).join('');
 
       document.getElementById('man-pinout-count-badge').textContent = `${comp.pins.length} Kabel`;
       document.getElementById('man-simple-pinout-list').innerHTML = comp.pins.map(p => `
-        <div class="flex items-start justify-between gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
-          <div>
-            <span class="font-mono font-bold text-amber-400">${p.pin}</span>
-            <span class="ml-1.5 px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 font-mono text-xs">${p.color}</span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="font-mono font-bold text-amber-400 whitespace-nowrap">${p.pin}</span>
+            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 font-mono text-[11px] whitespace-nowrap">${p.color}</span>
           </div>
-          <span class="text-slate-300 text-right">${p.desc}</span>
+          <span class="text-slate-300 sm:text-right">${p.desc}</span>
         </div>
       `).join('');
 
       document.getElementById('man-comp-symptoms').textContent = comp.symptoms;
       document.getElementById('man-quick-steps-list').innerHTML = comp.steps.map(stText => `
-        <div class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 leading-relaxed">
+        <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 leading-relaxed">
           ${stText}
         </div>
       `).join('');
@@ -4271,6 +4346,78 @@
         container.innerHTML = `<div class="text-xs text-red-400">Gagal mencari manual: ${err.message}</div>`;
       }
     }
+
+    // ---------- TOMBOL PUTAR LAYAR HORIZONTAL (LANDSCAPE) / VERTIKAL (PORTRAIT) ----------
+    let isHorizontalOrientation = window.innerWidth > window.innerHeight;
+
+    function syncOrientationButtonUI() {
+      const currentlyLandscape = window.innerWidth > window.innerHeight;
+      isHorizontalOrientation = currentlyLandscape;
+      const lbl = document.getElementById('label-orientation');
+      const icon = document.getElementById('icon-orientation');
+      if (currentlyLandscape) {
+        if (lbl) lbl.textContent = 'Vertikal';
+        if (icon) icon.classList.remove('rotate-90');
+      } else {
+        if (lbl) lbl.textContent = 'Horizontal';
+        if (icon) icon.classList.add('rotate-90');
+      }
+    }
+
+    function toggleAppOrientation() {
+      const targetHorizontal = !(window.innerWidth > window.innerHeight || isHorizontalOrientation);
+      isHorizontalOrientation = targetHorizontal;
+      const lbl = document.getElementById('label-orientation');
+      const icon = document.getElementById('icon-orientation');
+      const vp = document.querySelector('meta[name="viewport"]');
+      const hasNative = Boolean(window.AgosNative && typeof window.AgosNative.setOrientation === 'function');
+
+      if (targetHorizontal) {
+        if (lbl) lbl.textContent = 'Vertikal';
+        if (icon) icon.classList.remove('rotate-90');
+        if (hasNative) {
+          try { window.AgosNative.setOrientation('landscape'); } catch (e) {}
+          if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover');
+        } else {
+          if (screen.orientation && typeof screen.orientation.lock === 'function') {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+          if (vp && window.innerWidth < 768) {
+            vp.setAttribute('content', 'width=960, initial-scale=0.8, user-scalable=yes, viewport-fit=cover');
+          }
+        }
+      } else {
+        if (lbl) lbl.textContent = 'Horizontal';
+        if (icon) icon.classList.add('rotate-90');
+        if (hasNative) {
+          try { window.AgosNative.setOrientation('portrait'); } catch (e) {}
+          if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover');
+        } else {
+          if (screen.orientation && typeof screen.orientation.lock === 'function') {
+            screen.orientation.lock('portrait').catch(() => {});
+          }
+          if (vp) {
+            vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes, viewport-fit=cover');
+          }
+        }
+      }
+      setTimeout(() => {
+        renderManualComponentSimulator();
+        renderWiringSimulator();
+      }, 220);
+    }
+
+    let resizeSimTimer = null;
+    function handleOrientationOrResize() {
+      if (resizeSimTimer) clearTimeout(resizeSimTimer);
+      resizeSimTimer = setTimeout(() => {
+        syncOrientationButtonUI();
+        renderManualComponentSimulator();
+      }, 120);
+    }
+    window.addEventListener('resize', handleOrientationOrResize);
+    window.addEventListener('orientationchange', handleOrientationOrResize);
+    syncOrientationButtonUI();
 
     // ---------- HANDLER TOMBOL BACK ANDROID (BAGIAN 6 POIN 11) ----------
     function handleAndroidBackAction() {
