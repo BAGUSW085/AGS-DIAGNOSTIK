@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   AGOS SMART DIAGNOSTIK — OFFLINE ANDROID MOBILE-FIRST STYLES (ANTI-AMBURADUL)
+   ============================================================================ */
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Pastikan seluruh anak CSS Grid & Flexbox dapat menyusut sesuai lebar layar HP (360px+) */
+main,
+section.tab-pane,
+.grid > *,
+.flex > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+header.sticky {
+  padding-top: var(--safe-top);
+}
+
+#mobile-bottom-nav {
+  padding-bottom: var(--safe-bottom);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.gauge-pill { transition: all 0.2s ease-in-out; }
+.gauge-pill:hover { transform: translateY(-2px); }
+
+@keyframes flowPulse {
+  to { stroke-dashoffset: -28; }
+}
+.wire-flow {
+  stroke-dasharray: 8 6;
+  animation: flowPulse 0.8s linear infinite;
+}
+.probe-transition {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes radarPulse {
+  0% { r: 9; opacity: 0.9; }
+  100% { r: 24; opacity: 0; }
+}
+@keyframes spinFan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.flow-dash {
+  stroke-dasharray: 8 6;
+  animation: flowPulse 0.7s linear infinite;
+}
+.flow-dash-fast {
+  stroke-dasharray: 8 6;
+  animation: flowPulse 0.28s linear infinite;
+}
+.pulse-ring {
+  animation: radarPulse 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.fan-spin {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: spinFan 0.6s linear infinite;
+}
+
+/* ============================================================================
+   ATURAN KHUSUS LAYAR HP ANDROID (< 640px) — ANTI-AMBURADUL (BAGIAN 6 PROMPT)
+   ============================================================================ */
+@media (max-width: 639px) {
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  button,
+  .mob-nav-tab {
+    min-height: 44px;
+  }
+
+  h1, h2, h3, h4, p, span, td, div {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  /* Ubah 5 Tabel Lebar Menjadi Kartu Bertumpuk Rapi di Layar HP */
+  table.agos-mobile-cards,
+  table.agos-mobile-cards thead,
+  table.agos-mobile-cards tbody,
+  table.agos-mobile-cards tr,
+  table.agos-mobile-cards td {
+    display: block;
+    width: 100%;
+  }
+
+  table.agos-mobile-cards thead {
+    display: none;
+  }
+
+  table.agos-mobile-cards tbody tr {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 0.65rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  table.agos-mobile-cards tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.35rem 0 !important;
+    border-bottom: 1px dashed rgba(51, 65, 85, 0.5);
+    text-align: right !important;
+    font-size: 12.5px !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+  }
+
+  table.agos-mobile-cards tbody td:last-child {
+    border-bottom: none;
+    padding-bottom: 0 !important;
+  }
+
+  table.agos-mobile-cards tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    text-align: left;
+    flex-shrink: 0;
+    max-width: 42%;
+  }
+
+  /* SVG Diagram Container di HP agar tetap terbaca jelas & proporsional */
+  .agos-svg-scroll-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    padding-bottom: 4px;
+  }
+
+  .agos-svg-scroll-wrap svg {
+    min-width: 520px;
+    height: auto;
+  }
+}
+
+/* Dukungan kelas simulasi mobile untuk pengujian otomatis headless */
+html.agos-mobile-sim table.agos-mobile-cards,
+html.agos-mobile-sim table.agos-mobile-cards thead,
+html.agos-mobile-sim table.agos-mobile-cards tbody,
+html.agos-mobile-sim table.agos-mobile-cards tr,
+html.agos-mobile-sim table.agos-mobile-cards td {
+  display: block;
+  width: 100%;
+}
+html.agos-mobile-sim table.agos-mobile-cards thead {
+  display: none;
+}
+html.agos-mobile-sim table.agos-mobile-cards tbody td {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  white-space: normal !important;
+}
+html.agos-mobile-sim .agos-svg-scroll-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+html.agos-mobile-sim .agos-svg-scroll-wrap svg {
+  min-width: 520px;
+  height: auto;
+}
