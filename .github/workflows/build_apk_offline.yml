@@ -16,10 +16,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12 (Export & Verify Data)
+      - name: Set up Python 3.12 (Export Data, Ikon APK & Verifikasi)
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Install Python Build Helper (pydantic & pillow)
+        run: python3 -m pip install --quiet pydantic pillow
 
       - name: Export Offline JSON Data & Bundle Local FontAwesome
         run: |
@@ -48,7 +51,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Generate & Sync Capacitor Android Project
+      - name: Generate & Sync Capacitor Android Project + Custom Logo Icon
         working-directory: android_offline
         run: |
           if [ ! -d "android" ]; then
@@ -67,16 +70,16 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: agos-diagnostik-offline-apk
+          name: agos-diagnostik-offline-apk-v2
           path: android_offline/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
       - name: Publish APK to GitHub Release (Direct Download)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.2.1-offline
-          name: "AGOS Smart Diagnostik v1.2.1 — APK Android Full Offline (Perbaikan Tampilan & Layar Horizontal)"
-          body: "File instalasi APK Android Full Offline (Tanpa Server & Tanpa Internet) dengan perbaikan tombol komponen horizontal, gambar simulasi penuh tanpa geser, dan dukungan layar Horizontal/Landscape."
+          tag_name: v2.0.0-offline
+          name: "AGOS Smart Diagnostik v2.0.0 — APK Android Offline (174 Kode Mesin Asia/Eropa/China + Diesel/EV + PIN Admin + Logo Baru)"
+          body: "APK Android Full Offline v2.0.0 (pra-Poin 4) menggunakan logo ikon baru: mencakup 66 generasi & 174 kode mesin (Asia, Eropa, China termasuk Innova 1TR-FE/1TR-VE & Reborn 2GD-FTV), +85 DTC Diesel Common-Rail/Turbo/VVT/Hybrid/EV, Live Data Adaptif, Peringatan HV 1000V, Guardrail Wiring, Paket Manual Kustom, dan PIN Kepala Bengkel (awal: 1234) + Backup/Restore 1-Klik."
           files: android_offline/AGOS-Smart-Diagnostik-Offline.apk
           prerelease: false
         env:

@@ -41,6 +41,17 @@ from app.models import (
     WiringDiagram,
     WorkOrder,
 )
+from app.services.modern_dtc_catalog import (
+    build_low_confidence_safe_advice,
+    evaluate_adaptive_live_data,
+    is_text_compatible_with_fuel,
+    lookup_modern_dtc,
+    strip_unverified_jb420_pins_from_text,
+)
+from app.services.vehicle_applicability import (
+    VehicleApplicabilityInfo,
+    resolve_vehicle_applicability,
+)
 
 # ---------------------------------------------------------------------------
 # 1. KAMUS NORMALISASI ISTILAH BENGKEL INDONESIA & STOPWORDS
@@ -579,6 +590,8 @@ class SmartDiagnosticEngine:
 class WeightedCaseSearchRequest(BaseModel):
     brand: str = Field(default="", description="Merk kendaraan (opsional)")
     model: str = Field(default="", description="Model kendaraan (opsional)")
+    year: int | None = Field(default=None, ge=1980, le=2030, description="Tahun kendaraan untuk penentuan generasi & wiring")
+    engine_code: str = Field(default="", description="Kode/varian mesin opsional (misal: K14B, K15B, 1NR-VE)")
     odometer_km: int | None = Field(default=None, ge=0, description="Data kilometer tempuh kendaraan (kelipatan 100 km)")
     complaint: str = Field(default="", description="Keluhan pelanggan (misal: Mesin brebet saat idle)")
     symptom: str = Field(default="", description="Gejala teknis (misal: RPM naik turun tidak stabil)")
@@ -590,6 +603,16 @@ class WeightedCaseSearchRequest(BaseModel):
     map_kpa: float | None = Field(default=None, description="Tekanan Manifold MAP (kPa)")
     maf_gps: float | None = Field(default=None, description="Aliran Udara MAF (g/s)")
     ect_c: float | None = Field(default=None, description="Suhu Air Pendingin ECT (°C)")
+    # Live Data Khusus Diesel Common-Rail
+    rail_pressure_mpa: float | None = Field(default=None, description="Tekanan Fuel Rail Common-Rail (MPa)")
+    boost_kpa: float | None = Field(default=None, description="Tekanan Boost Turbo Absolut (kPa)")
+    inj_feedback_mm3: float | None = Field(default=None, description="Koreksi Injektor Diesel (mm³/st)")
+    egr_pct: float | None = Field(default=None, description="Posisi Bukaan Katup EGR (%)")
+    # Live Data Khusus Hybrid / EV
+    hv_soc_pct: float | None = Field(default=None, description="State of Charge Baterai HV (%)")
+    hv_cell_delta_mv: float | None = Field(default=None, description="Selisih Tegangan Sel Baterai HV (mV)")
+    hv_insulation_mohm: float | None = Field(default=None, description="Tahanan Isolasi Sistem HV (MOhm)")
+    hv_temp_c: float | None = Field(default=None, description="Suhu Baterai / Inverter HV (°C)")
     system_filter: str | None = Field(default=None, description="Filter sistem: Udara, Bahan Bakar, Pendingin, dll.")
 
 
@@ -605,6 +628,12 @@ class ManualRepairAdvice(BaseModel):
     sensor_standards: list[dict[str, str]]
     wiring_pinout: list[dict[str, str]]
     relearn_reset_steps: list[str]
+    is_pinout_verified: bool = True
+    active_pack_id: str = "universal"
+    safety_warning: str | None = None
+    hv_safety_warning: str | None = None
+    is_low_confidence_fallback: bool = False
+    adaptive_live_findings: list[dict[str, str]] = []
 
 
 class WeightedCaseMatchItem(BaseModel):
@@ -650,6 +679,7 @@ class WeightedCaseSearchResponse(BaseModel):
     ranked_matches: list[WeightedCaseMatchItem]
     system_summaries: list[SystemScoreSummary]
     direct_manual_advice: ManualRepairAdvice
+    vehicle_applicability: VehicleApplicabilityInfo | None = None
 
 
 class WeightedDiagnosticEngine:
@@ -850,6 +880,13 @@ class WeightedDiagnosticEngine:
         # Penalti bila pengguna mengisi kode DTC spesifik namun kasus historis memiliki DTC berbeda sistem
         if req_codes and sim_dtc == 0.0:
             normalized_text *= 0.30
+        # Penyesuaian generasi/tahun kendaraan: beri prioritas jika satu era/generasi tahun yang berdekatan
+        if req.year is not None and case.year is not None and sim_model >= 0.5:
+            year_diff = abs(int(req.year) - int(case.year))
+            if year_diff <= 3:
+                normalized_text = min(normalized_text * 1.05, 1.0)
+            elif year_diff >= 8:
+                normalized_text *= 0.90
         return normalized_text
 
     @classmethod
@@ -1893,6 +1930,25 @@ class WeightedDiagnosticEngine:
           pinout 8 Modul Kontrol `WiringDiagram` (251 Pin), dan `SensorSpec` dari Buku Manual yang ditanamkan!
         - Menghitung Skor Teks & Live Data serta menyusun ranking sistem akurat.
         """
+        # 0. Resolusi Model, Generasi Platform, Kode Mesin, Jenis BBM & Tahun Kendaraan (Safety Guardrail)
+        app_info, custom_pack = resolve_vehicle_applicability(
+            req.brand, req.model, req.year, req.engine_code
+        )
+        vehicle_fuel = app_info.resolved_fuel_type or "Bensin"
+
+        # Evaluasi Live Data Adaptif (Diesel Common-Rail & Hybrid/EV)
+        adaptive_live_findings = evaluate_adaptive_live_data(
+            fuel_type=vehicle_fuel,
+            rail_pressure_mpa=req.rail_pressure_mpa,
+            boost_kpa=req.boost_kpa,
+            inj_feedback_mm3=req.inj_feedback_mm3,
+            egr_pct=req.egr_pct,
+            hv_soc_pct=req.hv_soc_pct,
+            hv_cell_delta_mv=req.hv_cell_delta_mv,
+            hv_insulation_mohm=req.hv_insulation_mohm,
+            hv_temp_c=req.hv_temp_c,
+        )
+
         # 1. Ambil seluruh kasus historis + referensi Buku Manual dari database
         cases = (
             await session.execute(select(HistoricalCase).order_by(HistoricalCase.case_code.asc()))
@@ -1902,63 +1958,150 @@ class WeightedDiagnosticEngine:
 
         req_codes = cls._extract_all_request_dtcs(req)
         manual_dtc_entries: list[dict[str, str]] = []
+        custom_dtc_map: dict[str, dict[str, Any]] = {}
+        modern_dtc_entries_map: dict[str, dict[str, Any]] = {}
+        if custom_pack:
+            for cd in custom_pack.get("dtc_catalog", []):
+                c_key = str(cd.get("code", "")).strip().upper()
+                if c_key:
+                    custom_dtc_map[c_key] = cd
+
         if req_codes:
             db_dtcs = (
                 await session.execute(select(DTCCode).where(DTCCode.code.in_(req_codes)))
             ).scalars().all()
             db_dtc_map = {row.code.upper(): row for row in db_dtcs}
             for code in req_codes:
-                if code in db_dtc_map:
-                    r = db_dtc_map[code]
-                    manual_dtc_entries.append({
-                        "code": r.code,
-                        "system": r.system,
-                        "description_id": r.description_id,
-                        "possible_causes": r.possible_causes,
-                        "recommended_fix": r.recommended_fix or "",
-                        "severity_level": r.severity_level,
-                    })
-                elif code in cls.STANDARD_OBD_FALLBACK:
-                    fb = cls.STANDARD_OBD_FALLBACK[code]
+                modern_hit = lookup_modern_dtc(code, vehicle_fuel)
+                # Prioritaskan katalog modern untuk Diesel/EV/Hybrid atau kode yang belum ada di katalog JB420
+                use_modern = (
+                    modern_hit is not None
+                    and code not in custom_dtc_map
+                    and (vehicle_fuel in {"Diesel", "EV", "Hybrid"} or code not in db_dtc_map)
+                )
+                if code in custom_dtc_map:
+                    cd = custom_dtc_map[code]
+                    causes_val = cd.get("common_causes", "")
+                    if isinstance(causes_val, list):
+                        causes_val = "; ".join(str(x) for x in causes_val)
+                    steps_val = cd.get("repair_steps", [])
                     manual_dtc_entries.append({
                         "code": code,
-                        "system": fb["system"],
-                        "description_id": fb["description_id"],
-                        "possible_causes": fb["possible_causes"],
-                        "recommended_fix": "",
-                        "severity_level": fb["severity_level"],
+                        "system": str(custom_pack.get("title", "Buku Manual Kustom")),
+                        "description_id": str(cd.get("description_id", f"DTC {code}")),
+                        "possible_causes": str(causes_val or cd.get("description_id", "")),
+                        "recommended_fix": "\n".join(str(s) for s in steps_val) if isinstance(steps_val, list) else str(cd.get("recommended_fix", "")),
+                        "severity_level": str(cd.get("severity_level", "HIGH")),
                     })
-        else:
-            # Jika mekanik tidak mengetik kode DTC tapi menulis komponen spesifik (misal: "kipas radiator mati", "abs", "solenoid matic")
-            raw_text_low = f"{req.complaint or ''} {req.symptom or ''}".lower()
-            keyword_dtc_hints = [
-                (("kipas radiator", "cooling fan", "extra fan", "kipas mati"), "P0480"),
-                (("wheel speed", "sensor abs", "lampu abs"), "C1021"),
-                (("pompa abs", "abs pump"), "C1061"),
-                (("air bag", "airbag", "lampu srs", "pretensioner"), "B1031"),
-                (("shift solenoid", "transmisi matic", "gigi matic"), "P0751"),
-                (("sensor suhu kabin", "inside air", "ac otomatis", "blower ac"), "B1502"),
-                (("pedal gas", "app sensor"), "P2122"),
-                (("generator", "alternator", "aki tekor", "pengisian"), "P0620"),
-                (("starter relay", "tidak bisa starter"), "P0616"),
-                (("steering lock", "keyless start"), "KLS-11"),
-                (("immobilizer", "transponder"), "P1614"),
-            ]
-            for phrases, target_dtc in keyword_dtc_hints:
-                if any(p in raw_text_low for p in phrases):
-                    row_kw = (
-                        await session.execute(select(DTCCode).where(DTCCode.code == target_dtc))
-                    ).scalar_one_or_none()
-                    if row_kw:
+                elif use_modern and modern_hit:
+                    modern_dtc_entries_map[code] = modern_hit
+                    manual_dtc_entries.append({
+                        "code": code,
+                        "system": f"Katalog Universal {vehicle_fuel} / Modern OBD-II ({modern_hit['system_category']})",
+                        "description_id": str(modern_hit["title_id"]),
+                        "possible_causes": str(modern_hit["root_causes"]),
+                        "recommended_fix": "\n".join(modern_hit.get("repair_steps", [])),
+                        "severity_level": str(modern_hit.get("severity", "HIGH")),
+                    })
+                elif code in db_dtc_map:
+                    r = db_dtc_map[code]
+                    if is_text_compatible_with_fuel(f"{r.description_id} {r.possible_causes}", vehicle_fuel):
                         manual_dtc_entries.append({
-                            "code": row_kw.code,
-                            "system": row_kw.system,
-                            "description_id": row_kw.description_id,
-                            "possible_causes": row_kw.possible_causes,
-                            "recommended_fix": row_kw.recommended_fix or "",
-                            "severity_level": row_kw.severity_level,
+                            "code": r.code,
+                            "system": r.system,
+                            "description_id": r.description_id,
+                            "possible_causes": r.possible_causes,
+                            "recommended_fix": r.recommended_fix or "",
+                            "severity_level": r.severity_level,
                         })
-                    break
+                elif code in cls.STANDARD_OBD_FALLBACK:
+                    fb = cls.STANDARD_OBD_FALLBACK[code]
+                    if is_text_compatible_with_fuel(f"{fb['description_id']} {fb['possible_causes']}", vehicle_fuel):
+                        manual_dtc_entries.append({
+                            "code": code,
+                            "system": fb["system"],
+                            "description_id": fb["description_id"],
+                            "possible_causes": fb["possible_causes"],
+                            "recommended_fix": "",
+                            "severity_level": fb["severity_level"],
+                        })
+        else:
+            # Jika mekanik tidak mengetik kode DTC tapi menulis komponen spesifik
+            raw_text_low = f"{req.complaint or ''} {req.symptom or ''}".lower()
+            if vehicle_fuel == "Diesel":
+                diesel_kw_hints = [
+                    (("turbo", "underboost", "intercooler", "vnt", "wastegate"), "P0299"),
+                    (("rail", "scv", "suction control", "filter solar", "masuk angin", "backleak"), "P0087"),
+                    (("egr", "jelaga", "asap hitam"), "P0401"),
+                    (("dpf", "partikulat"), "P2002"),
+                    (("glow plug", "busi pemanas"), "P0380"),
+                    (("edu", "driver injektor"), "P062D"),
+                ]
+                for phrases, target_dtc in diesel_kw_hints:
+                    if any(p in raw_text_low for p in phrases):
+                        mh = lookup_modern_dtc(target_dtc, "Diesel")
+                        if mh:
+                            modern_dtc_entries_map[target_dtc] = mh
+                            manual_dtc_entries.append({
+                                "code": target_dtc,
+                                "system": f"Katalog Universal Diesel Common-Rail ({mh['system_category']})",
+                                "description_id": mh["title_id"],
+                                "possible_causes": mh["root_causes"],
+                                "recommended_fix": "\n".join(mh.get("repair_steps", [])),
+                                "severity_level": mh.get("severity", "HIGH"),
+                            })
+                        break
+            elif vehicle_fuel == "EV":
+                ev_kw_hints = [
+                    (("isolasi", "isolation", "nyetrum", "kompresor ac"), "P0AA6"),
+                    (("baterai", "battery", "sel drop", "imbalance", "tidak bisa ready", "ready"), "P0A80"),
+                    (("inverter", "overheat", "coolant inverter"), "P0A93"),
+                    (("dc/dc", "dc-dc", "aki 12v tidak mengisi"), "P0A94"),
+                ]
+                for phrases, target_dtc in ev_kw_hints:
+                    if any(p in raw_text_low for p in phrases):
+                        mh = lookup_modern_dtc(target_dtc, "EV")
+                        if mh:
+                            modern_dtc_entries_map[target_dtc] = mh
+                            manual_dtc_entries.append({
+                                "code": target_dtc,
+                                "system": f"Katalog Universal EV / Tegangan Tinggi ({mh['system_category']})",
+                                "description_id": mh["title_id"],
+                                "possible_causes": mh["root_causes"],
+                                "recommended_fix": "\n".join(mh.get("repair_steps", [])),
+                                "severity_level": mh.get("severity", "CRITICAL"),
+                            })
+                        break
+
+            if not manual_dtc_entries and vehicle_fuel != "EV":
+                keyword_dtc_hints = [
+                    (("kipas radiator", "cooling fan", "extra fan", "kipas mati"), "P0480"),
+                    (("wheel speed", "sensor abs", "lampu abs"), "C1021"),
+                    (("pompa abs", "abs pump"), "C1061"),
+                    (("air bag", "airbag", "lampu srs", "pretensioner"), "B1031"),
+                    (("shift solenoid", "transmisi matic", "gigi matic"), "P0751"),
+                    (("sensor suhu kabin", "inside air", "ac otomatis", "blower ac"), "B1502"),
+                    (("pedal gas", "app sensor"), "P2122"),
+                    (("generator", "alternator", "aki tekor", "pengisian"), "P0620"),
+                    (("starter relay", "tidak bisa starter"), "P0616"),
+                    (("steering lock", "keyless start"), "KLS-11"),
+                    (("immobilizer", "transponder"), "P1614"),
+                ]
+                for phrases, target_dtc in keyword_dtc_hints:
+                    if any(p in raw_text_low for p in phrases):
+                        row_kw = (
+                            await session.execute(select(DTCCode).where(DTCCode.code == target_dtc))
+                        ).scalar_one_or_none()
+                        if row_kw and is_text_compatible_with_fuel(f"{row_kw.description_id} {row_kw.possible_causes}", vehicle_fuel):
+                            manual_dtc_entries.append({
+                                "code": row_kw.code,
+                                "system": row_kw.system,
+                                "description_id": row_kw.description_id,
+                                "possible_causes": row_kw.possible_causes,
+                                "recommended_fix": row_kw.recommended_fix or "",
+                                "severity_level": row_kw.severity_level,
+                            })
+                        break
 
         # Filter sistem jika diminta pengguna (B16 pada sheet)
         filtered_system = req.system_filter.strip() if req.system_filter and req.system_filter.strip().lower() not in {"", "semua", "all"} else None
@@ -1977,6 +2120,13 @@ class WeightedDiagnosticEngine:
         req_codes_set = set(req_codes)
 
         for case in cases:
+            # Guardrail kesesuaian jenis mesin: cegah kasus bensin (sensor O2/busi/koil) masuk ke EV atau busi/koil masuk ke Diesel
+            if not is_text_compatible_with_fuel(
+                f"{case.final_diagnosis} {case.repair_action} {case.complaint} {case.symptom}",
+                vehicle_fuel,
+            ):
+                continue
+
             t_score = cls._calculate_text_similarity(req, case)
             l_score = cls._calculate_live_similarity(req, case)
 
@@ -2024,12 +2174,148 @@ class WeightedDiagnosticEngine:
             )
             scored_items.append(item)
 
-        # 2. Suntikkan kandidat resmi langsung dari BUKU MANUAL PERBAIKAN (190 DTC & Pinout Resmi)
+        # 2. Suntikkan kandidat resmi langsung dari BUKU MANUAL PERBAIKAN (OEM Pack Terpilih / Katalog JB420)
         if manual_dtc_entries:
-            manual_advice = cls._build_advice_from_manual_dtc_entries(
-                manual_dtc_entries, wiring_rows, sensor_rows
-            )
             primary_dtc = manual_dtc_entries[0]
+            p_code_up = primary_dtc["code"].upper()
+            if custom_pack and p_code_up in custom_dtc_map:
+                cd_entry = custom_dtc_map[p_code_up]
+                def _clean_pdf_str(raw_s: str) -> str:
+                    s = str(raw_s or "")
+                    s = re.sub(r"\)\s*\(Page\s+[^)]+\)", "", s, flags=re.IGNORECASE)
+                    s = s.replace("an d ", "and ").replace("O FF", "OFF").replace("di sconnect", "disconnect").replace("re lay", "relay")
+                    return re.sub(r"\s{2,}", " ", s).strip()
+
+                manual_advice = cls._build_advice_from_manual_dtc_entries(
+                    manual_dtc_entries, wiring_rows, sensor_rows
+                )
+                pack_title = str(custom_pack.get("title", "Buku Manual Kustom"))
+                manual_advice.active_pack_id = app_info.active_pack_id
+                manual_advice.manual_book_section = f"{pack_title} — Kode {p_code_up}"
+                if cd_entry.get("description_id"):
+                    manual_advice.diagnosis_title = f"DTC {p_code_up}: {_clean_pdf_str(cd_entry['description_id'])}"
+
+                # Bersihkan sisa nomor pin JB420 (C37/E23) yang terbawa dari template spesialis umum agar tidak bercampur dengan pinout manual aktif (mis. Ertiga C01/E01)
+                cleaned_causes: list[dict[str, str]] = []
+                for ci in manual_advice.cause_items:
+                    cic = dict(ci)
+                    for k_fld in ("title", "desc", "detail"):
+                        if k_fld in cic and isinstance(cic[k_fld], str):
+                            cic[k_fld] = _clean_pdf_str(strip_unverified_jb420_pins_from_text(cic[k_fld]))
+                    cleaned_causes.append(cic)
+                manual_advice.cause_items = cleaned_causes
+
+                cleaned_opts: list[dict[str, str]] = []
+                for opt in manual_advice.repair_options:
+                    oc = dict(opt)
+                    for k_fld in ("title", "desc", "why", "verify"):
+                        if k_fld in oc and isinstance(oc[k_fld], str):
+                            oc[k_fld] = _clean_pdf_str(strip_unverified_jb420_pins_from_text(oc[k_fld]))
+                    cleaned_opts.append(oc)
+                manual_advice.repair_options = cleaned_opts
+                manual_advice.step_by_step_repair = [
+                    _clean_pdf_str(strip_unverified_jb420_pins_from_text(st))
+                    for st in manual_advice.step_by_step_repair
+                    if str(st).strip()
+                ]
+                # Tambahkan referensi halaman manual resmi jika tersedia di custom pack
+                page_no = cd_entry.get("page")
+                if page_no and not any(f"Hal. PDF {page_no}" in st or f"Hal. {page_no}" in st for st in manual_advice.step_by_step_repair):
+                    manual_advice.step_by_step_repair.append(
+                        f"Referensi Resmi {custom_pack.get('brand', '')} {custom_pack.get('model', '')}: Lihat detail diagram pada Hal. PDF {page_no} ({pack_title})."
+                    )
+
+                if cd_entry.get("wiring_pinout"):
+                    manual_advice.wiring_pinout = [
+                        {
+                            "pin": str(pw.get("pin", "-")),
+                            "signal": str(pw.get("signal", "-")),
+                            "function": str(pw.get("function", "-")),
+                        }
+                        for pw in cd_entry["wiring_pinout"][:8]
+                    ]
+                elif custom_pack.get("wiring_pinouts"):
+                    manual_advice.wiring_pinout = [
+                        {
+                            "pin": str(pw.get("pin", "-")),
+                            "signal": str(pw.get("signal", "-")),
+                            "function": str(pw.get("function", "-")),
+                        }
+                        for pw in custom_pack["wiring_pinouts"][:6]
+                    ]
+                if cd_entry.get("standard_specs"):
+                    manual_advice.sensor_standards = [
+                        {
+                            "parameter": str(sp.get("parameter", "-")),
+                            "normal_range": str(sp.get("normal_range", "-")),
+                            "unit": str(sp.get("unit", "-")),
+                        }
+                        for sp in cd_entry["standard_specs"][:6]
+                    ]
+                if cd_entry.get("repair_options"):
+                    manual_advice.repair_options = list(cd_entry["repair_options"])
+                if cd_entry.get("cause_items"):
+                    manual_advice.cause_items = list(cd_entry["cause_items"])
+            elif p_code_up in modern_dtc_entries_map:
+                mh = modern_dtc_entries_map[p_code_up]
+                raw_causes = [c.strip() for c in str(mh["root_causes"]).split(";") if c.strip()]
+                cause_items = [
+                    {
+                        "category": "Prioritas Utama" if i == 0 else ("Kemungkinan Tinggi" if i == 1 else "Cek Pendukung"),
+                        "detail": c_txt,
+                    }
+                    for i, c_txt in enumerate(raw_causes[:6])
+                ]
+                m_sys_cat = str(mh.get("system_category", "Kelistrikan"))
+                grp_map = {
+                    "Bahan Bakar": "Engine & Fuel",
+                    "Udara": "Engine & Induction",
+                    "Pengapian": "Engine & Ignition",
+                    "Mekanis": "Engine & Drivetrain",
+                    "Pendingin": "Thermal & Cooling",
+                    "Emisi": "Exhaust & Emission",
+                    "Kelistrikan": "Electrical & Network",
+                }
+                pinout_placeholder = (
+                    [
+                        {
+                            "pin": "Konektor HV / BMS (Wajib APD 1000V)",
+                            "signal": "Baterai HV / Inverter / CAN Bus",
+                            "function": "Cek dengan Scanner BMS & Insulation Tester 500V (Jangan tusuk kabel oranye!)",
+                        }
+                    ]
+                    if mh.get("requires_hv_safety") or vehicle_fuel == "EV"
+                    else [
+                        {
+                            "pin": f"Soket Komponen {p_code_up} ({app_info.resolved_generation_label})",
+                            "signal": f"Sirkuit {m_sys_cat} ({vehicle_fuel})",
+                            "function": "Manual pinout spesifik model ini belum diunggah — verifikasi tegangan suplai (+5V/+12V) & massa langsung pada soket fisik dengan multitester.",
+                        }
+                    ]
+                )
+                manual_advice = ManualRepairAdvice(
+                    diagnosis_title=str(mh["title_id"]),
+                    system_category=m_sys_cat,
+                    group_category=grp_map.get(m_sys_cat, "Powertrain & Control"),
+                    manual_book_section=f"Katalog Universal {vehicle_fuel} / Modern OBD-II — Kode {p_code_up}",
+                    cause_summary=str(mh["root_causes"]),
+                    cause_items=cause_items,
+                    repair_options=list(mh.get("repair_options", [])),
+                    step_by_step_repair=list(mh.get("repair_steps", [])),
+                    sensor_standards=list(mh.get("standard_specs", [])),
+                    wiring_pinout=pinout_placeholder,
+                    relearn_reset_steps=[
+                        f"1. Hapus memori DTC {p_code_up} dengan scan tool (kunci ON mesin mati).",
+                        "2. Lakukan kalibrasi/learning sesuai kebutuhan sistem (SCV/Injektor learning Diesel, adaptasi VVT/throttle, atau reset BMS) lalu uji jalan.",
+                    ],
+                    is_pinout_verified=False,
+                    hv_safety_warning=app_info.hv_safety_warning if (mh.get("requires_hv_safety") or app_info.is_high_voltage) else None,
+                )
+            else:
+                manual_advice = cls._build_advice_from_manual_dtc_entries(
+                    manual_dtc_entries, wiring_rows, sensor_rows
+                )
+
             all_codes_str = ", ".join(d["code"] for d in manual_dtc_entries)
             m_sys, m_grp = cls._classify_dtc_workshop_system(
                 primary_dtc["code"], primary_dtc["system"], primary_dtc["description_id"]
@@ -2068,8 +2354,8 @@ class WeightedDiagnosticEngine:
                         case_code=manual_case_code,
                         brand=req.brand.strip().title() if req.brand.strip() else "Suzuki / OBD-II",
                         model=req.model.strip().title() if req.model.strip() else "Manual Book JB420",
-                        year=None,
-                        engine_capacity=None,
+                        year=req.year,
+                        engine_capacity=req.engine_code.strip() or None,
                         complaint=req.complaint.strip() or f"Indikator MIL / DTC {all_codes_str}",
                         symptom=req.symptom.strip() or primary_dtc["description_id"],
                         dtc=all_codes_str,
@@ -2126,27 +2412,157 @@ class WeightedDiagnosticEngine:
                     )
                 )
 
-        # Top Match
+        # Top Match + Confidence Cutoff (< 25% tanpa kecocokan DTC -> Panduan Pemeriksaan Awal Aman, anti-salah vonis!)
         top_match = scored_items[0] if scored_items else None
-        top_headline = (
-            f"{top_match.final_diagnosis} — {top_match.total_score}% ({top_match.category_label}), referensi {top_match.case_code}, sistem {top_match.system_category}"
-            if top_match
-            else "Tidak ada kasus yang cocok"
-        )
-        direct_advice = (
-            top_match.manual_advice
-            if top_match and top_match.manual_advice
-            else cls.get_repair_manual_guidance("Umum", None)
-        )
+        is_low_conf = (not manual_dtc_entries) and (top_match is None or top_match.total_score < 25.0)
+
+        if is_low_conf:
+            safe = build_low_confidence_safe_advice(
+                fuel_type=vehicle_fuel,
+                vehicle_label=app_info.resolved_generation_label,
+                dtc_raw=", ".join(req_codes) or req.dtc.strip(),
+                hv_safety_warning=app_info.hv_safety_warning,
+            )
+            top_case_code_out = "BELUM-TERPETAKAN"
+            top_diag_out = safe["title"]
+            top_score_out = top_match.total_score if top_match else 0.0
+            top_cat_out = "PERLU PEMERIKSAAN AWAL"
+            top_headline = (
+                f"{top_diag_out} — Kecocokan historis rendah ({top_score_out}%), "
+                f"gunakan panduan cek awal aman untuk mesin {vehicle_fuel}."
+            )
+            direct_advice = ManualRepairAdvice(
+                diagnosis_title=safe["title"],
+                system_category="Kelistrikan" if vehicle_fuel == "EV" else ("Bahan Bakar" if vehicle_fuel == "Diesel" else "Umum"),
+                group_category=f"Pemeriksaan Awal ({vehicle_fuel})",
+                manual_book_section=f"Mode Pemeriksaan Awal Aman — {app_info.resolved_generation_label}",
+                cause_summary=safe["root_cause_summary"],
+                cause_items=[
+                    {"category": "Status Database", "detail": safe["root_cause_summary"]},
+                    {"category": "Tindakan Disarankan", "detail": safe["proven_repair_action"]},
+                ],
+                repair_options=safe["repair_options"],
+                step_by_step_repair=safe["repair_steps"],
+                sensor_standards=safe["standard_specs"],
+                wiring_pinout=[
+                    {
+                        "pin": "Soket Fisik Komponen Terkait",
+                        "signal": f"Pengukuran Aman ({vehicle_fuel})",
+                        "function": "Belum ada manual OEM model ini — verifikasi suplai daya & massa langsung dengan multitester.",
+                    }
+                ],
+                relearn_reset_steps=[
+                    "1. Setelah menemukan sumber kerusakan & memperbaiki, hapus kode DTC lalu uji jalan.",
+                    "2. Klik tombol 'Simpan Kasus' agar kasus baru ini langsung masuk ke database kecerdasan bengkel.",
+                ],
+                is_pinout_verified=False,
+                safety_warning=app_info.safety_warning_desc,
+                hv_safety_warning=app_info.hv_safety_warning,
+                is_low_confidence_fallback=True,
+                adaptive_live_findings=adaptive_live_findings,
+            )
+        else:
+            top_case_code_out = top_match.case_code if top_match else "-"
+            top_diag_out = top_match.final_diagnosis if top_match else "-"
+            top_score_out = top_match.total_score if top_match else 0.0
+            top_cat_out = top_match.category_label if top_match else "Kurang mirip"
+            top_headline = (
+                f"{top_match.final_diagnosis} — {top_match.total_score}% ({top_match.category_label}), referensi {top_match.case_code}, sistem {top_match.system_category}"
+                if top_match
+                else "Tidak ada kasus yang cocok"
+            )
+            direct_advice = (
+                top_match.manual_advice
+                if top_match and top_match.manual_advice
+                else cls.get_repair_manual_guidance("Umum", None)
+            )
+            direct_advice = direct_advice.model_copy(deep=True)
+            direct_advice.adaptive_live_findings = adaptive_live_findings
+            if app_info.is_high_voltage and not direct_advice.hv_safety_warning:
+                direct_advice.hv_safety_warning = app_info.hv_safety_warning
+
+        # 3. Terapkan Guardrail Keamanan Wiring jika model+tahun belum memiliki file manual spesifik
+        direct_advice.active_pack_id = app_info.active_pack_id
+        if not is_low_conf:
+            if app_info.is_pinout_verified:
+                direct_advice.is_pinout_verified = True
+                direct_advice.safety_warning = app_info.safety_warning_desc
+                if custom_pack:
+                    direct_advice.manual_book_section = f"{app_info.active_manual_source}"
+                    if not manual_dtc_entries and custom_pack.get("wiring_pinouts"):
+                        # Pilih pinout dari custom pack yang paling relevan dengan keluhan/diagnosis
+                        diag_hint = f"{direct_advice.diagnosis_title} {req.complaint or ''} {req.symptom or ''}".lower()
+                        rel_pins = [
+                            pw for pw in custom_pack["wiring_pinouts"]
+                            if any(
+                                kw in f"{pw.get('signal', '')} {pw.get('function', '')}".lower()
+                                for kw in [
+                                    k for k in ("koil", "coil", "injektor", "map", "ect", "iat", "tps", "throttle", "app", "ckp", "cmp", "ocv", "o2", "ho2s", "kipas", "fan")
+                                    if k in diag_hint
+                                ]
+                            )
+                        ]
+                        chosen_pins = rel_pins[:6] if len(rel_pins) >= 2 else custom_pack["wiring_pinouts"][:6]
+                        direct_advice.wiring_pinout = [
+                            {
+                                "pin": str(pw.get("pin", "-")),
+                                "signal": str(pw.get("signal", "-")),
+                                "function": str(pw.get("function", "-")),
+                            }
+                            for pw in chosen_pins
+                        ]
+                    # Pastikan tidak ada teks pin JB420 (C37/E23) yang bocor ke paket manual kustom
+                    direct_advice.step_by_step_repair = [
+                        strip_unverified_jb420_pins_from_text(st) for st in direct_advice.step_by_step_repair
+                    ]
+                    cleaned_c_opts: list[dict[str, str]] = []
+                    for opt in direct_advice.repair_options:
+                        oc = dict(opt)
+                        for k_fld in ("title", "desc", "why", "verify"):
+                            if k_fld in oc and isinstance(oc[k_fld], str):
+                                oc[k_fld] = strip_unverified_jb420_pins_from_text(oc[k_fld])
+                        cleaned_c_opts.append(oc)
+                    direct_advice.repair_options = cleaned_c_opts
+            else:
+                direct_advice.is_pinout_verified = False
+                direct_advice.safety_warning = app_info.safety_warning_desc
+                if (req.brand.strip() or req.model.strip()) and "Katalog Universal" not in direct_advice.manual_book_section:
+                    direct_advice.manual_book_section = (
+                        f"Mode Universal OBD-II ({app_info.resolved_generation_label}) — "
+                        "File Manual Spesifik Model Ini Belum Diunggah"
+                    )
+                # Bersihkan kode pin E23/C37 JB420 dari teks opsi & langkah perbaikan agar tidak menyesatkan mekanik!
+                cleaned_opts: list[dict[str, str]] = []
+                for opt in direct_advice.repair_options:
+                    oc = dict(opt)
+                    for k_fld in ("title", "why", "verify"):
+                        if k_fld in oc and isinstance(oc[k_fld], str):
+                            oc[k_fld] = strip_unverified_jb420_pins_from_text(oc[k_fld])
+                    cleaned_opts.append(oc)
+                direct_advice.repair_options = cleaned_opts
+                direct_advice.step_by_step_repair = [
+                    strip_unverified_jb420_pins_from_text(st) for st in direct_advice.step_by_step_repair
+                ]
+                tagged_pinouts: list[dict[str, str]] = []
+                for wp in direct_advice.wiring_pinout:
+                    wp_copy = dict(wp)
+                    func_str = str(wp_copy.get("function", ""))
+                    pin_str = str(wp_copy.get("pin", ""))
+                    if "[Contoh Ref" not in func_str and "Cek dengan Scanner" not in func_str and "Manual pinout spesifik" not in func_str:
+                        if re.search(r"\b[ECGB]\d{2}-\d{1,2}\b", pin_str) or "IG-FUSE" in pin_str or "Terminal ECM" in pin_str:
+                            wp_copy["function"] = f"[Contoh Ref. JB420 — Cek Soket Fisik] {func_str}"
+                    tagged_pinouts.append(wp_copy)
+                direct_advice.wiring_pinout = tagged_pinouts
 
         return WeightedCaseSearchResponse(
             top_headline=top_headline,
-            top_case_code=top_match.case_code if top_match else "-",
-            top_diagnosis=top_match.final_diagnosis if top_match else "-",
-            top_score_percent=top_match.total_score if top_match else 0.0,
-            top_category_label=top_match.category_label if top_match else "Kurang mirip",
+            top_case_code=top_case_code_out,
+            top_diagnosis=top_diag_out,
+            top_score_percent=top_score_out,
+            top_category_label=top_cat_out,
             system_filter_applied=filtered_system,
             ranked_matches=scored_items[:20],
             system_summaries=summaries,
             direct_manual_advice=direct_advice,
+            vehicle_applicability=app_info,
         )

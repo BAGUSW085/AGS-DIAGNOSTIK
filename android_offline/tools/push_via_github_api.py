@@ -21,6 +21,8 @@ FILES_TO_PUSH = [
     "PROMPT_APK_OFFLINE.md",
     "PROGRES_APK_OFFLINE.md",
     "backend/app/db/seed_historical_cases.py",
+    "backend/app/services/vehicle_applicability.py",
+    "backend/app/services/modern_dtc_catalog.py",
     ".github/workflows/build_apk_offline.yml",
     "android_offline/CARA_INSTAL_APK.md",
     "android_offline/capacitor.config.json",
@@ -30,6 +32,7 @@ FILES_TO_PUSH = [
     "android_offline/tools/export_data.py",
     "android_offline/tools/verify_engine.py",
     "android_offline/tools/build_css_and_test_ui.py",
+    "android_offline/tools/sync_web_to_offline.py",
     "android_offline/tools/patch_android_project.py",
     "android_offline/tools/push_via_github_api.py",
     "android_offline/www/index.html",
@@ -41,6 +44,7 @@ FILES_TO_PUSH = [
     "android_offline/www/js/data-store.js",
     "android_offline/www/js/engine.js",
     "android_offline/www/js/manual-search.js",
+    "android_offline/www/js/offline-multi-model.js",
     "android_offline/www/js/offline-api.js",
 ]
 
@@ -120,7 +124,7 @@ def main() -> None:
         "/git/commits",
         token,
         {
-            "message": "fix(apk-offline): horizontal sensor pills, full-width simulation SVGs & landscape orientation toggle",
+            "message": "fix(apk-offline): override Android API 26+ adaptive icon foreground with custom AGOS logo PNG",
             "tree": new_tree["sha"],
             "parents": [base_commit_sha],
         },

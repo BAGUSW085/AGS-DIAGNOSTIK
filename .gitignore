@@ -9,9 +9,10 @@ frontend/build/
 frontend/.dart_tool/
 frontend/.flutter-plugins*
 
-# Local archive / raw large PDFs (database & JSON catalog sudah ter-seed di backend/)
+# Local archive / raw large PDFs
 project_bengkel_masa_depan_siap_pakai/
-manual repair suzuki vitara/*.pdf
+**/*.pdf
+*.pdf
 bin/
 *.zip
 *.log

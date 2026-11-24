@@ -3,7 +3,8 @@ module.exports = {
   darkMode: 'class',
   content: [
     './www/**/*.html',
-    './www/js/**/*.js'
+    './www/js/**/*.js',
+    '!./www/js/embedded-data.js'
   ],
   theme: {
     extend: {

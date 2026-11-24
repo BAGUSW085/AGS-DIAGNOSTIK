@@ -197,7 +197,8 @@ window.addEventListener('load', async () => {{
 }});
 </script>
 """
-    test_html.write_text(orig_html.replace("</body>", probe_script + "\n</body>"), encoding="utf-8")
+    parts = orig_html.rsplit("</body>", 1)
+    test_html.write_text((probe_script + "\n</body>").join(parts) if len(parts) == 2 else orig_html + probe_script, encoding="utf-8")
     try:
         proc = subprocess.run(
             [

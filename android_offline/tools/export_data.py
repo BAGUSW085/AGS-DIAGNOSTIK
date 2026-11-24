@@ -103,6 +103,26 @@ def export_all() -> None:
     # 6. JB420 Extracted Catalog
     jb420_catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
 
+    # 7. Multi-Model Vehicle Catalog (Asia, Eropa, China) + Modern DTC Catalog (Diesel/Turbo/VVT/Hybrid/EV/CAN)
+    sys.path.insert(0, str(BACKEND_DIR))
+    from app.services.vehicle_applicability import VEHICLE_GENERATION_CATALOG, build_engine_directory
+    from app.services.modern_dtc_catalog import MODERN_DTC_CATALOG
+
+    vehicle_generations = VEHICLE_GENERATION_CATALOG
+    engine_directory = build_engine_directory()
+    modern_dtc_catalog = MODERN_DTC_CATALOG
+
+    # 8. Custom Manual Packs terpasang (mis. Suzuki Ertiga Gen 1 K14B/D13A) agar tersedia 100% offline di APK!
+    custom_packs_path = BACKEND_DIR / "app" / "data" / "custom_manual_packs.json"
+    custom_manual_packs = []
+    if custom_packs_path.exists():
+        try:
+            raw_cp = json.loads(custom_packs_path.read_text(encoding="utf-8"))
+            if isinstance(raw_cp, dict) and isinstance(raw_cp.get("packs"), list):
+                custom_manual_packs = raw_cp["packs"]
+        except Exception:
+            custom_manual_packs = []
+
     datasets = {
         "historical_cases.json": sorted_cases,
         "dtc_codes.json": dtc_codes,
@@ -110,6 +130,10 @@ def export_all() -> None:
         "sensor_specs.json": sensor_specs,
         "repair_manuals.json": repair_manuals,
         "jb420_catalog.json": jb420_catalog,
+        "vehicle_generations.json": vehicle_generations,
+        "engine_directory.json": engine_directory,
+        "modern_dtc_catalog.json": modern_dtc_catalog,
+        "custom_manual_packs.json": custom_manual_packs,
     }
 
     print("=== HASIL EKSPOR DATA OFFLINE ===")
@@ -117,8 +141,10 @@ def export_all() -> None:
         out_file = OUT_DATA_DIR / filename
         out_file.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         size_kb = out_file.stat().st_size / 1024.0
-        count_info = len(payload) if isinstance(payload, list) else len(payload.get("dtc_catalog", []))
-        print(f" - {filename:24s} : {size_kb:8.2f} KB ({count_info} entri)")
+        count_info = len(payload) if isinstance(payload, (list, dict)) else 0
+        if filename == "jb420_catalog.json" and isinstance(payload, dict):
+            count_info = len(payload.get("dtc_catalog", []))
+        print(f" - {filename:26s} : {size_kb:8.2f} KB ({count_info} entri)")
 
     # Buat juga embedded-data.js agar bekerja 100% baik via fetch() maupun file:// langsung di WebView
     embedded_bundle = {
@@ -128,6 +154,10 @@ def export_all() -> None:
         "sensor_specs": sensor_specs,
         "repair_manuals": repair_manuals,
         "jb420_catalog": jb420_catalog,
+        "vehicle_generations": vehicle_generations,
+        "engine_directory": engine_directory,
+        "modern_dtc_catalog": modern_dtc_catalog,
+        "custom_manual_packs": custom_manual_packs,
     }
     embedded_js_path = OUT_JS_DIR / "embedded-data.js"
     embedded_js_path.write_text(

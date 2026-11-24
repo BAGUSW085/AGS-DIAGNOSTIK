@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user, get_db
 from app.models import HistoricalCase, User
+from app.services.admin_guard import require_workshop_pin
 from app.services.diagnostic_service import (
     DiagnosticRequest,
     DiagnosticResponse,
@@ -202,10 +203,11 @@ async def create_historical_case(
 
 @router.delete(
     "/cases/{case_id}",
-    summary="Hapus Kasus Historis dari Database",
+    summary="Hapus Kasus Historis dari Database (Dilindungi PIN Kepala Bengkel)",
 )
 async def delete_historical_case(
     case_id: int,
+    _pin_ok: str = Depends(require_workshop_pin),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> dict:

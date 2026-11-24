@@ -16,6 +16,8 @@ Fitur Utama:
    Manual + DTC + Sensor Spec + Wiring Pinout menjadi jawaban terstruktur siap pakai bagi mekanik.
 """
 
+import base64
+import io
 import json
 import re
 from pathlib import Path
@@ -28,6 +30,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user, get_db
 from app.models import DTCCode, RepairManual, SensorSpec, User, WiringDiagram
+from app.services.admin_guard import require_workshop_pin
+from app.services.modern_dtc_catalog import lookup_modern_dtc
+from app.services.vehicle_applicability import (
+    VEHICLE_GENERATION_CATALOG,
+    CustomManualPackSummary,
+    VehicleApplicabilityInfo,
+    build_engine_directory,
+    delete_custom_manual_pack,
+    get_custom_manual_pack_by_id,
+    list_all_manual_pack_summaries,
+    load_custom_manual_packs,
+    resolve_vehicle_applicability,
+    save_custom_manual_pack,
+)
 
 # ---------------------------------------------------------------------------
 # 1. PYDANTIC V2 SCHEMAS
@@ -86,13 +102,18 @@ class RepairManualChunkOut(BaseModel):
 class RAGAssistantQuery(BaseModel):
     query: str = Field(
         ...,
-        min_length=3,
+        min_length=2,
         examples=["Cara cek sensor CKP Suzuki Grand Vitara J20A kode P0335 dan warna kabel pinout ECU"],
         description="Pertanyaan teknis mekanik (bisa memuat merk, model, gejala, sensor, atau kode DTC)",
     )
     brand: str | None = Field(default=None, examples=["Suzuki"])
     model: str | None = Field(default=None, examples=["Grand Vitara"])
     dtc_code: str | None = Field(default=None, examples=["P0335"])
+    pack_id: str | None = Field(
+        default=None,
+        examples=["suzuki_ertiga_gen1_2012_2017"],
+        description="ID Buku Manual aktif yang dipilih mekanik (mis. suzuki_jb420_builtin, suzuki_ertiga_gen1_2012_2017, universal)",
+    )
 
     def __init__(self, **data):
         if "question" in data and "query" not in data:
@@ -353,19 +374,248 @@ class ManualAndWiringService:
         scored_manuals.sort(key=lambda item: item.relevance_score, reverse=True)
         return scored_manuals[:top_k]
 
+    @staticmethod
+    def _clean_custom_pdf_text(raw: str) -> str:
+        s = str(raw or "")
+        s = re.sub(r"\)\s*\(Page\s+[^)]+\)", "", s, flags=re.IGNORECASE)
+        s = s.replace("an d ", "and ").replace("O FF", "OFF").replace("di sconnect", "disconnect").replace("re lay", "relay")
+        return re.sub(r"\s{2,}", " ", s).strip()
+
+    @classmethod
+    def _ask_custom_pack_rag(
+        cls,
+        pack: dict[str, Any],
+        payload: RAGAssistantQuery,
+        detected_dtcs: list[str],
+    ) -> RAGAssistantResponse:
+        """
+        Pencarian RAG TERISOLASI secara ketat pada Buku Manual Kustom terpilih (mis. Suzuki Ertiga Gen 1 K14B/D13A).
+        Menjamin ZERO kebocoran pinout/standar dari Suzuki Grand Vitara JB420 (C37/E23).
+        """
+        pack_title = str(pack.get("title", f"{pack.get('brand', '')} {pack.get('model', '')}")).strip()
+        q_low = (payload.query or "").lower()
+        q_tokens = set(cls._extract_tokens(payload.query))
+        dtc_catalog: list[dict[str, Any]] = list(pack.get("dtc_catalog", []))
+        sensor_specs_raw: list[dict[str, Any]] = list(pack.get("sensor_specs", []))
+        wiring_pinouts_raw: list[dict[str, Any]] = list(pack.get("wiring_pinouts", []))
+
+        summary_parts: list[str] = []
+        matched_dtc_out: list[DTCCodeOut] = []
+        matched_specs_out: list[SensorSpecOut] = []
+        matched_pins_collected: list[WiringPinoutItem] = []
+
+        # Catatan cerdas khusus K14B bila mekanik mencari MAF
+        pack_engines = [str(e).upper() for e in pack.get("engine_codes", [])]
+        if re.search(r"\bmaf\b|mass air flow", q_low) and "K14B" in pack_engines:
+            summary_parts.append(
+                f"[CATATAN ARSITEKTUR MESIN — {pack_title}]\n"
+                "• Mesin Suzuki K14B (Ertiga Gen 1) TIDAK memakai MAF Sensor.\n"
+                "• K14B menggunakan sistem Speed-Density berbasis MAP Sensor (C01-29 / C01-2 / C01-20) dan IAT Sensor (C01-34 / C01-20).\n"
+                "• Menampilkan spesifikasi & pinout MAP + IAT resmi K14B di bawah ini:"
+            )
+            q_tokens.update({"map", "iat", "intake", "manifold"})
+
+        # 1. Cocokkan Kode DTC dari paket ini
+        dtc_by_code = {str(d.get("code", "")).strip().upper(): d for d in dtc_catalog if d.get("code")}
+        matched_entries: list[dict[str, Any]] = []
+        for code in detected_dtcs:
+            if code in dtc_by_code:
+                matched_entries.append(dtc_by_code[code])
+
+        # Jika belum ada kode DTC eksplisit, cari berdasarkan kata kunci di deskripsi/penyebab DTC
+        if not matched_entries and q_tokens:
+            scored_dtcs: list[tuple[int, dict[str, Any]]] = []
+            for d in dtc_catalog:
+                hay = f"{d.get('code', '')} {d.get('description_id', '')} {d.get('common_causes', '')}".lower()
+                hits = sum(1 for tok in q_tokens if tok in hay)
+                if hits > 0:
+                    scored_dtcs.append((hits, d))
+            scored_dtcs.sort(key=lambda x: x[0], reverse=True)
+            matched_entries = [x[1] for x in scored_dtcs[:3]]
+
+        for cd in matched_entries[:4]:
+            code = str(cd.get("code", "")).upper()
+            desc = cls._clean_custom_pdf_text(cd.get("description_id", f"DTC {code}"))
+            causes_raw = cd.get("common_causes", "")
+            if isinstance(causes_raw, list):
+                causes_list = [cls._clean_custom_pdf_text(c) for c in causes_raw if str(c).strip()]
+            else:
+                causes_list = [cls._clean_custom_pdf_text(c) for c in re.split(r"[;\n|]+", str(causes_raw)) if c.strip()]
+            steps_raw = cd.get("repair_steps", [])
+            steps_clean = [cls._clean_custom_pdf_text(s) for s in steps_raw if str(s).strip()]
+            sev = str(cd.get("severity_level", "HIGH"))
+            page_info = f" (Hal. PDF {cd['page']})" if cd.get("page") else ""
+
+            matched_dtc_out.append(
+                DTCCodeOut(
+                    code=code,
+                    system=pack_title,
+                    description_id=desc,
+                    possible_causes=causes_list[:6],
+                    recommended_fix="\n".join(steps_clean[:6]),
+                    severity_level=sev,
+                )
+            )
+            steps_block = "\n".join(f"  {s}" for s in steps_clean[:5]) if steps_clean else "  Ikuti prosedur pemeriksaan manual resmi."
+            summary_parts.append(
+                f"[BUKU MANUAL RESMI: {pack_title} — DTC {code} ({sev})]{page_info}\n"
+                f"• Deskripsi: {desc}\n"
+                f"• Penyebab / Kondisi Deteksi: {'; '.join(causes_list[:5]) or '-'}\n"
+                f"• Langkah Pemeriksaan:\n{steps_block}"
+            )
+            if cd.get("standard_specs"):
+                sp_lines = "\n".join(
+                    f"• {sp.get('parameter', '-')}: {sp.get('normal_range', '-')}"
+                    for sp in cd["standard_specs"][:6]
+                )
+                summary_parts.append(f"[SPESIFIKASI STANDAR MULTIMETER — DTC {code}]\n{sp_lines}")
+            if cd.get("wiring_pinout"):
+                pin_lines = "\n".join(
+                    f"• {p.get('pin', '-')}: {p.get('signal', '-')} — {p.get('function', '-')}"
+                    for p in cd["wiring_pinout"][:8]
+                )
+                summary_parts.append(f"[JALUR WIRING & PINOUT RESMI — DTC {code}]\n{pin_lines}")
+                for p in cd["wiring_pinout"][:8]:
+                    matched_pins_collected.append(
+                        WiringPinoutItem(
+                            pin_code=str(p.get("pin", "-")),
+                            wire_color=str(p.get("signal", "-")),
+                            function=str(p.get("function", "-")),
+                        )
+                    )
+
+        # 2. Cocokkan Spesifikasi Sensor dari paket ini
+        sensor_aliases = {
+            "koil": ["coil", "ignition", "pengapian"],
+            "coil": ["koil", "ignition", "pengapian"],
+            "kipas": ["fan", "radiator", "ac"],
+            "fan": ["kipas", "radiator"],
+            "throttle": ["tps", "etc"],
+            "tps": ["throttle", "etc"],
+            "pedal": ["app"],
+            "suhu": ["ect", "coolant", "iat"],
+            "oksigen": ["o2", "ho2s", "oxygen"],
+            "o2": ["ho2s", "oxygen", "oksigen"],
+            "vvt": ["ocv", "cmp", "ckp"],
+            "vakum": ["map", "manifold"],
+        }
+        expanded_tokens = set(q_tokens)
+        for t in list(q_tokens):
+            expanded_tokens.update(sensor_aliases.get(t, []))
+        for d in matched_entries[:2]:
+            expanded_tokens.update(cls._extract_tokens(str(d.get("description_id", ""))))
+
+        matched_spec_dicts: list[dict[str, Any]] = []
+        for idx_s, sp in enumerate(sensor_specs_raw, start=1):
+            hay_s = f"{sp.get('sensor_name', '')} {sp.get('pin_configuration', '')} {sp.get('voltage_idle', '')} {sp.get('voltage_wot', '')}".lower()
+            if any(tok in hay_s for tok in expanded_tokens if len(tok) >= 2):
+                matched_spec_dicts.append(sp)
+                matched_specs_out.append(
+                    SensorSpecOut(
+                        id=idx_s,
+                        brand=str(pack.get("brand", "")),
+                        model=str(pack.get("model", "")),
+                        sensor_name=str(sp.get("sensor_name", "-")),
+                        pin_configuration=str(sp.get("pin_configuration", "-")),
+                        voltage_idle=str(sp.get("voltage_idle", "-")),
+                        voltage_wot=str(sp.get("voltage_wot", "-")),
+                        resistance_ohm=str(sp.get("resistance_ohm", "-")),
+                        testing_notes=str(sp.get("testing_notes", "")),
+                    )
+                )
+        for sp in matched_spec_dicts[:2]:
+            summary_parts.append(
+                f"[SPESIFIKASI SENSOR RESMI — {sp.get('sensor_name', '-')}]\n"
+                f"• Konfigurasi Pinout: {sp.get('pin_configuration', '-')}\n"
+                f"• Tegangan Idle / KOEO: {sp.get('voltage_idle', '-')}\n"
+                f"• Tegangan Kerja / WOT: {sp.get('voltage_wot', '-')}\n"
+                f"• Tahanan / Suplai: {sp.get('resistance_ohm', '-')}"
+            )
+
+        # 3. Cocokkan Pinout Wiring dari paket ini (jika belum tercakup dari DTC)
+        if not matched_pins_collected and wiring_pinouts_raw and expanded_tokens:
+            rel_pins = [
+                p for p in wiring_pinouts_raw
+                if any(
+                    tok in f"{p.get('pin', '')} {p.get('signal', '')} {p.get('function', '')}".lower()
+                    for tok in expanded_tokens
+                    if len(tok) >= 2
+                )
+            ]
+            if rel_pins:
+                pin_lines = "\n".join(
+                    f"• {p.get('pin', '-')}: {p.get('signal', '-')} — {p.get('function', '-')}"
+                    for p in rel_pins[:10]
+                )
+                summary_parts.append(
+                    f"[PINOUT KONEKTOR ECM RESMI — {pack.get('brand', '')} {pack.get('model', '')}]\n{pin_lines}"
+                )
+                for p in rel_pins[:10]:
+                    matched_pins_collected.append(
+                        WiringPinoutItem(
+                            pin_code=str(p.get("pin", "-")),
+                            wire_color=str(p.get("signal", "-")),
+                            function=str(p.get("function", "-")),
+                        )
+                    )
+
+        if not summary_parts:
+            sample_codes = ", ".join(str(d.get("code", "")) for d in dtc_catalog[:8] if d.get("code"))
+            synthesized = (
+                f"Kata kunci '{payload.query}' belum ditemukan pada buku manual aktif: {pack_title}.\n"
+                f"• Total isi manual ini: {len(dtc_catalog)} kode DTC, {len(wiring_pinouts_raw)} pinout konektor, {len(sensor_specs_raw)} spesifikasi sensor.\n"
+                f"• Coba cari kode DTC yang terdaftar (misal: P0300, P0107, P0117, P0122, P0130, P0335, P0480, P2135 atau {sample_codes}) "
+                f"atau nama komponen (koil, map, tps, app, ect, ckp, o2, kipas, injektor, can)."
+            )
+        else:
+            synthesized = "\n\n".join(summary_parts)
+
+        wd_out = []
+        if matched_pins_collected:
+            prefixes = sorted({p.pin_code.split("-")[0] for p in matched_pins_collected if "-" in p.pin_code})
+            wd_out.append(
+                WiringDiagramOut(
+                    id=9001,
+                    brand=str(pack.get("brand", "")),
+                    model=str(pack.get("model", "")),
+                    year_range=f"{pack.get('year_start', '')}-{pack.get('year_end', '')}",
+                    system_name=pack_title,
+                    ecu_connector_code=" / ".join(prefixes) or "ECM",
+                    pinouts=matched_pins_collected,
+                    ground_locations="Massa utama ECM & blok mesin sesuai manual resmi",
+                )
+            )
+
+        return RAGAssistantResponse(
+            query=payload.query,
+            detected_dtc_codes=detected_dtcs,
+            synthesized_guidance=synthesized,
+            matched_dtc_details=matched_dtc_out,
+            matched_sensor_specs=matched_specs_out,
+            matched_wiring_diagrams=wd_out,
+            matched_manual_sections=[],
+        )
+
     @classmethod
     async def ask_rag_assistant(
         cls, session: AsyncSession, payload: RAGAssistantQuery
     ) -> RAGAssistantResponse:
         """
         Mengorkestrasi pengambilan konteks teknis dari Buku Manual Resmi yang ditanamkan:
-        HANYA menampilkan:
-        1. Penyebab & Saran Penyelesaian DTC dari Buku Manual (`jb420_extracted_catalog.json` + `DTCCode`)
-        2. Spesifikasi Standar Multimeter (Volt / Ohm)
-        3. Jalur Wiring, Pinout Konektor Modul Kontrol, Warna Kabel & Titik Ground
-        (Tanpa menampilkan teks Daftar Isi atau narasi tidak relevan).
+        - Jika `payload.pack_id` menunjuk ke paket manual kustom (mis. Suzuki Ertiga Gen 1),
+          pencarian diisolasi 100% pada buku manual tersebut (anti-bocor pinout JB420).
+        - Jika `payload.pack_id == 'suzuki_jb420_builtin'` atau kosong, menggunakan Suzuki JB420.
+        - Jika `payload.pack_id == 'universal'`, memprioritaskan Katalog Universal OBD-II & Modern.
         """
         detected_dtcs = cls._extract_dtc_from_text(payload.query, payload.dtc_code)
+        req_pack_id = str(payload.pack_id or "").strip()
+
+        # Mode Terisolasi Paket Manual Kustom (Ertiga Gen 1 atau manual baru di masa depan)
+        if req_pack_id and req_pack_id not in {"suzuki_jb420_builtin", "universal"}:
+            custom_pack = get_custom_manual_pack_by_id(req_pack_id)
+            if custom_pack:
+                return cls._ask_custom_pack_rag(custom_pack, payload, detected_dtcs)
+
         dtc_details = await cls.lookup_dtc_codes(session, detected_dtcs)
         cat_map = cls._get_jb420_dtc_catalog_map()
 
@@ -693,10 +943,55 @@ class ManualAndWiringService:
                     f"• Titik Massa (Ground): {matched_wd.ground_locations}"
                 )
 
+        # Cek pula Katalog Universal Modern (Diesel Common-Rail, Turbo, VVT/VANOS, Hybrid/EV, CAN) & Paket Manual Kustom
+        if detected_dtcs:
+            extra_blocks: list[str] = []
+            already_codes = {d.code.upper() for d in dtc_details}
+            # 1) Cek paket manual kustom HANYA bila user tidak secara eksplisit mengunci ke JB420 atau Universal
+            if req_pack_id not in {"suzuki_jb420_builtin", "universal"}:
+                for pack in load_custom_manual_packs():
+                    p_brand = str(pack.get("brand", "")).lower()
+                    p_model = str(pack.get("model", "")).lower()
+                    if payload.brand and p_brand and payload.brand.lower() not in p_brand and p_brand not in payload.brand.lower():
+                        continue
+                    for cd in pack.get("dtc_catalog", []):
+                        cd_code = str(cd.get("code", "")).upper()
+                        if cd_code in detected_dtcs:
+                            extra_blocks.append(
+                                f"[PAKET MANUAL KUSTOM: {pack.get('title', p_model)} — {cd_code}]\n"
+                                f"• Deskripsi: {cd.get('description_id', '-')}\n"
+                                f"• Penyebab: {cd.get('common_causes', '-')}\n"
+                                f"• Langkah: {' | '.join(cd.get('repair_steps', []))}"
+                            )
+            # 2) Cek Katalog Modern (Diesel / Turbo / VVT / EV / Hybrid / CAN)
+            for code in detected_dtcs:
+                mh = lookup_modern_dtc(code, "Diesel" if "diesel" in payload.query.lower() or "2gd" in payload.query.lower() else "Bensin")
+                if mh and (req_pack_id == "universal" or code not in already_codes or code in {"P0087", "P0299", "P0015", "P0A80", "P0AA6", "U0100"}):
+                    opts_txt = " | ".join(o["title"] for o in mh.get("repair_options", [])[:3])
+                    specs_txt = "; ".join(f"{s['parameter']}: {s['normal_range']}" for s in mh.get("standard_specs", [])[:3])
+                    hv_note = "\n⚠️ WAJIB APD TEGANGAN TINGGI (HV 1000V)!" if mh.get("requires_hv_safety") else ""
+                    extra_blocks.append(
+                        f"[KATALOG UNIVERSAL MODERN — {mh['code']} ({mh['system_category']})]\n"
+                        f"• Deskripsi: {mh['title_id']}\n"
+                        f"• Penyebab Utama: {mh['root_causes']}\n"
+                        f"• Opsi Perbaikan: {opts_txt}\n"
+                        f"• Standar Ukur: {specs_txt}{hv_note}"
+                    )
+            if extra_blocks:
+                summary_parts = extra_blocks + summary_parts
+
+        if req_pack_id == "universal" and summary_parts:
+            summary_parts.insert(
+                0,
+                "[MODE STANDAR UNIVERSAL OBD-II]\n"
+                "• Catatan: Nilai tegangan & pinout di bawah bersifat ilustrasi referensi umum (basis arsitektur Suzuki JB420 / SAE J2012). "
+                "Pilih buku manual spesifik model bila sudah tersedia, atau verifikasi fisik menggunakan multitester."
+            )
+
         if not summary_parts:
             synthesized = (
                 "Data spesifikasi, penyebab & solusi DTC, atau jalur wiring belum ditemukan untuk kata kunci tersebut. "
-                "Masukkan kode DTC Buku Manual (contoh: P0480, C1021, P0756, B1502, B1017, B1133, P1614, KLS-11) "
+                "Masukkan kode DTC (contoh: P0087, P0299, P0015, P0A80, P0AA6, U0100, P0480, C1021, P0756, B1502) "
                 "atau nama sensor/modul (MAF, O2, ECT, TPS, CKP, ABS, TCM, HVAC, SRS Airbag, BCM, Immobilizer, Keyless)."
             )
         else:
@@ -784,3 +1079,307 @@ async def ask_repair_assistant(
     current_user: User = Depends(get_current_active_user),
 ) -> RAGAssistantResponse:
     return await ManualAndWiringService.ask_rag_assistant(db, payload)
+
+
+class VehicleResolveRequest(BaseModel):
+    brand: str = ""
+    model: str = ""
+    year: int | None = None
+    engine_code: str = ""
+
+
+class ManualPackImportRequest(BaseModel):
+    pack_id: str | None = None
+    brand: str = Field(..., min_length=1)
+    model: str = Field(..., min_length=1)
+    generation_id: str | None = None
+    generation_label: str = ""
+    year_start: int = Field(default=2010, ge=1980, le=2030)
+    year_end: int = Field(default=2027, ge=1980, le=2030)
+    engine_codes: list[str] = []
+    title: str = Field(..., min_length=2)
+    dtc_catalog: list[dict[str, Any]] = []
+    wiring_pinouts: list[dict[str, str]] = []
+    sensor_specs: list[dict[str, str]] = []
+
+
+class PdfPreviewRequest(BaseModel):
+    file_name: str
+    content_base64: str
+    brand: str = ""
+    model: str = ""
+    year_start: int = 2015
+    year_end: int = 2026
+    max_pages: int = 25
+
+
+@router.get(
+    "/vehicle-matrix",
+    summary="Matriks Model, Generasi, Katalog Kode Mesin (Asia/Eropa/China) & Status Manual",
+)
+async def get_vehicle_matrix_and_packs(
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, Any]:
+    """Mengembalikan katalog generasi kendaraan (Asia, Eropa, China), direktori kode mesin, & paket manual terpasang."""
+    packs = [p.model_dump() for p in list_all_manual_pack_summaries()]
+    engines = build_engine_directory()
+    region_counts: dict[str, int] = {"Asia": 0, "Eropa": 0, "China": 0}
+    for e in engines:
+        reg = e.get("region", "Asia")
+        region_counts[reg] = region_counts.get(reg, 0) + 1
+    return {
+        "generations": VEHICLE_GENERATION_CATALOG,
+        "installed_packs": packs,
+        "engine_directory": engines,
+        "region_counts": region_counts,
+    }
+
+
+@router.get(
+    "/engine-catalog",
+    summary="Pencarian Katalog Kode Mesin Mobil Asia, Eropa & China",
+)
+async def search_engine_catalog(
+    region: str | None = Query(None, description="Filter wilayah: Asia, Eropa, China"),
+    brand: str | None = Query(None, description="Filter merek mobil"),
+    fuel: str | None = Query(None, description="Filter bahan bakar: Bensin, Diesel, Hybrid, EV"),
+    q: str | None = Query(None, description="Cari kode mesin, alias (mis. 1TR-VE, 2GD), atau model mobil"),
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, Any]:
+    """Mencari kode mesin lintas merek Asia, Eropa, dan China lengkap dengan normalisasi alias bengkel."""
+    engines = build_engine_directory()
+    if region and region.lower() != "semua":
+        r_low = region.strip().lower()
+        engines = [e for e in engines if e.get("region", "").lower() == r_low]
+    if brand:
+        b_low = brand.strip().lower()
+        engines = [e for e in engines if b_low in e.get("brand", "").lower()]
+    if fuel and fuel.lower() != "semua":
+        f_low = fuel.strip().lower()
+        engines = [e for e in engines if f_low in e.get("fuel", "").lower()]
+    if q:
+        q_raw = q.strip().lower()
+        q_norm = re.sub(r"[^a-z0-9]", "", q_raw)
+
+        def _match_q(entry: dict[str, Any]) -> bool:
+            hay = " ".join(
+                [
+                    entry.get("code", ""),
+                    " ".join(entry.get("aliases", [])),
+                    entry.get("brand", ""),
+                    " ".join(entry.get("models", [])),
+                    " ".join(entry.get("generation_labels", [])),
+                    entry.get("desc", ""),
+                    entry.get("origin_country", ""),
+                    entry.get("region", ""),
+                ]
+            ).lower()
+            if q_raw in hay:
+                return True
+            if q_norm and q_norm in re.sub(r"[^a-z0-9]", "", hay):
+                return True
+            return False
+
+        engines = [e for e in engines if _match_q(e)]
+
+    return {
+        "total": len(engines),
+        "engines": engines,
+    }
+
+
+@router.post(
+    "/resolve-vehicle",
+    response_model=VehicleApplicabilityInfo,
+    summary="Resolusi Generasi Mobil, Kode Mesin & Ketersediaan Manual OEM",
+)
+async def resolve_vehicle_endpoint(
+    payload: VehicleResolveRequest,
+    current_user: User = Depends(get_current_active_user),
+) -> VehicleApplicabilityInfo:
+    app_info, _ = resolve_vehicle_applicability(
+        payload.brand, payload.model, payload.year, payload.engine_code
+    )
+    return app_info
+
+
+@router.post(
+    "/packs/import",
+    status_code=status.HTTP_201_CREATED,
+    summary="Impor Paket Buku Manual Model Baru (Dilindungi PIN Kepala Bengkel)",
+)
+async def import_custom_manual_pack(
+    payload: ManualPackImportRequest,
+    _pin_ok: str = Depends(require_workshop_pin),
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, Any]:
+    saved = save_custom_manual_pack(payload.model_dump())
+    return {
+        "status": "success",
+        "message": f"Paket manual '{saved['title']}' berhasil diaktifkan untuk {saved['brand']} {saved['model']} ({saved['year_start']}–{saved['year_end']}).",
+        "pack": saved,
+    }
+
+
+@router.get(
+    "/packs/{pack_id}",
+    summary="Detail Lengkap Paket Buku Manual Aktif (Pinout, Sensor Specs & DTC Populer)",
+)
+async def get_manual_pack_detail(
+    pack_id: str,
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, Any]:
+    """Mengembalikan detail sensor specs, pinout konektor & kode DTC populer dari buku manual yang dipilih."""
+    pid = str(pack_id or "").strip()
+    if pid == "suzuki_jb420_builtin":
+        return {
+            "pack_id": "suzuki_jb420_builtin",
+            "brand": "Suzuki",
+            "model": "Grand Vitara",
+            "generation_id": "suzuki_jb420",
+            "generation_label": "Grand Vitara Gen 2 (JB420)",
+            "year_start": 2006,
+            "year_end": 2015,
+            "engine_codes": ["J20A"],
+            "title": "Buku Pedoman Resmi Suzuki Grand Vitara JB420 (Vol 1 & Vol 2)",
+            "is_builtin": True,
+            "dtc_count": 207,
+            "pinout_count": 251,
+            "sensor_spec_count": 9,
+            "popular_dtcs": ["P0480", "C1021", "P0756", "B1502", "B1017", "B1133", "P1614", "KLS-11"],
+            "wiring_pinouts": [],
+            "sensor_specs": [],
+        }
+
+    pack = get_custom_manual_pack_by_id(pid)
+    if not pack:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Paket manual '{pid}' tidak ditemukan.",
+        )
+
+    dtcs = list(pack.get("dtc_catalog", []))
+    dtc_codes_set = {str(d.get("code", "")).upper() for d in dtcs if d.get("code")}
+    preferred_order = ["P0300", "P0107", "P0117", "P0122", "P0130", "P0335", "P0480", "P2135", "P0171", "P0340", "P0105", "P2122"]
+    popular = [c for c in preferred_order if c in dtc_codes_set][:8]
+    if len(popular) < 8:
+        for d in dtcs:
+            c = str(d.get("code", "")).upper()
+            if c and c not in popular:
+                popular.append(c)
+            if len(popular) >= 8:
+                break
+
+    return {
+        "pack_id": str(pack.get("pack_id", pid)),
+        "brand": str(pack.get("brand", "")),
+        "model": str(pack.get("model", "")),
+        "generation_id": pack.get("generation_id"),
+        "generation_label": str(pack.get("generation_label", pack.get("model", ""))),
+        "year_start": int(pack.get("year_start", 2010)),
+        "year_end": int(pack.get("year_end", 2026)),
+        "engine_codes": list(pack.get("engine_codes", [])),
+        "title": str(pack.get("title", "Manual Tambahan Bengkel")),
+        "is_builtin": False,
+        "dtc_count": len(dtcs),
+        "pinout_count": len(pack.get("wiring_pinouts", [])),
+        "sensor_spec_count": len(pack.get("sensor_specs", [])),
+        "popular_dtcs": popular,
+        "wiring_pinouts": list(pack.get("wiring_pinouts", [])),
+        "sensor_specs": list(pack.get("sensor_specs", [])),
+    }
+
+
+@router.delete(
+    "/packs/{pack_id}",
+    summary="Hapus Paket Buku Manual Kustom (Dilindungi PIN Kepala Bengkel)",
+)
+async def remove_custom_manual_pack(
+    pack_id: str,
+    _pin_ok: str = Depends(require_workshop_pin),
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, str]:
+    ok = delete_custom_manual_pack(pack_id)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Paket manual tidak ditemukan atau merupakan paket bawaan sistem.",
+        )
+    return {"status": "deleted", "pack_id": pack_id}
+
+
+@router.post(
+    "/packs/preview-pdf",
+    summary="Pra-Ekstrak Otomatis File PDF Manual Baru Menjadi Draf Paket JSON",
+)
+async def preview_pdf_manual_extraction(
+    payload: PdfPreviewRequest,
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, Any]:
+    """Membaca teks PDF manual baru secara otomatis, mendeteksi kode DTC OBD-II & pola pinout sebagai draf siap review."""
+    try:
+        from pypdf import PdfReader
+    except ImportError as exc:
+        raise HTTPException(status_code=500, detail=f"Library pypdf belum tersedia: {exc}")
+
+    try:
+        raw_b64 = payload.content_base64.split(",", 1)[-1]
+        pdf_bytes = base64.b64decode(raw_b64)
+        reader = PdfReader(io.BytesIO(pdf_bytes))
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Gagal membaca file PDF: {exc}")
+
+    total_pages = len(reader.pages)
+    limit = min(total_pages, max(1, payload.max_pages))
+    dtc_seen: dict[str, dict[str, Any]] = {}
+    pin_seen: list[dict[str, str]] = []
+    seen_pin_codes: set[str] = set()
+
+    for page_idx in range(limit):
+        txt = reader.pages[page_idx].extract_text() or ""
+        if not txt.strip():
+            continue
+        lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
+        for i, ln in enumerate(lines):
+            # Deteksi kode DTC (P0xxx, P1xxx, Cxxxx, Bxxxx, Uxxxx)
+            for m in re.finditer(r"\b([PCBU][0-9A-F]{4})\b", ln.upper()):
+                code = m.group(1)
+                if code not in dtc_seen:
+                    ctx_after = " ".join(lines[i : min(i + 3, len(lines))])
+                    dtc_seen[code] = {
+                        "code": code,
+                        "description_id": ctx_after[:180],
+                        "common_causes": f"Hasil ekstraksi PDF halaman {page_idx + 1}: perlu verifikasi mekanik.",
+                        "repair_steps": [f"1. Periksa komponen & sirkuit kode {code} (Hal. {page_idx + 1} PDF)."],
+                        "page": page_idx + 1,
+                    }
+            # Deteksi pola pinout konektor umum (misal E1-12, C37-24, A12)
+            for pm in re.finditer(r"\b([A-Z]\d{1,2}[-]\d{1,2})\b", ln):
+                p_code = pm.group(1)
+                if p_code not in seen_pin_codes and len(pin_seen) < 20:
+                    seen_pin_codes.add(p_code)
+                    pin_seen.append({
+                        "pin": p_code,
+                        "signal": ln[:60],
+                        "function": f"Terdeteksi di halaman {page_idx + 1} (perlu verifikasi)",
+                    })
+
+    draft_pack = {
+        "brand": payload.brand.strip() or "Model Baru",
+        "model": payload.model.strip() or Path(payload.file_name).stem,
+        "year_start": payload.year_start,
+        "year_end": payload.year_end,
+        "engine_codes": [],
+        "title": f"Draf Manual {payload.brand} {payload.model} ({payload.file_name})".strip(),
+        "dtc_catalog": list(dtc_seen.values())[:50],
+        "wiring_pinouts": pin_seen,
+        "sensor_specs": [],
+    }
+    return {
+        "file_name": payload.file_name,
+        "total_pages_in_pdf": total_pages,
+        "pages_scanned": limit,
+        "detected_dtc_count": len(dtc_seen),
+        "detected_pinout_count": len(pin_seen),
+        "draft_pack": draft_pack,
+    }

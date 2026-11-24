@@ -24,8 +24,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.api.v1.endpoints.diagnostic_router import router as diagnostic_router
 from app.core.config import settings
 from app.models import Base
+from app.services.admin_guard import router as admin_guard_router
 from app.services.manual_wiring_service import router as manual_wiring_router
-from app.services.pos_workorder_service import router as pos_workorder_router
 
 try:
     from app.api.v1.endpoints.auth_vehicle_router import router as auth_vehicle_router
@@ -121,11 +121,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registrasi Router Auth/Kendaraan & 3 Pilar Utama
+# Registrasi Router Auth/Kendaraan, Diagnostik, Manual Multi-Merek & Admin Security/Backup
 app.include_router(auth_vehicle_router)
 app.include_router(diagnostic_router)
 app.include_router(manual_wiring_router)
-app.include_router(pos_workorder_router)
+app.include_router(admin_guard_router)
 
 # Mount Web Dashboard SPA & Static Assets
 STATIC_DIR = Path(__file__).parent / "static"
