@@ -3,6 +3,38 @@ Konfigurasi Environment Proyek — app/core/config.py
 """
 
 import os
+from pathlib import Path
+import shutil
+
+
+def _resolve_database_url() -> str:
+    """Menentukan URL database yang aman untuk mode lokal maupun serverless read-only (Vercel)."""
+    raw = os.getenv("DATABASE_URL", "").strip()
+    if raw:
+        if raw.startswith("postgres://"):
+            return raw.replace("postgres://", "postgresql+asyncpg://", 1)
+        if raw.startswith("postgresql://") and "+asyncpg" not in raw:
+            return raw.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return raw
+
+    bundled_db = Path(__file__).resolve().parent.parent.parent / "bengkel_masa_depan.db"
+    is_serverless = bool(
+        os.getenv("VERCEL")
+        or os.getenv("VERCEL_ENV")
+        or os.getenv("AWS_LAMBDA_FUNCTION_NAME")
+    )
+    dir_writable = os.access(bundled_db.parent, os.W_OK)
+
+    if is_serverless or not dir_writable:
+        tmp_db = Path("/tmp/bengkel_masa_depan.db")
+        if not tmp_db.exists() and bundled_db.exists():
+            try:
+                shutil.copy2(bundled_db, tmp_db)
+            except Exception:
+                pass
+        return f"sqlite+aiosqlite:///{tmp_db.as_posix()}"
+
+    return f"sqlite+aiosqlite:///{bundled_db.as_posix()}"
 
 
 class Settings:
@@ -10,15 +42,7 @@ class Settings:
     VERSION: str = "1.1.0"
     API_V1_STR: str = "/api/v1"
 
-    _raw_db_url: str = os.getenv(
-        "DATABASE_URL", "sqlite+aiosqlite:///./bengkel_masa_depan.db"
-    )
-    if _raw_db_url.startswith("postgres://"):
-        DATABASE_URL: str = _raw_db_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif _raw_db_url.startswith("postgresql://") and "+asyncpg" not in _raw_db_url:
-        DATABASE_URL = _raw_db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    else:
-        DATABASE_URL = _raw_db_url
+    DATABASE_URL: str = _resolve_database_url()
     JWT_SECRET_KEY: str = os.getenv(
         "JWT_SECRET_KEY", "bengkel-masa-depan-super-secret-jwt-key-2026"
     )

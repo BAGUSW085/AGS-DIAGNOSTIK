@@ -17,6 +17,7 @@ Menyelesaikan tiga kebutuhan kritis bengkel multi-merek modern:
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -938,6 +939,28 @@ VEHICLE_GENERATION_CATALOG: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 
 CUSTOM_PACKS_PATH = Path(__file__).resolve().parent.parent / "data" / "custom_manual_packs.json"
+_TMP_CUSTOM_PACKS_PATH = Path("/tmp/agos_custom_manual_packs.json")
+_PACKS_CACHE: dict[str, Any] = {"path": None, "mtime_ns": None, "packs": None}
+
+
+def _is_readonly_packs_env() -> bool:
+    return bool(
+        os.getenv("VERCEL")
+        or os.getenv("VERCEL_ENV")
+        or os.getenv("AWS_LAMBDA_FUNCTION_NAME")
+        or not os.access(CUSTOM_PACKS_PATH.parent, os.W_OK)
+    )
+
+
+def _get_writable_packs_path() -> Path:
+    return _TMP_CUSTOM_PACKS_PATH if _is_readonly_packs_env() else CUSTOM_PACKS_PATH
+
+
+def _get_readable_packs_path() -> Path:
+    writable = _get_writable_packs_path()
+    if writable.exists():
+        return writable
+    return CUSTOM_PACKS_PATH
 
 
 class CustomManualPackSummary(BaseModel):
@@ -1062,30 +1085,43 @@ def build_engine_directory() -> list[dict[str, Any]]:
 
 
 def _ensure_custom_packs_file() -> None:
-    CUSTOM_PACKS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not CUSTOM_PACKS_PATH.exists():
-        CUSTOM_PACKS_PATH.write_text(json.dumps({"packs": []}, indent=2), encoding="utf-8")
+    writable = _get_writable_packs_path()
+    if not writable.exists() and not CUSTOM_PACKS_PATH.exists():
+        try:
+            writable.parent.mkdir(parents=True, exist_ok=True)
+            writable.write_text(json.dumps({"packs": []}, indent=2), encoding="utf-8")
+        except OSError:
+            pass
 
 
 def load_custom_manual_packs() -> list[dict[str, Any]]:
     """Membaca semua paket manual kustom tambahan yang sudah diimpor oleh bengkel."""
     _ensure_custom_packs_file()
+    read_path = _get_readable_packs_path()
+    if not read_path.exists():
+        return []
     try:
-        raw = json.loads(CUSTOM_PACKS_PATH.read_text(encoding="utf-8"))
+        mtime_ns = read_path.stat().st_mtime_ns
+        if (
+            _PACKS_CACHE["path"] == str(read_path)
+            and _PACKS_CACHE["mtime_ns"] == mtime_ns
+            and _PACKS_CACHE["packs"] is not None
+        ):
+            return _PACKS_CACHE["packs"]
+        raw = json.loads(read_path.read_text(encoding="utf-8"))
         packs = raw.get("packs", [])
-        return packs if isinstance(packs, list) else []
+        result = packs if isinstance(packs, list) else []
+        _PACKS_CACHE["path"] = str(read_path)
+        _PACKS_CACHE["mtime_ns"] = mtime_ns
+        _PACKS_CACHE["packs"] = result
+        return result
     except Exception:
         return []
 
 
 def save_custom_manual_pack(pack_data: dict[str, Any]) -> dict[str, Any]:
     """Menyimpan atau memperbarui paket manual kustom ke custom_manual_packs.json."""
-    _ensure_custom_packs_file()
-    try:
-        raw = json.loads(CUSTOM_PACKS_PATH.read_text(encoding="utf-8"))
-        packs: list[dict[str, Any]] = raw.get("packs", []) if isinstance(raw.get("packs"), list) else []
-    except Exception:
-        packs = []
+    packs = list(load_custom_manual_packs())
 
     pack_id = str(pack_data.get("pack_id") or "").strip()
     if not pack_id:
@@ -1098,10 +1134,13 @@ def save_custom_manual_pack(pack_data: dict[str, Any]) -> dict[str, Any]:
 
     updated = [p for p in packs if p.get("pack_id") != pack_id]
     updated.append(pack_data)
-    CUSTOM_PACKS_PATH.write_text(
+    target_path = _get_writable_packs_path()
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(
         json.dumps({"packs": updated}, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
+    _PACKS_CACHE["path"] = None
     return pack_data
 
 
@@ -1109,15 +1148,17 @@ def delete_custom_manual_pack(pack_id: str) -> bool:
     """Menghapus paket manual kustom berdasarkan pack_id."""
     if pack_id == "suzuki_jb420_builtin":
         return False
-    _ensure_custom_packs_file()
     packs = load_custom_manual_packs()
     filtered = [p for p in packs if p.get("pack_id") != pack_id]
     if len(filtered) == len(packs):
         return False
-    CUSTOM_PACKS_PATH.write_text(
+    target_path = _get_writable_packs_path()
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(
         json.dumps({"packs": filtered}, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
+    _PACKS_CACHE["path"] = None
     return True
 
 

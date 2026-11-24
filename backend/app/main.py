@@ -19,11 +19,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.api.v1.endpoints.diagnostic_router import router as diagnostic_router
 from app.core.config import settings
-from app.models import Base
+from app.models import Base, DTCCode, HistoricalCase, User
 from app.services.admin_guard import router as admin_guard_router
 from app.services.manual_wiring_service import router as manual_wiring_router
 
@@ -48,50 +49,61 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
 
     # Otomatis suntikkan referensi terstruktur JB420 & Kasus Historis Excel (K001 - K012)
+    # Fast-path untuk Vercel/Serverless jika DB pre-seeded sudah terisi lengkap
     try:
-        from app.db.ingest_vitara_manuals import seed_jb420_structured_reference_data
-        from app.db.seed_historical_cases import seed_historical_cases
-
         session_factory = async_sessionmaker(
             engine, expire_on_commit=False, class_=AsyncSession
         )
-        async with session_factory() as session:
-            try:
-                async with session.begin():
-                    await seed_jb420_structured_reference_data(session)
-            except Exception as e_jb:
-                logger.warning("Auto-seed JB420 referensi dilewati: %s", e_jb)
+        already_populated = False
+        async with session_factory() as check_session:
+            dtc_cnt = (await check_session.execute(select(func.count(DTCCode.id)))).scalar() or 0
+            hc_cnt = (await check_session.execute(select(func.count(HistoricalCase.id)))).scalar() or 0
+            usr_cnt = (await check_session.execute(select(func.count(User.id)))).scalar() or 0
+            if dtc_cnt >= 180 and hc_cnt >= 1 and usr_cnt >= 1:
+                already_populated = True
 
-            try:
-                async with session.begin():
-                    await seed_historical_cases(session)
-            except Exception as e_hc:
-                logger.warning("Auto-seed kasus historis dilewati: %s", e_hc)
+        if not already_populated:
+            from app.db.ingest_vitara_manuals import seed_jb420_structured_reference_data
+            from app.db.seed_historical_cases import seed_historical_cases
 
-            try:
-                from app.db.seed_data import (
-                    is_already_seeded,
-                    seed_customers_and_vehicles,
-                    seed_diagnostic_knowledge_base,
-                    seed_inventory_and_sample_work_order,
-                    seed_manuals_dtc_and_wiring,
-                    seed_users,
-                )
+            async with session_factory() as session:
+                try:
+                    async with session.begin():
+                        await seed_jb420_structured_reference_data(session)
+                except Exception as e_jb:
+                    logger.warning("Auto-seed JB420 referensi dilewati: %s", e_jb)
 
-                async with session.begin():
-                    if not await is_already_seeded(session):
-                        u_map = await seed_users(session)
-                        v_map = await seed_customers_and_vehicles(session)
-                        await seed_diagnostic_knowledge_base(session, v_map)
-                        await seed_manuals_dtc_and_wiring(session)
-                        await seed_inventory_and_sample_work_order(
-                            session, u_map, v_map
-                        )
-            except Exception as e_seed:
-                logger.warning("Auto-seed data umum dilewati: %s", e_seed)
+                try:
+                    async with session.begin():
+                        await seed_historical_cases(session)
+                except Exception as e_hc:
+                    logger.warning("Auto-seed kasus historis dilewati: %s", e_hc)
+
+                try:
+                    from app.db.seed_data import (
+                        is_already_seeded,
+                        seed_customers_and_vehicles,
+                        seed_diagnostic_knowledge_base,
+                        seed_inventory_and_sample_work_order,
+                        seed_manuals_dtc_and_wiring,
+                        seed_users,
+                    )
+
+                    async with session.begin():
+                        if not await is_already_seeded(session):
+                            u_map = await seed_users(session)
+                            v_map = await seed_customers_and_vehicles(session)
+                            await seed_diagnostic_knowledge_base(session, v_map)
+                            await seed_manuals_dtc_and_wiring(session)
+                            await seed_inventory_and_sample_work_order(
+                                session, u_map, v_map
+                            )
+                except Exception as e_seed:
+                    logger.warning("Auto-seed data umum dilewati: %s", e_seed)
 
         logger.info(
-            "Data referensi Suzuki Grand Vitara JB420 & Kasus Historis (K001-K012) siap."
+            "Data referensi Suzuki Grand Vitara JB420 & Kasus Historis siap (fast_path=%s).",
+            already_populated,
         )
     except Exception as exc:
         logger.warning("Auto-seed referensi dilewati saat startup: %s", exc)

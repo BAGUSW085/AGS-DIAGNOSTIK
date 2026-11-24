@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,8 +30,22 @@ from app.services.vehicle_applicability import (
 )
 
 SECURITY_CONFIG_PATH = Path(__file__).resolve().parent.parent / "data" / "workshop_security.json"
+_TMP_SECURITY_CONFIG_PATH = Path("/tmp/agos_workshop_security.json")
 _SALT = "agos_smart_diagnostik_workshop_pin_v1"
 DEFAULT_PIN = "1234"
+
+
+def _is_readonly_env() -> bool:
+    return bool(
+        os.getenv("VERCEL")
+        or os.getenv("VERCEL_ENV")
+        or os.getenv("AWS_LAMBDA_FUNCTION_NAME")
+        or not os.access(SECURITY_CONFIG_PATH.parent, os.W_OK)
+    )
+
+
+def _get_writable_security_path() -> Path:
+    return _TMP_SECURITY_CONFIG_PATH if _is_readonly_env() else SECURITY_CONFIG_PATH
 
 
 def _hash_pin(pin: str) -> str:
@@ -38,18 +53,23 @@ def _hash_pin(pin: str) -> str:
 
 
 def _load_security_config() -> dict[str, Any]:
-    SECURITY_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not SECURITY_CONFIG_PATH.exists():
+    target_path = _get_writable_security_path()
+    read_path = target_path if target_path.exists() else SECURITY_CONFIG_PATH
+    if not read_path.exists():
         default_cfg = {
             "pin_enabled": True,
             "is_default_pin": True,
             "pin_hash": _hash_pin(DEFAULT_PIN),
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
-        SECURITY_CONFIG_PATH.write_text(json.dumps(default_cfg, indent=2), encoding="utf-8")
+        try:
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            target_path.write_text(json.dumps(default_cfg, indent=2), encoding="utf-8")
+        except OSError:
+            pass
         return default_cfg
     try:
-        data = json.loads(SECURITY_CONFIG_PATH.read_text(encoding="utf-8"))
+        data = json.loads(read_path.read_text(encoding="utf-8"))
         if not data.get("pin_hash"):
             data["pin_hash"] = _hash_pin(DEFAULT_PIN)
             data["is_default_pin"] = True
@@ -63,8 +83,9 @@ def _load_security_config() -> dict[str, Any]:
 
 
 def _save_security_config(cfg: dict[str, Any]) -> None:
-    SECURITY_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SECURITY_CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    target_path = _get_writable_security_path()
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 
 
 def verify_pin_value(pin: str | None) -> bool:

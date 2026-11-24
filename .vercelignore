@@ -1,0 +1,37 @@
+# Version Control & CI
+.git/
+.github/
+
+# Python Virtual Environments & Caches
+.venv/
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Non-Web Folders (APK Offline, Flutter Mobile, Raw Manuals, Binaries, Archives)
+android_offline/
+bin/
+frontend/
+manual repair suzuki vitara/
+manual repair toyota/
+project_bengkel_masa_depan_siap_pakai/
+
+# Large / Unused Files
+*.apk
+*.docx
+*.pptx
+*.md
+*.bat
+*.vbs
+*.pdf
+*.zip
+*.log
+Dockerfile
+.dockerignore
+railway.json
+render.yaml
+/bengkel.db
+/bengkel_masa_depan.db
+backend/bengkel.db
