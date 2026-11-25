@@ -84,6 +84,42 @@
       possible_causes: 'Relay atau kabel kontrol kipas pendingin 3 putus/konslet.',
       severity_level: 'HIGH'
     },
+    P0105: {
+      system: 'Engine / Powertrain (ECM) — Intake Air Pressure (MAP)',
+      description_id: 'Gangguan Sirkuit Sensor MAP / Barometric Pressure (Manifold Absolute Pressure)',
+      possible_causes: 'Selang vakum MAP bocor/lepas, soket 3-pin sensor MAP kendor/korosi, referensi +5V atau massa sensor putus, atau elemen sensor MAP rusak.',
+      severity_level: 'HIGH'
+    },
+    P0106: {
+      system: 'Engine / Powertrain (ECM) — Intake Air Pressure (MAP)',
+      description_id: 'Kinerja / Rentang Sinyal Sensor MAP Tidak Sesuai Spesifikasi',
+      possible_causes: 'Kebocoran vakum intake manifold, sensor MAP kotor/melenceng, atau jalur sinyal MAP ke ECM terganggu.',
+      severity_level: 'MEDIUM'
+    },
+    P0136: {
+      system: 'Engine / Powertrain (ECM) — Emission / O2 Sensor',
+      description_id: 'Gangguan Sirkuit Sensor Oksigen Belakang (HO2S Bank 1 Sensor 2 / Downstream)',
+      possible_causes: 'Sensor O2 belakang (pasca-katalis) rusak/jenuh karbon, kabel harness terkelupas kena knalpot, soket 4-pin kendor, atau kebocoran gas buang sebelum sensor.',
+      severity_level: 'MEDIUM'
+    },
+    P0137: {
+      system: 'Engine / Powertrain (ECM) — Emission / O2 Sensor',
+      description_id: 'Tegangan Sirkuit Sensor O2 Belakang (Bank 1 Sensor 2) Terlalu Rendah',
+      possible_causes: 'Kabel sinyal HO2S-2 hubung singkat ke massa, kebocoran knalpot, atau elemen sensor O2 belakang mati.',
+      severity_level: 'MEDIUM'
+    },
+    P0138: {
+      system: 'Engine / Powertrain (ECM) — Emission / O2 Sensor',
+      description_id: 'Tegangan Sirkuit Sensor O2 Belakang (Bank 1 Sensor 2) Terlalu Tinggi',
+      possible_causes: 'Kabel sinyal HO2S-2 short ke +12V heater, ground sensor putus, atau campuran bahan bakar terlalu kaya.',
+      severity_level: 'MEDIUM'
+    },
+    P0141: {
+      system: 'Engine / Powertrain (ECM) — Emission / O2 Sensor Heater',
+      description_id: 'Gangguan Sirkuit Pemanas (Heater) Sensor O2 Belakang (Bank 1 Sensor 2)',
+      possible_causes: 'Elemen pemanas internal HO2S-2 putus (tahanan ∞), suplai +12V Main Relay/EFI putus, atau jalur kontrol heater ke ECM putus.',
+      severity_level: 'MEDIUM'
+    },
     P0128: {
       system: 'Engine / Powertrain (ECM) — Cooling System',
       description_id: 'Suhu Kerja Coolant di Bawah Temperatur Regulasi Thermostat',
@@ -305,7 +341,7 @@
     const dtcClean = String(dtc || '').toUpperCase();
     const dtcCodes = new Set(splitDtcCodes(dtcClean));
 
-    if (diagClean.includes('vakum') || diagClean.includes('selang intake') || dtcCodes.has('P0171')) {
+    if (diagClean.includes('vakum') || diagClean.includes('selang intake') || /\bmap\b|manifold.*pressure/.test(diagClean) || hasAnyCode(dtcCodes, ['P0171', 'P0105', 'P0106', 'P0107', 'P0108', 'P0109'])) {
       return {
         diagnosis_title: 'Kebocoran Udara / Vakum pada Saluran Intake (Lean Mixture)',
         system_category: 'Udara',
@@ -408,12 +444,21 @@
           { parameter: 'Frekuensi Osilasi (pada 2.500 RPM)', normal_range: '> 1 Hz (minimal 1 kali per detik)', unit: 'Hz' },
           { parameter: 'Tahanan Pemanas Sensor (20°C)', normal_range: '11.0 - 16.0 Ohm', unit: 'Ohm' }
         ],
-        wiring_pinout: [
-          { pin: 'E23-50 (Pin 1)', signal: 'Heater +12V Power (BLK/YEL)', function: 'Suplai arus +12V IG ke elemen pemanas sensor O2' },
-          { pin: 'E23-49 (Pin 2)', signal: 'HT / Heater PWM Control (BLK/WHT)', function: 'Kontrol duty-cycle pemanas heater O2 dari ECM' },
-          { pin: 'C37-65 (Pin 3)', signal: 'OX / Sinyal Output O2 (WHT/RED)', function: 'Tegangan sinyal pembacaan oksigen 0.1 - 0.9V ke ECM' },
-          { pin: 'C37-57 (Pin 4)', signal: 'E2 / Massa Sensor O2 (GRY/GRN)', function: 'Ground referensi sinyal sensor O2 ke ECM' }
-        ],
+        wiring_pinout: (hasAnyCode(dtcCodes, ['P0036', 'P0037', 'P0038', 'P0136', 'P0137', 'P0138', 'P0140', 'P0141']) || diagClean.includes('sensor 2') || diagClean.includes('belakang'))
+          ? [
+              { pin: 'MAIN-RLY (Pin 1)', signal: 'BLU/BLK — Suplai +12V Heater HO2S-2 (Main Relay)', function: 'Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 14)' },
+              { pin: 'C37-47 (Pin 2)', signal: 'BLK/RED — Kontrol Heater HO2S-2 (Low-Side ECM)', function: 'Kontrol ground PWM pemanas HO2S-2 oleh ECM' },
+              { pin: 'C37-11 (Pin 3)', signal: 'RED — Sinyal HO2S-2 Belakang', function: 'Sinyal sensor oksigen hilir 0.1 – 0.9 V saat idle hangat' },
+              { pin: 'GND-ENG (Pin 4)', signal: 'BLK/YEL — Massa Sensor HO2S-2', function: 'Jalur massa sensor HO2S-2 (< 0.3 V ke bodi/mesin)' }
+            ]
+          : [
+              { pin: 'MAIN-RLY (Pin 1)', signal: 'BLU/BLK — Suplai +12V Heater A/F (Main Relay)', function: 'Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 15)' },
+              { pin: 'C37-32 (Pin 2)', signal: 'PNK/BLU — Kontrol Heater A/F (Low-Side PWM ECM)', function: 'Kontrol ground PWM pemanas A/F Sensor-1 oleh ECM (C37-31 BLK/YEL adalah ground heater internal ECM)' },
+              { pin: 'C37-38 (Pin 3)', signal: 'WHT — A/F Sensor Signal (+)', function: 'Sinyal sel wideband (+) 3.0 – 3.2 V saat idle' },
+              { pin: 'C37-37 (Pin 4)', signal: 'BLK — A/F Sensor Signal (-)', function: 'Sinyal sel wideband (-) 2.6 – 2.8 V saat idle' },
+              { pin: 'C37-35 (Pin 5)', signal: 'RED/YEL — A/F Adjusting Resistor Signal', function: 'Sinyal resistor kalibrasi A/F 0.15 – 4.82 V' },
+              { pin: 'C37-34 (Pin 6)', signal: 'RED/BLU — A/F Adjusting Resistor Ground', function: 'Massa resistor kalibrasi A/F (< 0.3 V)' }
+            ],
         step_by_step_repair: [
           '1. Periksa kabel dan soket sensor O2 di exhaust manifold dari leleh/terbakar akibat panas knalpot.',
           '2. Gunakan multimeter untuk mengukur tahanan heater pada 2 pin sensor O2 (normal 11-16 Ohm). Bila putus/infinite, sensor wajib ganti.',
@@ -466,7 +511,7 @@
       };
     }
 
-    if (diagClean.includes('maf') || dtcCodes.has('P0101')) {
+    if (diagClean.includes('maf') || hasAnyCode(dtcCodes, ['P0100', 'P0101', 'P0102', 'P0103'])) {
       return {
         diagnosis_title: 'Sensor Aliran Udara MAF Kotor / Terkontaminasi Jelaga',
         system_category: 'Udara',
@@ -489,11 +534,11 @@
           { parameter: 'Tegangan MAF (Akselerasi Penuh WOT)', normal_range: '3.50 - 4.50 V (>50 g/s)', unit: 'V' }
         ],
         wiring_pinout: [
-          { pin: 'E23-31 (Pin 1)', signal: 'MAF +12V Power (BLK/WHT)', function: 'Suplai daya +12V Main Relay ke elemen Hot-Wire MAF' },
-          { pin: 'C37-63 (Pin 2)', signal: 'MAF Ground (BLK/GRN)', function: 'Massa utama pemanas sensor MAF' },
-          { pin: 'C37-62 (Pin 3)', signal: 'MAF Signal Output (PNK/BLK)', function: 'Sinyal debit aliran udara (idle ~1.15V) ke ECM' },
-          { pin: 'C37-25 (Pin 4)', signal: 'IAT Signal +5V Pull-Up (LT GRN/BLK)', function: 'Sinyal sensor suhu udara masuk (IAT) terintegrasi' },
-          { pin: 'C37-57 (Pin 5)', signal: 'IAT Sensor Ground (GRY/GRN)', function: 'Massa referensi sensor IAT ke ECM' }
+          { pin: 'E23-01 (Pin 1)', signal: 'Main Relay +12V Power', function: 'Suplai daya +12V Main Relay ke elemen Hot-Wire MAF' },
+          { pin: 'C37-26 (Pin 2)', signal: 'MAF Signal Output', function: 'Sinyal debit aliran udara (0.9–1.2V KOEO, 1.3–1.8V Idle) ke ECM' },
+          { pin: 'C37-27 (Pin 3)', signal: 'MAF Ground Return', function: 'Massa khusus elemen pengukur sensor MAF ke ECM' },
+          { pin: 'C37-25 (Pin 4)', signal: 'IAT Signal +5V Pull-Up', function: 'Sinyal sensor suhu udara masuk (IAT) terintegrasi' },
+          { pin: 'C37-57 (Pin 5)', signal: 'Sensor Ground (E2)', function: 'Massa referensi sensor IAT/MAP/ECT ke ECM' }
         ],
         step_by_step_repair: [
           '1. Matikan kunci kontak, lepas konektor terminal sensor MAF di boks filter udara.',
@@ -508,7 +553,7 @@
       };
     }
 
-    if (diagClean.includes('throttle') || diagClean.includes('trotel') || dtcCodes.has('P0507')) {
+    if (diagClean.includes('throttle') || diagClean.includes('trotel') || hasAnyCode(dtcCodes, ['P0120', 'P0121', 'P0122', 'P0123', 'P0124', 'P0220', 'P0222', 'P0223', 'P0507', 'P2135'])) {
       return {
         diagnosis_title: 'Endapan Karbon pada Throttle Body / Malfungsi Idle Air Control',
         system_category: 'Udara',
@@ -532,12 +577,12 @@
           { parameter: 'Target RPM Idle (AC ON)', normal_range: '850 ± 50 RPM', unit: 'RPM' }
         ],
         wiring_pinout: [
-          { pin: 'E23-42 (Pin 1)', signal: 'Throttle Motor M+ (RED)', function: 'Penggerak motor aktuator katup gas (+)' },
-          { pin: 'E23-41 (Pin 2)', signal: 'Throttle Motor M- (YLW)', function: 'Penggerak motor aktuator katup gas (-)' },
-          { pin: 'C37-14 (Pin 3)', signal: 'TPS +5V Reference (GRY/RED)', function: 'Suplai referensi 5.0V untuk TPS1 & TPS2' },
-          { pin: 'C37-66 (Pin 4)', signal: 'VTA1 / TPS 1 Main (GRN)', function: 'Sinyal utama bukaan katup gas (~0.68V saat idle)' },
-          { pin: 'C37-67 (Pin 5)', signal: 'VTA2 / TPS 2 Sub (WHT)', function: 'Sinyal redundansi pembanding (~4.32V saat idle)' },
-          { pin: 'C37-57 (Pin 6)', signal: 'E2 / TPS Ground Return (GRY/GRN)', function: 'Massa referensi sensor posisi throttle ke ECM' }
+          { pin: 'C37-44 (Pin 1)', signal: 'Throttle Actuator M+ (Drive)', function: 'Penggerak motor aktuator katup gas (+) dari ECM JB420' },
+          { pin: 'C37-45 (Pin 2)', signal: 'Throttle Actuator M- (Drive)', function: 'Penggerak motor aktuator katup gas (-) dari ECM JB420' },
+          { pin: 'C37-53 (Pin 3)', signal: 'TPS +5V Reference (Vref)', function: 'Suplai referensi 5.0V untuk TPS Main & TPS Sub' },
+          { pin: 'C37-54 (Pin 4)', signal: 'TP Sensor Main Signal', function: 'Sinyal utama bukaan katup gas (0.72–1.04V saat idle)' },
+          { pin: 'C37-40 (Pin 5)', signal: 'TP Sensor Sub Signal', function: 'Sinyal redundansi pembanding (1.60–1.91V saat idle)' },
+          { pin: 'C37-41 (Pin 6)', signal: 'TP Sensor Ground', function: 'Massa referensi sensor posisi throttle ke ECM' }
         ],
         step_by_step_repair: [
           '1. Lepas selang belalai intake duct dari moncong throttle body.',
@@ -630,10 +675,17 @@
           { parameter: 'Misfire Counter per Silinder (Idle/RPM Tinggi)', normal_range: '0 count', unit: 'hit' }
         ],
         wiring_pinout: [
-          { pin: 'IG-FUSE (Pin 1)', signal: '+12V Ignition Feed (BLK/WHT)', function: 'Arus positif utama ke soket 4-pin Ignition Coil' },
-          { pin: 'E23-35 (Pin 2)', signal: 'IGT1-4 Trigger (WHT/RED)', function: 'Pulsa pemicu pengapian 5V dari ECM ke Igniter Koil' },
-          { pin: 'E23-40 (Pin 3)', signal: 'IGF Confirmation (YEL/GRN)', function: 'Sinyal konfirmasi percikan pengapian balik ke ECM' },
-          { pin: 'GND-ENG (Pin 4)', signal: 'Cylinder Head Ground (BLK)', function: 'Titik massa igniter koil pada kepala silinder (< 0.3 Ohm)' }
+          { pin: 'IG-COIL (Pin 1)', signal: 'BLK/WHT — Suplai +12V IG1 Koil (Fuse IG COIL)', function: 'Suplai daya +10–14 V IG ON dari Fuse IG COIL di J/B (Bab 1H-2 Hal. 430; bukan dari ECM)' },
+          hasAnyCode(dtcCodes, ['P0301', 'P0351'])
+            ? { pin: 'C37-21 (Pin 2)', signal: 'BRN — Trigger ECM Koil Silinder #1', function: 'Sinyal pulsa 5V ECM ke igniter Koil #1 (0–0.6V IG ON, Pulsa Idle)' }
+            : hasAnyCode(dtcCodes, ['P0302', 'P0352'])
+            ? { pin: 'C37-20 (Pin 2)', signal: 'BRN/BLK — Trigger ECM Koil Silinder #2', function: 'Sinyal pulsa 5V ECM ke igniter Koil #2 (0–0.6V IG ON, Pulsa Idle)' }
+            : hasAnyCode(dtcCodes, ['P0303', 'P0353'])
+            ? { pin: 'C37-19 (Pin 2)', signal: 'BRN/WHT — Trigger ECM Koil Silinder #3', function: 'Sinyal pulsa 5V ECM ke igniter Koil #3 (0–0.6V IG ON, Pulsa Idle)' }
+            : hasAnyCode(dtcCodes, ['P0304', 'P0354'])
+            ? { pin: 'C37-18 (Pin 2)', signal: 'BRN/YEL — Trigger ECM Koil Silinder #4', function: 'Sinyal pulsa 5V ECM ke igniter Koil #4 (0–0.6V IG ON, Pulsa Idle)' }
+            : { pin: 'C37-21..18 (Pin 2)', signal: 'BRN / BRN-BLK / BRN-WHT / BRN-YEL — Trigger ECM Koil #1–#4', function: 'Tiap soket 3-pin koil menerima 1 kabel trigger ECM (#1 C37-21, #2 C37-20, #3 C37-19, #4 C37-18)' },
+          { pin: 'GND-ENG (Pin 3)', signal: 'BLK/ORN — Ground Massa Koil (Blok Mesin)', function: 'Massa langsung ke blok/kepala silinder mesin (< 0.3 V / < 1 Ohm — Bab 1H-2)' }
         ],
         step_by_step_repair: [
           '1. Lepas konektor dan baut 10 mm pengikat Ignition Coil, periksa karet selongsong (boot) koil dari retakan atau jejak loncatan bunga api putih.',
@@ -703,11 +755,16 @@
           { parameter: 'Sinyal Output CKP/CMP (Saat Starter)', normal_range: 'Pulsa gelombang kotak 0 - 5.0 V', unit: 'V' },
           { parameter: 'Celah Udara (Air Gap) Ujung Sensor', normal_range: '0.5 - 1.5 mm', unit: 'mm' }
         ],
-        wiring_pinout: [
-          { pin: 'C37-47', signal: 'CKP Sensor Signal (PNK)', function: 'Input pulsa posisi poros engkol ke ECM' },
-          { pin: 'C37-46', signal: 'CMP Sensor Signal (BLU)', function: 'Input pulsa posisi poros nok ke ECM' },
-          { pin: 'C37-57', signal: 'Sensor Ground (GRY/GRN)', function: 'Ground referensi sensor' }
-        ],
+        wiring_pinout: (hasAnyCode(dtcCodes, ['P0340', 'P0341', 'P0342', 'P0343', 'P0344']) || (diagClean.includes('cmp') && !diagClean.includes('ckp')))
+          ? [
+              { pin: 'MAIN-RLY (Pin 1)', signal: 'BLU/BLK — Suplai +12V Sensor CMP (Main Relay)', function: 'Suplai daya 10–14 V IG ON dari Main Relay (Bab 1H-2 & 1A-15)' },
+              { pin: 'C37-52 (Pin 2)', signal: 'WHT/RED — Sinyal Output Sensor CMP', function: 'Input pulsa kotak 0–5 V posisi poros nok ke ECM' },
+              { pin: 'GND-ENG (Pin 3)', signal: 'BLK/YEL — Massa Sensor CMP (Blok Mesin)', function: 'Massa sensor Hall-IC CMP ke blok mesin (< 0.3 V)' }
+            ]
+          : [
+              { pin: 'C37-51 (Pin 1)', signal: 'BLU — CKP Sensor Signal (+)', function: 'Input pulsa AC (+) poros engkol ke ECM (Induktif 2-Pin + shield BLK — Bab 1H-2 & 1A-15)' },
+              { pin: 'C37-36 (Pin 2)', signal: 'PNK — CKP Sensor Signal (-)', function: 'Input pulsa AC (-) / return poros engkol ke ECM' }
+            ],
         step_by_step_repair: [
           '1. Periksa soket 3-pin sensor CKP/CMP dari rembesan oli mesin atau kabel yang getas.',
           '2. Lepas baut pengikat sensor (10 mm), bersihkan ujung magnet sensor dari kotoran gram besi.',
@@ -755,10 +812,10 @@
           { parameter: 'Suhu ECT Aktivasi Kipas Low-Speed (Bab 1A-233)', normal_range: 'ON ≥ 97.5°C / OFF ≤ 93.0°C', unit: '°C' }
         ],
         wiring_pinout: [
-          { pin: 'E23-46 (Pin 1)', signal: 'Cooling Fan Relay No.1 (RED/BLK)', function: 'Output kendali massa ECM ke koil Relay Kipas No.1 (10-14V OFF, <1V ON)' },
-          { pin: 'E23-47 (Pin 2)', signal: 'Cooling Fan Relay No.2 (RED)', function: 'Output kendali massa ECM ke koil Relay Kipas No.2 (High Speed / A/C)' },
-          { pin: 'C37-24 (Pin 3)', signal: 'ECT Sensor Signal (PPL/YEL)', function: 'Sinyal suhu air radiator ke ECM pemicu kipas (0.40-0.53V @ 100°C)' },
-          { pin: 'C37-57 (Pin 4)', signal: 'Sensor Ground (GRY/GRN)', function: 'Massa referensi sensor suhu pendingin ke ECM (< 0.3V)' }
+          { pin: 'IG1-FUSE (Koil +)', signal: 'BLK/WHT — Suplai +12V IG1 ke 3 Koil Relay Kipas', function: 'Suplai +10–14 V IG ON ke kumparan Relay Kipas No.1, No.2 & No.3 (Bab 1A-15 Item 46–48)' },
+          { pin: 'E23-46 (Relay #1)', signal: 'RED/BLK — Kontrol Massa Relay Kipas No.1 (Low)', function: 'Output kendali ground ECM ke koil Relay Kipas No.1 (10–14 V OFF, <1 V ON)' },
+          { pin: 'E23-47 (Relay #2)', signal: 'RED — Kontrol Massa Relay Kipas No.2 (High)', function: 'Output kendali ground ECM ke koil Relay Kipas No.2 (High Speed / A/C)' },
+          { pin: 'E23-48 (Relay #3)', signal: 'RED/YEL — Kontrol Massa Relay Kipas No.3 (Sub)', function: 'Output kendali ground ECM ke koil Relay Kipas No.3 (Sub Fan / A/C)' }
         ],
         step_by_step_repair: [
           '1. Buka tutup Fuse & Relay Box di ruang mesin, periksa sekering utama Cooling Fan (30A/40A) dan sekering IG koil relay dari putus atau kaki gosong.',
@@ -886,7 +943,7 @@
     } else if (hasAnyCode(codeSet, ['P2122', 'P2123', 'P2127', 'P2128', 'P2138']) || txt.includes('pedal position')) {
       wantedPins = ['E23-56', 'E23-55', 'E23-53', 'E23-52', 'C37-57'];
     } else if (hasAnyCode(codeSet, ['P0030', 'P0031', 'P0032', 'P0037', 'P0038', 'P0131', 'P0132', 'P0133', 'P0134', 'P0137', 'P0138', 'P0140', 'P2195', 'P2196']) || txt.includes('ho2s') || txt.includes('o2 sensor')) {
-      wantedPins = ['C37-38', 'C37-37', 'C37-32', 'C37-11', 'C37-47', 'C37-57'];
+      wantedPins = ['C37-38', 'C37-37', 'C37-32', 'C37-31', 'C37-57'];
     } else if (hasAnyCode(codeSet, ['P0335', 'P0340', 'B1556']) || txt.includes('crankshaft') || txt.includes('camshaft')) {
       wantedPins = ['C37-51', 'C37-36', 'C37-52', 'C37-57'];
     } else if (hasAnyCode(codeSet, ['P0327', 'P0328']) || txt.includes('knock')) {

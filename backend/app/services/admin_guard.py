@@ -33,6 +33,27 @@ SECURITY_CONFIG_PATH = Path(__file__).resolve().parent.parent / "data" / "worksh
 _TMP_SECURITY_CONFIG_PATH = Path("/tmp/agos_workshop_security.json")
 _SALT = "agos_smart_diagnostik_workshop_pin_v1"
 DEFAULT_PIN = "1234"
+_PIN_FAIL_TIMESTAMPS: list[float] = []
+_PIN_MAX_FAILS = 5
+_PIN_WINDOW_SEC = 60.0
+
+
+def _check_pin_rate_limit() -> None:
+    now = datetime.now(timezone.utc).timestamp()
+    _PIN_FAIL_TIMESTAMPS[:] = [ts for ts in _PIN_FAIL_TIMESTAMPS if now - ts < _PIN_WINDOW_SEC]
+    if len(_PIN_FAIL_TIMESTAMPS) >= _PIN_MAX_FAILS:
+        wait_s = int(max(1, _PIN_WINDOW_SEC - (now - _PIN_FAIL_TIMESTAMPS[0])))
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Terlalu banyak percobaan PIN salah. Tunggu {wait_s} detik sebelum mencoba lagi.",
+        )
+
+
+def _record_pin_result(ok: bool) -> None:
+    if ok:
+        _PIN_FAIL_TIMESTAMPS.clear()
+    else:
+        _PIN_FAIL_TIMESTAMPS.append(datetime.now(timezone.utc).timestamp())
 
 
 def _is_readonly_env() -> bool:
@@ -152,7 +173,9 @@ async def verify_workshop_pin(
     payload: VerifyPinRequest,
     current_user: User = Depends(get_current_active_user),
 ) -> dict[str, Any]:
+    _check_pin_rate_limit()
     ok = verify_pin_value(payload.pin)
+    _record_pin_result(ok)
     if not ok:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

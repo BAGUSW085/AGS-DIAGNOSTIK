@@ -114,6 +114,11 @@ class RAGAssistantQuery(BaseModel):
         examples=["suzuki_ertiga_gen1_2012_2017"],
         description="ID Buku Manual aktif yang dipilih mekanik (mis. suzuki_jb420_builtin, suzuki_ertiga_gen1_2012_2017, universal)",
     )
+    engine_code: str | None = Field(
+        default=None,
+        examples=["1TR-FE"],
+        description="Opsional kode mesin spesifik pada manual multi-mesin (mis. 1TR-FE, 2KD-FTV, K3-VE)",
+    )
 
     def __init__(self, **data):
         if "question" in data and "query" not in data:
@@ -179,6 +184,10 @@ class ManualAndWiringService:
             k_code = f"KLS-{m_num}"
             if k_code not in found:
                 found.append(k_code)
+        # Dukung kode DTC Toyota non-OBD (Audio/AC/Navigasi/Airbag format XX-XX, mis. 01-21, 60-10, 44-41, 01-E0)
+        for m_toy in re.findall(r"\b([0-9]{2}-[0-9A-F]{2})\b", combined):
+            if m_toy not in found:
+                found.append(m_toy)
         return found
 
     @classmethod
@@ -398,6 +407,20 @@ class ManualAndWiringService:
         dtc_catalog: list[dict[str, Any]] = list(pack.get("dtc_catalog", []))
         sensor_specs_raw: list[dict[str, Any]] = list(pack.get("sensor_specs", []))
         wiring_pinouts_raw: list[dict[str, Any]] = list(pack.get("wiring_pinouts", []))
+        eng_filter = re.sub(r"[^a-z0-9]", "", (payload.engine_code or "").lower())
+        if eng_filter and len(eng_filter) >= 3:
+            eng_specs = [
+                sp for sp in sensor_specs_raw
+                if eng_filter in re.sub(r"[^a-z0-9]", "", str(sp.get("sensor_name", "")).lower())
+            ]
+            if eng_specs:
+                sensor_specs_raw = eng_specs
+            eng_pins = [
+                pw for pw in wiring_pinouts_raw
+                if eng_filter in re.sub(r"[^a-z0-9]", "", str(pw.get("pin", "")).lower())
+            ]
+            if eng_pins:
+                wiring_pinouts_raw = eng_pins
 
         summary_parts: list[str] = []
         matched_dtc_out: list[DTCCodeOut] = []
@@ -1221,15 +1244,131 @@ async def import_custom_manual_pack(
     }
 
 
+def _build_curated_pack_components(
+    pack: dict[str, Any],
+    engine_filter: str | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, str] | None]:
+    """
+    Menyaring & mengelompokkan 200–2.500 entri sensor/pinout pada manual multi-mesin (seperti Toyota Avanza,
+    Fortuner, Innova, Hilux, Yaris, Corolla/Camry) menjadi 7–10 komponen inti siap simulasi di Tab 3
+    (Koil/Rail, Injektor, MAP/MAF, Throttle/TPS, Pedal APP, ECT/IAT, O2/A-F, CKP/CMP/VVT, Kipas/AC)
+    agar payload ringan (~30 KB bukan 800 KB) dan tidak terjebak menampilkan 'Baterai / +B' saja.
+    """
+    specs_all = list(pack.get("sensor_specs", []))
+    pins_all = list(pack.get("wiring_pinouts", []))
+    dtcs_all = list(pack.get("dtc_catalog", []))
+    eng_clean = re.sub(r"[^a-z0-9]", "", (engine_filter or "").lower())
+
+    # Filter berdasarkan kode mesin bila dipilih (atau pakai mesin pertama yang ada di pinout bila terlalu banyak)
+    if eng_clean and len(eng_clean) >= 3:
+        specs_pool = [s for s in specs_all if eng_clean in re.sub(r"[^a-z0-9]", "", str(s.get("sensor_name", "")).lower())] or specs_all
+        pins_pool = [p for p in pins_all if eng_clean in re.sub(r"[^a-z0-9]", "", str(p.get("pin", "")).lower())] or pins_all
+    else:
+        specs_pool = specs_all
+        pins_pool = pins_all
+
+    is_diesel_eng = bool(re.search(r"1kd|2kd|1gd|2gd|d13a|4d56|4n15", eng_clean))
+    eng_label = (engine_filter or "").strip() or (", ".join(pack.get("engine_codes", [])[:3]) or str(pack.get("model", "")))
+
+    categories = [
+        ("coil", "Koil Pengapian (IGT/IGF)" if not is_diesel_eng else "Common-Rail & SCV Diesel",
+         "coil" if not is_diesel_eng else "map",
+         r"\b(igt[1-8]|igf\d?|ig[1-4]|koil|ignition\s*coil)\b" if not is_diesel_eng else r"\b(pcr\d?|pr\d?|scv|vcs|fuel\s*rail|common.?rail)\b",
+         r"^P030|^P035" if not is_diesel_eng else r"^P008[78]|^P0093|^P019"),
+        ("map", "Sensor MAP / Tekanan Intake", "map", r"\b(pim|vcpm|e2pm|map\s*sensor|tekanan\s*absolut|manifold\s*absolute|turbo\s*pressure)\b", r"^P010[5-9]|^P023|^P0299"),
+        ("maf", "Sensor MAF & Suhu Udara IAT", "maf", r"\b(vg|e2g|maf|air\s*flow|aliran\s*udara|massa\s*udara)\b", r"^P010[0-4]|^P017[12]"),
+        ("throttle", "Throttle Body (ETC / TPS)", "throttle", r"\b(vta\d?|tps|tp\s*sensor|posisi\s*throttle|aktuator\s*throttle|m\+|m-)\b", r"^P012[0-4]|^P022|^P210|^P211|^P2135"),
+        ("app", "Sensor Pedal Gas (APP / VPA)", "app", r"\b(vpa\d?|epa\d?|app\s*sensor|pedal\s*akselerator|accelerator\s*pedal)\b", r"^P212|^P2138"),
+        ("ect", "Sensor Suhu ECT (THW) & IAT", "ect", r"\b(thw|ect\s*sensor|suhu\s*air\s*pendingin|coolant\s*temp|tha|iat\s*sensor|suhu\s*udara\s*masuk)\b", r"^P011[0-9]|^P012[58]"),
+        ("ckp", "Sensor CKP (NE), CMP (G2) & VVT", "ckp", r"\b(ne[+-]|g2[+-]|ckp|cmp|poros\s*engkol|crankshaft|camshaft|ocv|vvt)\b", r"^P033[5-9]|^P034|^P001[0-7]"),
+        ("o2", "Sensor Oksigen / A-F (OX / HT)", "o2", r"\b(ox\d?|ht\d?|a1a|ha1a|ho2s|o2\s*sensor|a/f\s*sensor|oksigen|rasio\s*udara)\b", r"^P003[0-8]|^P013|^P014|^P219"),
+        ("injector", "Injektor Bahan Bakar", "coil", r"\b(#10|#20|#30|#40|inj\d?|injektor|injector)\b", r"^P020[0-8]|^P062D"),
+        ("fan", "Kipas Radiator & Sistem AC", "fan", r"\b(fan\d?|kipas\s*radiator|cooling\s*fan|acsw|mgc|kompresor\s*ac)\b", r"^P048[0-5]|^P053"),
+    ]
+
+    curated: list[dict[str, Any]] = []
+    map_reference: dict[str, str] | None = None
+
+    for cid, label, a_type, rx_str, dtc_rx_str in categories:
+        rx = re.compile(rx_str, re.I)
+        dtc_rx = re.compile(dtc_rx_str, re.I)
+
+        m_pins: list[dict[str, str]] = []
+        seen_p: set[str] = set()
+        for pw in pins_pool:
+            hay = f"{pw.get('pin', '')} {pw.get('signal', '')} {pw.get('function', '')}"
+            if rx.search(hay):
+                pk = str(pw.get("pin", "-"))
+                if pk not in seen_p:
+                    seen_p.add(pk)
+                    m_pins.append({
+                        "pin": pk,
+                        "signal": str(pw.get("signal", "-")),
+                        "function": str(pw.get("function", "-")),
+                    })
+                if len(m_pins) >= 6:
+                    break
+
+        m_specs: list[dict[str, str]] = []
+        seen_s: set[str] = set()
+        for sp in specs_pool:
+            hay_s = f"{sp.get('sensor_name', '')} {sp.get('pin_configuration', '')} {sp.get('voltage_idle', '')}"
+            if rx.search(hay_s):
+                sn = str(sp.get("sensor_name", "-"))
+                if sn not in seen_s:
+                    seen_s.add(sn)
+                    m_specs.append({
+                        "sensor_name": sn,
+                        "pin_configuration": str(sp.get("pin_configuration", "-")),
+                        "voltage_idle": str(sp.get("voltage_idle", "-")),
+                        "voltage_wot": str(sp.get("voltage_wot", "-")),
+                        "resistance_ohm": str(sp.get("resistance_ohm", "-")),
+                    })
+                if len(m_specs) >= 4:
+                    break
+
+        if not m_pins and not m_specs:
+            continue
+
+        rel_dtcs = [
+            str(d.get("code", "")).upper()
+            for d in dtcs_all
+            if dtc_rx.search(str(d.get("code", "")))
+        ][:6]
+
+        if cid == "map" and not map_reference:
+            sp0 = m_specs[0] if m_specs else {}
+            p0 = m_pins[0] if m_pins else {}
+            map_reference = {
+                "engine": eng_label,
+                "pin_hint": sp0.get("pin_configuration") or (f"{p0.get('pin', '')} ({p0.get('signal', '')})" if p0 else ""),
+                "voltage_idle": sp0.get("voltage_idle") or (p0.get("function") or "Idle ~0.9–1.5V | KOEO ~3.8–4.3V"),
+                "voltage_wot": sp0.get("voltage_wot") or "-",
+            }
+
+        curated.append({
+            "id": cid,
+            "anatomy_type": a_type,
+            "short_label": label,
+            "engine_label": eng_label,
+            "dtcs": ", ".join(rel_dtcs) if rel_dtcs else "Lihat Pencarian Manual",
+            "pins": m_pins,
+            "specs": m_specs,
+        })
+
+    return curated, map_reference
+
+
 @router.get(
     "/packs/{pack_id}",
-    summary="Detail Lengkap Paket Buku Manual Aktif (Pinout, Sensor Specs & DTC Populer)",
+    summary="Detail Ringkas & Terkelompok Paket Buku Manual Aktif (Cepat & Multi-Mesin)",
 )
 async def get_manual_pack_detail(
     pack_id: str,
+    engine: str | None = Query(default=None, description="Opsional filter kode mesin (mis. 1TR-FE, 2KD-FTV, K3-VE)"),
     current_user: User = Depends(get_current_active_user),
 ) -> dict[str, Any]:
-    """Mengembalikan detail sensor specs, pinout konektor & kode DTC populer dari buku manual yang dipilih."""
+    """Mengembalikan komponen inti terkelompok, acuan MAP, kode DTC populer & ringkasan pinout dari manual aktif."""
     pid = str(pack_id or "").strip()
     if pid == "suzuki_jb420_builtin":
         return {
@@ -1247,6 +1386,8 @@ async def get_manual_pack_detail(
             "pinout_count": 251,
             "sensor_spec_count": 9,
             "popular_dtcs": ["P0480", "C1021", "P0756", "B1502", "B1017", "B1133", "P1614", "KLS-11"],
+            "curated_components": [],
+            "map_reference": None,
             "wiring_pinouts": [],
             "sensor_specs": [],
         }
@@ -1260,7 +1401,7 @@ async def get_manual_pack_detail(
 
     dtcs = list(pack.get("dtc_catalog", []))
     dtc_codes_set = {str(d.get("code", "")).upper() for d in dtcs if d.get("code")}
-    preferred_order = ["P0300", "P0107", "P0117", "P0122", "P0130", "P0335", "P0480", "P2135", "P0171", "P0340", "P0105", "P2122"]
+    preferred_order = ["P0300", "P0171", "P0087", "P0107", "P0117", "P0122", "P0130", "P0335", "P0340", "P0480", "P2135", "P0105", "P2122"]
     popular = [c for c in preferred_order if c in dtc_codes_set][:8]
     if len(popular) < 8:
         for d in dtcs:
@@ -1270,23 +1411,29 @@ async def get_manual_pack_detail(
             if len(popular) >= 8:
                 break
 
+    curated_comps, map_ref = _build_curated_pack_components(pack, engine)
+
     return {
         "pack_id": str(pack.get("pack_id", pid)),
         "brand": str(pack.get("brand", "")),
+        "brand_aliases": list(pack.get("brand_aliases", [])),
         "model": str(pack.get("model", "")),
         "generation_id": pack.get("generation_id"),
         "generation_label": str(pack.get("generation_label", pack.get("model", ""))),
         "year_start": int(pack.get("year_start", 2010)),
         "year_end": int(pack.get("year_end", 2026)),
         "engine_codes": list(pack.get("engine_codes", [])),
+        "selected_engine": (engine or "").strip() or None,
         "title": str(pack.get("title", "Manual Tambahan Bengkel")),
         "is_builtin": False,
         "dtc_count": len(dtcs),
         "pinout_count": len(pack.get("wiring_pinouts", [])),
         "sensor_spec_count": len(pack.get("sensor_specs", [])),
         "popular_dtcs": popular,
-        "wiring_pinouts": list(pack.get("wiring_pinouts", [])),
-        "sensor_specs": list(pack.get("sensor_specs", [])),
+        "curated_components": curated_comps,
+        "map_reference": map_ref,
+        "wiring_pinouts": list(pack.get("wiring_pinouts", []))[:60],
+        "sensor_specs": list(pack.get("sensor_specs", []))[:25],
     }
 
 

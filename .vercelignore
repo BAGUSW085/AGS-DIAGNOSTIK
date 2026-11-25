@@ -17,6 +17,8 @@ frontend/
 manual repair suzuki vitara/
 manual repair toyota/
 project_bengkel_masa_depan_siap_pakai/
+**/local_ewd_cache/
+backend/local_ewd_cache/
 
 # Large / Unused Files
 *.apk

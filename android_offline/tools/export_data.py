@@ -112,7 +112,10 @@ def export_all() -> None:
     engine_directory = build_engine_directory()
     modern_dtc_catalog = MODERN_DTC_CATALOG
 
-    # 8. Custom Manual Packs terpasang (mis. Suzuki Ertiga Gen 1 K14B/D13A) agar tersedia 100% offline di APK!
+    # 8. Custom Manual Packs terpasang (8 buku manual: 1 bawaan JB420 + 7 paket JSON)
+    # Strategi Lazy-Load: embedded-data.js hanya menyimpan ringkasan ringan (~3 KB),
+    # sedangkan isi lengkap tiap buku manual dipisah ke `www/data/packs/<pack_id>.js`
+    # agar startup APK 3x lebih cepat (embedded-data.js turun dari 13.8 MB -> ~4.3 MB)!
     custom_packs_path = BACKEND_DIR / "app" / "data" / "custom_manual_packs.json"
     custom_manual_packs = []
     if custom_packs_path.exists():
@@ -122,6 +125,46 @@ def export_all() -> None:
                 custom_manual_packs = raw_cp["packs"]
         except Exception:
             custom_manual_packs = []
+
+    custom_pack_summaries = []
+    packs_out_dir = OUT_DATA_DIR / "packs"
+    packs_out_dir.mkdir(parents=True, exist_ok=True)
+    # Bersihkan file pack lama agar tidak ada residu
+    for old_f in packs_out_dir.glob("*.js"):
+        old_f.unlink()
+    stale_giant_json = OUT_DATA_DIR / "custom_manual_packs.json"
+    if stale_giant_json.exists():
+        stale_giant_json.unlink()
+
+    for p in custom_manual_packs:
+        pid = str(p.get("pack_id") or "").strip()
+        if not pid:
+            continue
+        custom_pack_summaries.append({
+            "pack_id": pid,
+            "brand": str(p.get("brand", "")),
+            "brand_aliases": list(p.get("brand_aliases", [])),
+            "model": str(p.get("model", "")),
+            "model_aliases": list(p.get("model_aliases", [])),
+            "generation_id": p.get("generation_id"),
+            "generation_label": str(p.get("generation_label") or p.get("model") or ""),
+            "year_start": int(p.get("year_start", 2010)),
+            "year_end": int(p.get("year_end", 2026)),
+            "engine_codes": list(p.get("engine_codes", [])),
+            "title": str(p.get("title", "Manual Tambahan Bengkel")),
+            "dtc_count": len(p.get("dtc_catalog", [])),
+            "pinout_count": len(p.get("wiring_pinouts", [])),
+            "sensor_spec_count": len(p.get("sensor_specs", [])),
+            "is_builtin": False,
+        })
+        pack_js_file = packs_out_dir / f"{pid}.js"
+        pack_js_file.write_text(
+            "window.AGOS_PACK_STORE=window.AGOS_PACK_STORE||{};"
+            + f"window.AGOS_PACK_STORE[{json.dumps(pid)}]="
+            + json.dumps(p, ensure_ascii=False, separators=(",", ":"))
+            + ";\n",
+            encoding="utf-8",
+        )
 
     datasets = {
         "historical_cases.json": sorted_cases,
@@ -133,7 +176,7 @@ def export_all() -> None:
         "vehicle_generations.json": vehicle_generations,
         "engine_directory.json": engine_directory,
         "modern_dtc_catalog.json": modern_dtc_catalog,
-        "custom_manual_packs.json": custom_manual_packs,
+        "custom_manual_pack_summaries.json": custom_pack_summaries,
     }
 
     print("=== HASIL EKSPOR DATA OFFLINE ===")
@@ -144,9 +187,13 @@ def export_all() -> None:
         count_info = len(payload) if isinstance(payload, (list, dict)) else 0
         if filename == "jb420_catalog.json" and isinstance(payload, dict):
             count_info = len(payload.get("dtc_catalog", []))
-        print(f" - {filename:26s} : {size_kb:8.2f} KB ({count_info} entri)")
+        print(f" - {filename:34s} : {size_kb:8.2f} KB ({count_info} entri)")
 
-    # Buat juga embedded-data.js agar bekerja 100% baik via fetch() maupun file:// langsung di WebView
+    print("=== PAKET MANUAL LAZY-LOAD (data/packs/*.js) ===")
+    for pf in sorted(packs_out_dir.glob("*.js")):
+        print(f" - data/packs/{pf.name:38s} : {pf.stat().st_size / 1024.0:8.2f} KB")
+
+    # Buat juga embedded-data.js ringan (~4.3 MB) — paket manual kustom dimuat on-demand via data/packs/<id>.js
     embedded_bundle = {
         "historical_cases": sorted_cases,
         "dtc_codes": dtc_codes,
@@ -157,7 +204,7 @@ def export_all() -> None:
         "vehicle_generations": vehicle_generations,
         "engine_directory": engine_directory,
         "modern_dtc_catalog": modern_dtc_catalog,
-        "custom_manual_packs": custom_manual_packs,
+        "custom_manual_pack_summaries": custom_pack_summaries,
     }
     embedded_js_path = OUT_JS_DIR / "embedded-data.js"
     embedded_js_path.write_text(
@@ -166,7 +213,7 @@ def export_all() -> None:
         + ";\n",
         encoding="utf-8",
     )
-    print(f" - {'js/embedded-data.js':24s} : {embedded_js_path.stat().st_size / 1024.0:8.2f} KB")
+    print(f" - {'js/embedded-data.js':34s} : {embedded_js_path.stat().st_size / 1024.0:8.2f} KB")
 
 
 if __name__ == "__main__":

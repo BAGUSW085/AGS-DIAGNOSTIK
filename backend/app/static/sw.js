@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agos-smart-diagnostik-v1.2';
+const CACHE_NAME = 'agos-smart-diagnostik-v2.4';
 const CORE_ASSETS = [
   '/',
   '/manifest.json',

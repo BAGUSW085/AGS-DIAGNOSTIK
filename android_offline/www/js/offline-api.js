@@ -41,10 +41,12 @@
     try {
       // 1. GET /health
       if (path === '/health' || path.endsWith('/health')) {
+        const summaries = mm ? mm.listAllPackSummaries() : [];
         return makeJsonResponse({
           status: 'healthy',
-          service: 'Mode Offline v2.0 (174 Mesin · Diesel/EV)',
-          version: '2.0.0-offline',
+          service: `Mode Offline v2.2 (${summaries.length || 8} Manual · 174 Mesin)`,
+          version: '2.2.0-offline',
+          active_manuals_count: summaries.length || 8,
           jb420_catalog_loaded: true
         });
       }
@@ -52,7 +54,9 @@
       // 2. POST /api/v1/diagnostics/search-case
       if (path.endsWith('/diagnostics/search-case') && method === 'POST') {
         const raw = await global.AgosDiagnosticEngine.searchWeightedCases(bodyObj);
-        const result = mm ? mm.enhanceOfflineSearchResult(bodyObj, raw) : raw;
+        const result = mm
+          ? await mm.enhanceOfflineSearchResultAsync(bodyObj, raw)
+          : raw;
         return makeJsonResponse(result, 200);
       }
 
@@ -82,7 +86,8 @@
       if (path.endsWith('/manuals/ask-assistant') && method === 'POST') {
         const reqPackId = String(bodyObj.pack_id || '').trim();
         if (mm && reqPackId && reqPackId !== 'suzuki_jb420_builtin' && reqPackId !== 'universal') {
-          const cRes = mm.askCustomPackRag(reqPackId, bodyObj.query || bodyObj.question || '');
+          await mm.ensureOfflinePackLoaded(reqPackId);
+          const cRes = mm.askCustomPackRag(reqPackId, bodyObj.query || bodyObj.question || '', bodyObj.engine_code || '');
           if (cRes) return makeJsonResponse(cRes, 200);
         }
         const res = await global.AgosManualSearch.askRagAssistant(bodyObj);
@@ -157,7 +162,13 @@
       // 11. GET & DELETE /api/v1/manuals/packs/{pack_id}
       const packMatch = path.match(/\/manuals\/packs\/([^/]+)$/);
       if (packMatch && method === 'GET' && mm) {
-        const detail = mm.getPackDetailById(decodeURIComponent(packMatch[1]));
+        const pid = decodeURIComponent(packMatch[1]);
+        const params = new URLSearchParams(queryStr || '');
+        const engParam = params.get('engine') || '';
+        if (pid !== 'suzuki_jb420_builtin' && pid !== 'universal') {
+          await mm.ensureOfflinePackLoaded(pid);
+        }
+        const detail = mm.getPackDetailById(pid, engParam);
         if (!detail) return makeJsonResponse({ detail: 'Paket manual tidak ditemukan.' }, 404);
         return makeJsonResponse(detail, 200);
       }

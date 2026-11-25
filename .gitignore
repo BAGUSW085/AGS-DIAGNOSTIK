@@ -9,10 +9,16 @@ frontend/build/
 frontend/.dart_tool/
 frontend/.flutter-plugins*
 
-# Local archive / raw large PDFs
+# Local archive / raw large PDFs & OEM EWD cache (HKI / local-only)
 project_bengkel_masa_depan_siap_pakai/
+**/local_ewd_cache/
+local_ewd_cache/
 **/*.pdf
 *.pdf
+**/*.rar
+*.rar
+**/*.svgz
+*.svgz
 bin/
 *.zip
 *.log

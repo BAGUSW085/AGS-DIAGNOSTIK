@@ -27,6 +27,7 @@ from app.core.config import settings
 from app.models import Base, DTCCode, HistoricalCase, User
 from app.services.admin_guard import router as admin_guard_router
 from app.services.manual_wiring_service import router as manual_wiring_router
+from app.services.ewd_viewer_service import router as ewd_viewer_router
 
 try:
     from app.api.v1.endpoints.auth_vehicle_router import router as auth_vehicle_router
@@ -116,11 +117,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="AGOS SMART DIAGNOSTIK by Agos Corporation API",
     description=(
-        "Backend REST API & AI Engine untuk Smart Fault Diagnostic, "
-        "RAG Repair Manual & Wiring Assistant (Suzuki Grand Vitara JB420 Vol 1 & Vol 2, "
-        "Toyota, Mitsubishi, Honda), serta POS Kasir & Manajemen Gudang Otomatis."
+        "Backend REST API & AI Engine untuk Smart Fault Diagnostic Multi-Merek (Asia, Eropa, China), "
+        "RAG Repair Manual & Wiring Assistant Multi-Buku (Suzuki Grand Vitara JB420, Suzuki Ertiga Gen 1, "
+        "Toyota Avanza/Xenia, Fortuner, Innova, Hilux/HiAce, Yaris/Vios, Corolla/Camry/Alphard), "
+        "serta Katalog Modern Diesel Common-Rail, Turbo, VVT, Hybrid & EV."
     ),
-    version="1.1.0",
+    version="2.2.0",
     lifespan=lifespan,
 )
 
@@ -137,6 +139,7 @@ app.add_middleware(
 app.include_router(auth_vehicle_router)
 app.include_router(diagnostic_router)
 app.include_router(manual_wiring_router)
+app.include_router(ewd_viewer_router)
 app.include_router(admin_guard_router)
 
 # Mount Web Dashboard SPA & Static Assets
@@ -150,7 +153,7 @@ async def serve_web_dashboard():
     """Melayani Web Dashboard Interaktif AGOS SMART DIAGNOSTIK by Agos Corporation."""
     index_file = STATIC_DIR / "index.html"
     if index_file.exists():
-        return FileResponse(index_file)
+        return FileResponse(index_file, headers={"Cache-Control": "no-cache, must-revalidate"})
     return {"message": "AGOS SMART DIAGNOSTIK by Agos Corporation API running. Static index.html not found."}
 
 
@@ -171,22 +174,30 @@ async def serve_service_worker():
         return FileResponse(
             sw_file,
             media_type="application/javascript",
-            headers={"Service-Worker-Allowed": "/"},
+            headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache, must-revalidate"},
         )
     return {"error": "sw.js not found"}
 
 
 @app.get("/health", tags=["System Health"])
 async def health_check() -> dict:
+    from app.services.vehicle_applicability import list_all_manual_pack_summaries
+
     catalog_path = Path(__file__).with_name("jb420_extracted_catalog.json")
+    packs = list_all_manual_pack_summaries()
+    total_dtcs = sum(p.dtc_count for p in packs)
+    total_pins = sum(p.pinout_count for p in packs)
     return {
         "status": "healthy",
         "service": "AGOS SMART DIAGNOSTIK by Agos Corporation",
-        "version": "1.1.0",
+        "version": "2.2.0",
         "jb420_catalog_loaded": catalog_path.exists(),
+        "active_manuals_count": len(packs),
+        "total_mapped_dtcs": total_dtcs,
+        "total_mapped_pinouts": total_pins,
         "pillars": [
-            "1. Smart Fault Diagnostic (Hybrid CBR + EMA Self-Learning)",
-            "2. AI Repair Manual & Wiring Assistant (Suzuki Grand Vitara JB420 Vol 1 & Vol 2 + 189 DTC + Pinout C37/E23/E92/E93/G30-G32)",
-            "3. POS Kasir (PPN 11%) & Auto Stock Deduction PKB",
+            "1. Smart Fault Diagnostic Multi-Merek (66 Generasi · 174 Kode Mesin Asia/Eropa/China · Bensin/Diesel/Hybrid/EV)",
+            f"2. AI Repair Manual & Wiring Assistant ({len(packs)} Buku Manual Resmi · {total_dtcs}+ DTC · {total_pins}+ Pinout)",
+            "3. Workshop Tech Suite (Fuel Trim, MAP Vakum, Voltage Drop, DLC 16-Pin & Quick DTC Decoder Terikat Manual)",
         ],
     }

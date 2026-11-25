@@ -40,13 +40,28 @@ def build_offline_css() -> None:
 
     body_match = re.search(r"<body[^>]*>(.*)</body>", html_text, flags=re.S | re.I)
     body_inner = body_match.group(1) if body_match else html_text
+    inline_scripts = "\n".join(re.findall(r"<script\b[^>]*>(.*?)</script>", body_inner, flags=re.S | re.I))
+    # Ekstrak token kelas Tailwind yang dibuat secara dinamis dari inline <script> agar 100% terkompilasi ke app.css
+    script_class_tokens = set()
+    for m in re.finditer(r'(?:class|className)\s*=\s*["\'`]([^"\'`]+)["\'`]', inline_scripts):
+        for tok in m.group(1).split():
+            if "${" not in tok and re.match(r"^[a-z0-9:/_.\-\[\]%!]+$", tok, re.I):
+                script_class_tokens.add(tok)
     body_no_scripts = re.sub(r"<script\b[^>]*>.*?</script>", "", body_inner, flags=re.S | re.I)
 
     dynamic_classes = (
         "sm:grid-cols-2 sm:grid-cols-3 sm:grid-cols-4 md:grid-cols-2 "
         "w-6 h-6 sm:w-7 sm:h-7 h-12 sm:h-14 text-[13px] whitespace-normal "
         "col-span-1 col-span-2 grid-cols-3 grid-cols-2 md:col-span-5 md:col-span-6 "
-        "md:col-span-7 md:col-span-8 md:col-span-12 md:grid-cols-2 md:grid-cols-12 md:flex-row"
+        "md:col-span-7 md:col-span-8 md:col-span-12 md:grid-cols-2 md:grid-cols-12 md:flex-row "
+        "line-through opacity-80 break-words align-top max-h-72 overflow-y-auto "
+        "sm:flex-row sm:items-center sm:items-start sm:justify-between sm:text-right "
+        "bg-emerald-950/30 bg-emerald-950/35 bg-emerald-950/70 bg-amber-950/35 bg-amber-950/45 "
+        "bg-amber-950/70 bg-cyan-950/35 bg-cyan-950/70 border-emerald-500/60 border-emerald-600/50 "
+        "border-emerald-700/50 border-amber-600/50 border-amber-700/50 border-cyan-600/50 "
+        "border-cyan-800/60 text-emerald-100 text-emerald-200 text-amber-100/90 text-amber-200 "
+        "text-cyan-100 text-cyan-200 text-cyan-300/90 rotate-90 "
+        + " ".join(sorted(script_class_tokens))
     )
 
     tmp_html = OFFLINE_DIR / "tools" / "_tw_extract.html"

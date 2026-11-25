@@ -39,7 +39,7 @@ def _resolve_database_url() -> str:
 
 class Settings:
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "AGOS SMART DIAGNOSTIK by Agos Corporation")
-    VERSION: str = "1.1.0"
+    VERSION: str = "2.2.0"
     API_V1_STR: str = "/api/v1"
 
     DATABASE_URL: str = _resolve_database_url()

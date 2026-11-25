@@ -10,6 +10,7 @@
   const KEY_CUSTOM_PACKS = 'agos_offline_custom_manual_packs_v1';
   const KEY_ADMIN_PIN = 'agos_offline_workshop_pin_v1';
   const DEFAULT_PIN = '1234';
+  const _packLoadPromises = {};
 
   function normCode(raw) {
     return String(raw || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -27,31 +28,254 @@
     return (global.AGOS_OFFLINE_DATA && global.AGOS_OFFLINE_DATA.modern_dtc_catalog) || {};
   }
 
-  function getBundledCustomPacks() {
-    const arr = (global.AGOS_OFFLINE_DATA && global.AGOS_OFFLINE_DATA.custom_manual_packs) || [];
-    return Array.isArray(arr) ? arr : [];
-  }
-
-  function loadCustomPacks() {
-    let localPacks = [];
+  function getLocalStoragePacks() {
     try {
       const raw = global.localStorage.getItem(KEY_CUSTOM_PACKS);
       const parsed = raw ? JSON.parse(raw) : [];
-      localPacks = Array.isArray(parsed) ? parsed : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch (_) {
-      localPacks = [];
+      return [];
     }
-    const merged = new Map();
-    getBundledCustomPacks().forEach((p) => {
-      if (p && p.pack_id) merged.set(p.pack_id, p);
+  }
+
+  function getBundledPackSummaries() {
+    if (global.AGOS_OFFLINE_DATA && Array.isArray(global.AGOS_OFFLINE_DATA.custom_manual_pack_summaries)) {
+      return global.AGOS_OFFLINE_DATA.custom_manual_pack_summaries;
+    }
+    const legacy = (global.AGOS_OFFLINE_DATA && global.AGOS_OFFLINE_DATA.custom_manual_packs) || [];
+    return Array.isArray(legacy) ? legacy.map((p) => ({
+      pack_id: String(p.pack_id || ''),
+      brand: String(p.brand || ''),
+      brand_aliases: Array.isArray(p.brand_aliases) ? p.brand_aliases : [],
+      model: String(p.model || ''),
+      model_aliases: Array.isArray(p.model_aliases) ? p.model_aliases : [],
+      generation_id: p.generation_id || null,
+      generation_label: String(p.generation_label || p.model || ''),
+      year_start: Number(p.year_start || 2010),
+      year_end: Number(p.year_end || 2026),
+      engine_codes: Array.isArray(p.engine_codes) ? p.engine_codes : [],
+      title: String(p.title || 'Manual Tambahan Bengkel'),
+      dtc_count: Array.isArray(p.dtc_catalog) ? p.dtc_catalog.length : 0,
+      pinout_count: Array.isArray(p.wiring_pinouts) ? p.wiring_pinouts.length : 0,
+      sensor_spec_count: Array.isArray(p.sensor_specs) ? p.sensor_specs.length : 0,
+      is_builtin: false
+    })) : [];
+  }
+
+  function getLoadedPackSync(packId) {
+    const pid = String(packId || '').trim();
+    if (!pid) return null;
+    const localMatch = getLocalStoragePacks().find((p) => String(p.pack_id || '') === pid);
+    if (localMatch) return localMatch;
+    if (global.AGOS_PACK_STORE && global.AGOS_PACK_STORE[pid]) {
+      return global.AGOS_PACK_STORE[pid];
+    }
+    const legacy = (global.AGOS_OFFLINE_DATA && global.AGOS_OFFLINE_DATA.custom_manual_packs) || [];
+    if (Array.isArray(legacy)) {
+      const hit = legacy.find((p) => String(p.pack_id || '') === pid);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  function ensureOfflinePackLoaded(packId) {
+    const pid = String(packId || '').trim();
+    if (!pid || pid === 'suzuki_jb420_builtin' || pid === 'universal') {
+      return Promise.resolve(null);
+    }
+    const existing = getLoadedPackSync(pid);
+    if (existing) return Promise.resolve(existing);
+    if (_packLoadPromises[pid]) return _packLoadPromises[pid];
+
+    const summaryExists = getBundledPackSummaries().some((s) => String(s.pack_id || '') === pid);
+    if (!summaryExists || typeof document === 'undefined') {
+      return Promise.resolve(null);
+    }
+
+    _packLoadPromises[pid] = new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = `data/packs/${encodeURIComponent(pid)}.js`;
+      script.async = true;
+      script.onload = () => {
+        resolve((global.AGOS_PACK_STORE && global.AGOS_PACK_STORE[pid]) || null);
+      };
+      script.onerror = () => {
+        delete _packLoadPromises[pid];
+        resolve(null);
+      };
+      (document.head || document.documentElement).appendChild(script);
     });
-    localPacks.forEach((p) => {
+    return _packLoadPromises[pid];
+  }
+
+  function loadCustomPacks() {
+    const merged = new Map();
+    if (global.AGOS_PACK_STORE) {
+      Object.values(global.AGOS_PACK_STORE).forEach((p) => {
+        if (p && p.pack_id) merged.set(p.pack_id, p);
+      });
+    }
+    const legacy = (global.AGOS_OFFLINE_DATA && global.AGOS_OFFLINE_DATA.custom_manual_packs) || [];
+    if (Array.isArray(legacy)) {
+      legacy.forEach((p) => { if (p && p.pack_id) merged.set(p.pack_id, p); });
+    }
+    getLocalStoragePacks().forEach((p) => {
       if (p && p.pack_id) merged.set(p.pack_id, p);
     });
     return Array.from(merged.values());
   }
 
-  function getPackDetailById(packId) {
+  function buildCuratedPackComponents(pack, engineFilter) {
+    const pinouts = Array.isArray(pack.wiring_pinouts) ? pack.wiring_pinouts : [];
+    const specs = Array.isArray(pack.sensor_specs) ? pack.sensor_specs : [];
+    const dtcs = Array.isArray(pack.dtc_catalog) ? pack.dtc_catalog : [];
+    const engNorm = normCode(engineFilter || '');
+
+    const matchesEng = (txt) => {
+      if (!engNorm || engNorm.length < 3) return true;
+      return normCode(txt).includes(engNorm);
+    };
+
+    let fPins = engNorm ? pinouts.filter((p) => matchesEng(`${p.pin || ''} ${p.signal || ''} ${p.function || ''}`)) : pinouts;
+    let fSpecs = engNorm ? specs.filter((s) => matchesEng(`${s.sensor_name || ''} ${s.pin_configuration || ''}`)) : specs;
+    if (engNorm && !fPins.length) fPins = pinouts;
+    if (engNorm && !fSpecs.length) fSpecs = specs;
+
+    const isDieselEng = engNorm && /(1kd|2kd|1gd|2gd|d13a|2l|3l)/i.test(engNorm);
+    const engLabel = (engineFilter && String(engineFilter).trim()) || (pack.engine_codes || []).join(' / ') || pack.model;
+
+    const slotDefs = [
+      {
+        id: 'coil', anatomy: 'coil',
+        label: isDieselEng ? 'Common-Rail & SCV' : 'Koil Pengapian',
+        pinPat: isDieselEng ? /\b(pcr\d?|scv|inj|edu|i-?jt|fuel\s*press|common\s*rail)\b/i : /\b(igt\d|igf\d?|coil|koil|ignit|pengapian)\b/i,
+        specPat: isDieselEng ? /\b(pcr|scv|rail|injektor|injector|edu)\b/i : /\b(igt|igf|coil|koil|ignit)\b/i,
+        dtcPat: isDieselEng ? /^(P008[78]|P0093|P020[1-6]|P1229|P0627)$/ : /^(P030[0-8]|P035[1-8])$/
+      },
+      {
+        id: 'map', anatomy: 'map',
+        label: isDieselEng ? 'Sensor Turbo / MAP' : 'Sensor MAP / Vakum',
+        pinPat: /\b(pim|vcpm|e2pm|map|manifold|turbo|boost)\b/i,
+        specPat: /\b(pim|map|manifold|turbo|boost)\b/i,
+        dtcPat: /^(P010[5-9]|P023[4-8]|P0299)$/
+      },
+      {
+        id: 'maf', anatomy: 'maf', label: 'Sensor MAF / Udara',
+        pinPat: /\b(vg\b|evg|e2g|maf|mass\s*air|air\s*flow)\b/i,
+        specPat: /\b(vg\b|maf|air\s*flow)\b/i,
+        dtcPat: /^(P010[0-4]|P017[12])$/
+      },
+      {
+        id: 'throttle', anatomy: 'throttle', label: 'Throttle Body & TPS',
+        pinPat: /\b(vta\d?|m\+|m-|me01|etcs|throttle|tps|isc|idle)\b/i,
+        specPat: /\b(vta|throttle|tps|etcs|isc)\b/i,
+        dtcPat: /^(P012[0-4]|P022[0-3]|P050[57]|P21[013][0-9])$/
+      },
+      {
+        id: 'app', anatomy: 'app', label: 'Sensor Pedal Gas APP',
+        pinPat: /\b(vpa\d?|epa\d?|vcp[a2]|pedal|accel|app)\b/i,
+        specPat: /\b(vpa|pedal|accel|app)\b/i,
+        dtcPat: /^(P212[0-8]|P2138)$/
+      },
+      {
+        id: 'ect', anatomy: 'ect', label: 'Sensor Suhu ECT & IAT',
+        pinPat: /\b(thw|tha|ect|iat|coolant|water\s*temp)\b/i,
+        specPat: /\b(thw|tha|ect|iat|coolant)\b/i,
+        dtcPat: /^(P011[0-9]|P012[58])$/
+      },
+      {
+        id: 'ckp', anatomy: 'ckp', label: 'Sensor CKP, CMP & VVT',
+        pinPat: /\b(ne[+-]|g2[+-]|ckp|cmp|crank|cam|oc[v1][+-]?|vvt)\b/i,
+        specPat: /\b(ne[+-]|g2|ckp|cmp|crank|cam|ocv|vvt)\b/i,
+        dtcPat: /^(P033[5-9]|P034[0-5]|P001[0-6])$/
+      },
+      {
+        id: 'o2', anatomy: 'o2', label: 'Sensor Oksigen O2 / A-F',
+        pinPat: /\b(ox\d|ht\d|a1a|ha1a|o2|ho2s|oxygen|a\/f)\b/i,
+        specPat: /\b(ox\d|ht\d|a1a|o2|ho2s|oxygen|a\/f)\b/i,
+        dtcPat: /^(P003[0-8]|P013[0-9]|P014[01]|P219[56]|P223[78])$/
+      },
+      {
+        id: 'injector', anatomy: 'coil', label: 'Injektor Bahan Bakar',
+        pinPat: /#\d0\b|\b(inj\d|injektor|injector)\b/i,
+        specPat: /#\d0\b|\b(inj|injektor|injector)\b/i,
+        dtcPat: /^(P020[1-6]|P017[12])$/
+      },
+      {
+        id: 'fan', anatomy: 'fan', label: 'Kipas Radiator & AC',
+        pinPat: /\b(fan\d?|rfc|ac1|act|mrel|kipas|radiator|cooling\s*fan)\b/i,
+        specPat: /\b(fan|kipas|radiator|ac)\b/i,
+        dtcPat: /^(P048[0-5]|P053[0-3])$/
+      }
+    ];
+
+    const curated = [];
+    let mapReference = null;
+
+    slotDefs.forEach((slot) => {
+      const mPins = [];
+      const seenPin = new Set();
+      for (const p of fPins) {
+        const hay = `${p.pin || ''} ${p.signal || ''} ${p.function || ''}`;
+        if (slot.pinPat.test(hay)) {
+          const pk = String(p.pin || '').trim();
+          if (pk && !seenPin.has(pk)) {
+            seenPin.add(pk);
+            mPins.push(p);
+            if (mPins.length >= 6) break;
+          }
+        }
+      }
+      const mSpecs = [];
+      const seenSp = new Set();
+      for (const s of fSpecs) {
+        const hay = `${s.sensor_name || ''} ${s.pin_configuration || ''}`;
+        if (slot.specPat.test(hay)) {
+          const sk = String(s.sensor_name || '').trim();
+          if (sk && !seenSp.has(sk)) {
+            seenSp.add(sk);
+            mSpecs.push(s);
+            if (mSpecs.length >= 4) break;
+          }
+        }
+      }
+      if (!mPins.length && !mSpecs.length) return;
+
+      const relDtcs = [];
+      for (const d of dtcs) {
+        const c = String(d.code || '').toUpperCase();
+        if (c && slot.dtcPat.test(c) && !relDtcs.includes(c)) {
+          relDtcs.push(c);
+          if (relDtcs.length >= 5) break;
+        }
+      }
+
+      if (slot.id === 'map') {
+        const sp0 = mSpecs[0] || {};
+        const p0 = mPins[0] || {};
+        mapReference = {
+          engine: engLabel,
+          pin_hint: sp0.pin_configuration || (p0.pin ? `${p0.pin} (${p0.signal || ''})` : ''),
+          voltage_idle: sp0.voltage_idle || p0.function || 'Idle ~0.9–1.5V | KOEO ~3.8–4.3V',
+          voltage_wot: sp0.voltage_wot || '-'
+        };
+      }
+
+      curated.push({
+        id: slot.id,
+        anatomy_type: slot.anatomy,
+        short_label: slot.label,
+        engine_label: engLabel,
+        dtcs: relDtcs.length ? relDtcs.join(', ') : 'Lihat Pencarian Manual',
+        pins: mPins,
+        specs: mSpecs
+      });
+    });
+
+    return { curated, mapReference };
+  }
+
+  function getPackDetailById(packId, engineFilter) {
     const pid = String(packId || '').trim();
     if (pid === 'suzuki_jb420_builtin') {
       return {
@@ -69,38 +293,45 @@
         pinout_count: 251,
         sensor_spec_count: 9,
         popular_dtcs: ['P0480', 'C1021', 'P0756', 'B1502', 'B1017', 'B1133', 'P1614', 'KLS-11'],
+        curated_components: [],
+        map_reference: null,
         wiring_pinouts: [],
         sensor_specs: []
       };
     }
-    const pack = loadCustomPacks().find((p) => String(p.pack_id || '') === pid);
+    const pack = getLoadedPackSync(pid);
     if (!pack) return null;
     const dtcs = Array.isArray(pack.dtc_catalog) ? pack.dtc_catalog : [];
     const codeSet = new Set(dtcs.map((d) => String(d.code || '').toUpperCase()));
-    const pref = ['P0300', 'P0107', 'P0117', 'P0122', 'P0130', 'P0335', 'P0480', 'P2135', 'P0171', 'P0340'];
+    const pref = ['P0300', 'P0171', 'P0087', 'P0107', 'P0117', 'P0122', 'P0130', 'P0335', 'P0340', 'P0480', 'P2135', 'P0105', 'P2122'];
     const popular = pref.filter((c) => codeSet.has(c)).slice(0, 8);
     for (const d of dtcs) {
       if (popular.length >= 8) break;
       const c = String(d.code || '').toUpperCase();
       if (c && !popular.includes(c)) popular.push(c);
     }
+    const { curated, mapReference } = buildCuratedPackComponents(pack, engineFilter || '');
     return {
       pack_id: String(pack.pack_id || pid),
       brand: String(pack.brand || ''),
+      brand_aliases: Array.isArray(pack.brand_aliases) ? pack.brand_aliases : [],
       model: String(pack.model || ''),
       generation_id: pack.generation_id || null,
       generation_label: String(pack.generation_label || pack.model || ''),
       year_start: Number(pack.year_start || 2010),
       year_end: Number(pack.year_end || 2026),
       engine_codes: Array.isArray(pack.engine_codes) ? pack.engine_codes : [],
+      selected_engine: String(engineFilter || '').trim() || null,
       title: String(pack.title || 'Manual Tambahan Bengkel'),
       is_builtin: false,
       dtc_count: dtcs.length,
       pinout_count: Array.isArray(pack.wiring_pinouts) ? pack.wiring_pinouts.length : 0,
       sensor_spec_count: Array.isArray(pack.sensor_specs) ? pack.sensor_specs.length : 0,
       popular_dtcs: popular,
-      wiring_pinouts: Array.isArray(pack.wiring_pinouts) ? pack.wiring_pinouts : [],
-      sensor_specs: Array.isArray(pack.sensor_specs) ? pack.sensor_specs : []
+      curated_components: curated,
+      map_reference: mapReference,
+      wiring_pinouts: Array.isArray(pack.wiring_pinouts) ? pack.wiring_pinouts.slice(0, 60) : [],
+      sensor_specs: Array.isArray(pack.sensor_specs) ? pack.sensor_specs.slice(0, 25) : []
     };
   }
 
@@ -115,15 +346,24 @@
       .trim();
   }
 
-  function askCustomPackRag(packId, queryText) {
-    const pack = loadCustomPacks().find((p) => String(p.pack_id || '') === String(packId || '').trim());
+  function askCustomPackRag(packId, queryText, engineCode) {
+    const pack = getLoadedPackSync(packId);
     if (!pack) return null;
     const q = String(queryText || '').trim();
     const qLow = q.toLowerCase();
-    const detected = (q.toUpperCase().match(/\b[PCBU][0-9A-F]{4}\b/g) || []);
+    const obdCodes = (q.toUpperCase().match(/\b[PCBU][0-9A-F]{4}\b/g) || []);
+    const toyotaTwoPart = (q.toUpperCase().match(/\b[0-9]{2}-[0-9A-F]{2}\b/g) || []);
+    const detected = [...new Set([...obdCodes, ...toyotaTwoPart])];
     const dtcs = Array.isArray(pack.dtc_catalog) ? pack.dtc_catalog : [];
-    const specs = Array.isArray(pack.sensor_specs) ? pack.sensor_specs : [];
-    const pinouts = Array.isArray(pack.wiring_pinouts) ? pack.wiring_pinouts : [];
+    let specs = Array.isArray(pack.sensor_specs) ? pack.sensor_specs : [];
+    let pinouts = Array.isArray(pack.wiring_pinouts) ? pack.wiring_pinouts : [];
+    const engNorm = normCode(engineCode || '');
+    if (engNorm && engNorm.length >= 3) {
+      const fSpecs = specs.filter((sp) => normCode(sp.sensor_name || '').includes(engNorm));
+      if (fSpecs.length) specs = fSpecs;
+      const fPins = pinouts.filter((pw) => normCode(`${pw.pin || ''} ${pw.signal || ''}`).includes(engNorm));
+      if (fPins.length) pinouts = fPins;
+    }
     const title = String(pack.title || `${pack.brand} ${pack.model}`);
     const parts = [];
 
@@ -160,10 +400,10 @@
 
     const expToks = new Set(toks);
     if (/\bmaf\b/i.test(qLow)) { expToks.add('map'); expToks.add('iat'); }
-    if (/koil|coil/i.test(qLow)) { expToks.add('coil'); expToks.add('koil'); }
+    if (/koil|coil/i.test(qLow)) { expToks.add('coil'); expToks.add('koil'); expToks.add('igt'); }
     if (/kipas|fan/i.test(qLow)) { expToks.add('kipas'); expToks.add('fan'); }
-    if (/throttle|tps/i.test(qLow)) { expToks.add('tps'); expToks.add('throttle'); }
-    if (/pedal|app/i.test(qLow)) expToks.add('app');
+    if (/throttle|tps/i.test(qLow)) { expToks.add('tps'); expToks.add('throttle'); expToks.add('vta'); }
+    if (/pedal|app/i.test(qLow)) { expToks.add('app'); expToks.add('vpa'); }
 
     const mSpecs = specs.filter((sp) => {
       const h = `${sp.sensor_name} ${sp.pin_configuration} ${sp.voltage_idle}`.toLowerCase();
@@ -185,7 +425,7 @@
         return Array.from(expToks).some((t) => h.includes(t));
       });
       if (rPins.length) {
-        parts.push(`[PINOUT KONEKTOR ECM RESMI — ${pack.brand} ${pack.model}]\n` + rPins.slice(0, 10).map((p) => `• ${p.pin}: ${p.signal} — ${p.function}`).join('\n'));
+        parts.push(`[PINOUT KONEKTOR ECM RESMI — ${pack.brand} ${pack.model}${engineCode ? ' (' + engineCode + ')' : ''}]\n` + rPins.slice(0, 10).map((p) => `• ${p.pin}: ${p.signal} — ${p.function}`).join('\n'));
       }
     }
 
@@ -194,7 +434,7 @@
       detected_dtc_codes: detected,
       synthesized_guidance: parts.length
         ? parts.join('\n\n')
-        : `Kata kunci '${q}' belum ditemukan pada buku manual ${title}. Coba cari kode P0300, P0107, P0117, P0122, P0130, P0335, P0480, P2135 atau koil, map, tps, app, ect, ckp, o2, kipas.`,
+        : `Kata kunci '${q}' belum ditemukan pada buku manual ${title}. Coba cari kode P0300, P0171, P0107, P0117, P0122, P0130, P0335, P0480, P2135 atau koil, map, tps, app, ect, ckp, o2, kipas.`,
       matched_dtc_details: [],
       matched_sensor_specs: [],
       matched_wiring_diagrams: [],
@@ -203,29 +443,34 @@
   }
 
   function saveCustomPack(packData) {
-    const packs = loadCustomPacks();
+    const localPacks = getLocalStoragePacks();
     const copy = { ...packData };
     if (!copy.pack_id) {
       const sb = String(copy.brand || 'custom').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
       const sm = String(copy.model || 'model').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
       copy.pack_id = `${sb}_${sm}_${copy.year_start || 2015}_${copy.year_end || 2026}`;
     }
-    const updated = packs.filter((p) => p.pack_id !== copy.pack_id);
+    const updated = localPacks.filter((p) => p.pack_id !== copy.pack_id);
     updated.push(copy);
     try {
       global.localStorage.setItem(KEY_CUSTOM_PACKS, JSON.stringify(updated));
     } catch (_) {}
+    global.AGOS_PACK_STORE = global.AGOS_PACK_STORE || {};
+    global.AGOS_PACK_STORE[copy.pack_id] = copy;
     return copy;
   }
 
   function deleteCustomPack(packId) {
     if (packId === 'suzuki_jb420_builtin') return false;
-    const packs = loadCustomPacks();
-    const filtered = packs.filter((p) => p.pack_id !== packId);
-    if (filtered.length === packs.length) return false;
+    const localPacks = getLocalStoragePacks();
+    const filtered = localPacks.filter((p) => p.pack_id !== packId);
+    if (filtered.length === localPacks.length) return false;
     try {
       global.localStorage.setItem(KEY_CUSTOM_PACKS, JSON.stringify(filtered));
     } catch (_) {}
+    if (global.AGOS_PACK_STORE && global.AGOS_PACK_STORE[packId]) {
+      delete global.AGOS_PACK_STORE[packId];
+    }
     return true;
   }
 
@@ -233,7 +478,9 @@
     const builtin = {
       pack_id: 'suzuki_jb420_builtin',
       brand: 'Suzuki',
+      brand_aliases: ['Suzuki'],
       model: 'Grand Vitara',
+      model_aliases: ['Grand Vitara', 'Vitara', 'JB420'],
       generation_id: 'suzuki_jb420',
       generation_label: 'Grand Vitara Gen 2 (JB420)',
       year_start: 2006,
@@ -245,23 +492,32 @@
       sensor_spec_count: 9,
       is_builtin: true
     };
-    return [builtin].concat(
-      loadCustomPacks().map((p) => ({
-        pack_id: String(p.pack_id || ''),
-        brand: String(p.brand || ''),
-        model: String(p.model || ''),
-        generation_id: p.generation_id || null,
-        generation_label: String(p.generation_label || p.model || ''),
-        year_start: Number(p.year_start || 2010),
-        year_end: Number(p.year_end || 2026),
-        engine_codes: Array.isArray(p.engine_codes) ? p.engine_codes : [],
-        title: String(p.title || 'Manual Tambahan Bengkel'),
-        dtc_count: Array.isArray(p.dtc_catalog) ? p.dtc_catalog.length : 0,
-        pinout_count: Array.isArray(p.wiring_pinouts) ? p.wiring_pinouts.length : 0,
-        sensor_spec_count: Array.isArray(p.sensor_specs) ? p.sensor_specs.length : 0,
-        is_builtin: false
-      }))
-    );
+    const merged = new Map();
+    getBundledPackSummaries().forEach((s) => {
+      if (s && s.pack_id) merged.set(s.pack_id, s);
+    });
+    getLocalStoragePacks().forEach((p) => {
+      if (p && p.pack_id) {
+        merged.set(p.pack_id, {
+          pack_id: String(p.pack_id || ''),
+          brand: String(p.brand || ''),
+          brand_aliases: Array.isArray(p.brand_aliases) ? p.brand_aliases : [],
+          model: String(p.model || ''),
+          model_aliases: Array.isArray(p.model_aliases) ? p.model_aliases : [],
+          generation_id: p.generation_id || null,
+          generation_label: String(p.generation_label || p.model || ''),
+          year_start: Number(p.year_start || 2010),
+          year_end: Number(p.year_end || 2026),
+          engine_codes: Array.isArray(p.engine_codes) ? p.engine_codes : [],
+          title: String(p.title || 'Manual Tambahan Bengkel'),
+          dtc_count: Array.isArray(p.dtc_catalog) ? p.dtc_catalog.length : 0,
+          pinout_count: Array.isArray(p.wiring_pinouts) ? p.wiring_pinouts.length : 0,
+          sensor_spec_count: Array.isArray(p.sensor_specs) ? p.sensor_specs.length : 0,
+          is_builtin: false
+        });
+      }
+    });
+    return [builtin].concat(Array.from(merged.values()));
   }
 
   // --- ADMIN PIN GUARD (OFFLINE LOCALSTORAGE) ---
@@ -299,13 +555,17 @@
   }
 
   // --- RESOLUSI KENDARAAN, GENERASI, ALIAS MESIN & GUARDRAIL ---
-  function matchesBrandModel(bq, mq, eb, em, aliases) {
+  function matchesBrandModel(bq, mq, eb, em, aliases, brandAliases) {
     const bLow = String(bq || '').trim().toLowerCase();
     const mLow = String(mq || '').trim().toLowerCase();
     const ebLow = String(eb || '').trim().toLowerCase();
     const emLow = String(em || '').trim().toLowerCase();
     if (!mLow) return false;
-    if (bLow && ebLow && !ebLow.includes(bLow) && !bLow.includes(ebLow)) return false;
+    if (bLow) {
+      const bPool = [ebLow].concat((brandAliases || []).map((ba) => String(ba || '').trim().toLowerCase())).filter(Boolean);
+      const bHit = bPool.some((cand) => cand.includes(bLow) || bLow.includes(cand));
+      if (bPool.length && !bHit) return false;
+    }
     if (emLow && (emLow.includes(mLow) || mLow.includes(emLow))) return true;
     return (aliases || []).some((al) => {
       const a = String(al || '').toLowerCase();
@@ -327,12 +587,13 @@
   }
 
   function findCustomPack(brand, model, year, eng) {
-    const packs = loadCustomPacks();
+    const summaries = listAllPackSummaries().filter((p) => !p.is_builtin);
     const engNorm = normCode(eng);
     const hasExplicitEng = Boolean(engNorm && (/[a-z]\d{2}[a-z]?|\d[a-z]{2}/.test(engNorm)));
     const scored = [];
-    packs.forEach((p) => {
-      if (!matchesBrandModel(brand, model, p.brand, p.model, p.model_aliases || [p.model])) return;
+    summaries.forEach((p) => {
+      const bAliases = Array.isArray(p.brand_aliases) && p.brand_aliases.length ? p.brand_aliases : [p.brand];
+      if (!matchesBrandModel(brand, model, p.brand, p.model, p.model_aliases || [p.model], bAliases)) return;
       const pCodes = (p.engine_codes || []).map((ec) => normCode(ec)).filter(Boolean);
       const engMatch = Boolean(engNorm && pCodes.length && pCodes.some((ec) => ec.includes(engNorm) || engNorm.includes(ec)));
       if (hasExplicitEng && pCodes.length && !engMatch) return;
@@ -347,7 +608,8 @@
       } else {
         yp = engMatch ? 2 : 1;
       }
-      scored.push({ score: yp + (engMatch ? 2 : 0), pack: p });
+      const loaded = getLoadedPackSync(p.pack_id);
+      scored.push({ score: yp + (engMatch ? 2 : 0), pack: loaded || p });
     });
     if (!scored.length) return null;
     scored.sort((a, b) => b.score - a.score);
@@ -628,15 +890,166 @@
     const out = [];
     tokens.forEach((t) => {
       const m = t.match(/^([PCBU][0-9A-F]{4})(?:[-]?[0-9A-F]{2})?$/);
-      const norm = m ? m[1] : null;
+      const m2 = t.match(/^([0-9]{2}-[0-9A-F]{2})$/);
+      const norm = m ? m[1] : (m2 ? m2[1] : null);
       if (norm && !out.includes(norm)) out.push(norm);
     });
     return out;
   }
 
-  function enhanceOfflineSearchResult(req, rawRes) {
-    const { appInfo, customPack } = resolveVehicleApplicability(req.brand, req.model, req.year, req.engine_code);
+  function cleanAndDedupePackPins(rawPins, packId) {
+    const cleaned = [];
+    for (const p of (rawPins || [])) {
+      const pinS = String(p && p.pin || '').trim();
+      if (!pinS) continue;
+      const body = pinS.replace(/^\[[^\]]+\]\s*/, '').trim();
+      if (/^\d\s*[-–]\s*\d$/.test(body)) continue;
+      if (/\batau\b.*(masa\s*bodi|body\s*ground)/i.test(body)) continue;
+      if ((body.match(/\bIGT\d\b/g) || []).length >= 2) continue;
+      cleaned.push(p);
+    }
+    let out = cleaned.length ? cleaned : (rawPins || []);
+    const pid = String(packId || '').toLowerCase();
+    if (pid.includes('fortuner')) {
+      const hasC75 = out.some(x => /\bC7[0-6]-/.test(String(x.pin || '')));
+      const hasE10 = out.some(x => /\bE1[01]-/.test(String(x.pin || '')));
+      if (hasC75 && hasE10) out = out.filter(x => !/\bE1[01]-/.test(String(x.pin || '')));
+    }
+    if (pid.includes('yaris_vios')) {
+      const hasC20 = out.some(x => /\b(C20|A21)-/.test(String(x.pin || '')));
+      const hasC23 = out.some(x => /\b(C23|A20)-/.test(String(x.pin || '')));
+      if (hasC20 && hasC23) out = out.filter(x => !/\b(C23|A20)-/.test(String(x.pin || '')));
+    }
+    return out;
+  }
+
+  function selectCustomPackPins(pack, dtcCodes, textHint, engineCode, fuelType) {
+    const allPins = Array.isArray(pack && pack.wiring_pinouts) ? pack.wiring_pinouts : [];
+    if (!allPins.length) return [];
+
+    const packId = String(pack.pack_id || '').toLowerCase();
+    const engNorm = normCode(engineCode || '');
+    const isDiesel = String(fuelType || '').toLowerCase() === 'diesel';
+    const codeSet = new Set((dtcCodes || []).map((c) => String(c || '').toUpperCase()));
+    const hint = String(textHint || '').toLowerCase();
+
+    // Guardrail Diesel: Ertiga D13A tidak memiliki pinout di paket K14B
+    if (isDiesel && packId === 'suzuki_ertiga_gen1_2012_2017') return [];
+
+    // Ertiga K14B tidak pakai MAF (Speed-Density MAP + IAT)
+    if (packId === 'suzuki_ertiga_gen1_2012_2017' && [...codeSet].some(c => /^P010[0-4]$/.test(c))) {
+      return [
+        { pin: 'C01-2', signal: 'GRY/RED — Suplai +5V Sensor MAP (K14B tanpa MAF)', function: 'Suplai +4.5–5.5 V IG ON' },
+        { pin: 'C01-29', signal: 'RED/BLK — Sinyal Sensor MAP', function: 'Sinyal vakum intake manifold (1.0–1.6 V Idle)' },
+        { pin: 'C01-34', signal: 'BLK/YEL — Sinyal Sensor IAT', function: 'Sinyal suhu udara masuk' },
+        { pin: 'C01-20', signal: 'GRY/BLU — Massa Sensor MAP & IAT', function: 'Massa referensi sensor (< 0.3 V)' }
+      ];
+    }
+
+    const isFan = [...codeSet].some((c) => /^P048[0-5]$/.test(c)) || /\b(kipas|cooling\s*fan|radiator\s*fan)\b/i.test(hint);
+    let pool = allPins.filter(p => {
+      const ps = String(p.pin || '');
+      if (/^\[(AUDIO|PARK\s*ASSIST|STARTING|METER|ENGINE\s*IMMOBILIS|A\/T|AIR\s*BAG|SRS|ABS|VSC|CRUISE)/i.test(ps)) return false;
+      if (!isFan && /^\[AIR\s*CONDITIONING/i.test(ps)) return false;
+      return true;
+    });
+    if (!pool.length) pool = allPins;
+
+    const hasEngTags = pool.some(p => /\[(1|2|3|4|k3|ej|d13)[a-z0-9\-]{2,}/i.test(String(p.pin || '')));
+    if (engNorm && engNorm.length >= 3 && hasEngTags) {
+      const engFiltered = pool.filter((p) => normCode(String(p.pin || '')).includes(engNorm));
+      if (engFiltered.length) {
+        pool = engFiltered;
+      } else {
+        return []; // Isolasi ketat multi-mesin: jangan bocorkan 3ZR-FE ke mesin lain!
+      }
+    } else if (isDiesel) {
+      const dieselOnly = pool.filter((p) => /\[(1kd|2kd|1gd|2gd|d13a|4d56|4n15)/i.test(String(p.pin || '')));
+      if (dieselOnly.length) pool = dieselOnly;
+      else if (hasEngTags) return [];
+    }
+
+    const pats = [];
+    if ([...codeSet].some((c) => /^P030[0-8]$|^P035[1-8]$/.test(c)) || /\b(koil|coil|misfire|pengapian|ignition|busi)\b/i.test(hint)) {
+      pats.push(isDiesel ? /\b(pcr\d?|scv|inj|edu|rail|diesel)\b/i : /\b(igt[1-8]|igf\d?|ig[1-4](?!d)|koil\s*pengapian|ignition\s*coil)\b/i);
+    } else if ([...codeSet].some((c) => /^P008[78]$|^P0093$/.test(c)) || /\b(common.?rail|scv|pcr|fuel\s*rail)\b/i.test(hint)) {
+      pats.push(/\b(pcr\d?|scv|edu|inj|rail|fuel\s*press)\b/i);
+    } else if ([...codeSet].some((c) => /^P033[5-9]$/.test(c)) || (/\b(ckp|crankshaft|poros\s*engkol)\b/i.test(hint) && !/\b(cmp|camshaft)\b/i.test(hint))) {
+      pats.push(/\b(ne[+-]?|n1[+-]?|ckp|crankshaft|poros\s*engkol)\b/i);
+    } else if ([...codeSet].some((c) => /^P034[0-9]$/.test(c)) || /\b(cmp|camshaft|poros\s*nok)\b/i.test(hint)) {
+      pats.push(/\b(g2[+-]?(?!-\d)|n2[+-]?|vv1[+-]?|cmp|camshaft|poros\s*nok)\b/i);
+    } else if (isFan) {
+      pats.push(/\b(fan\d?|fanl|fanh|rfc|kipas\s*radiator|fan\s*radiator|cooling\s*fan)\b/i);
+    } else if ([...codeSet].some((c) => /^P011[5-9]$|^P012[58]$/.test(c)) || /\b(ect|coolant|suhu\s*air|water\s*temp|thermostat)\b/i.test(hint)) {
+      pats.push(/\b(thw|ethw|ect|coolant|water\s*temp|suhu\s*air)\b/i);
+    } else if ([...codeSet].some((c) => /^P010[0-4]$/.test(c)) || /\b(maf|mass\s*air\s*flow)\b/i.test(hint)) {
+      pats.push(/\b(vg\b|evg|e2g|maf|mass\s*air\s*flow)\b/i, /\b(vcpm|pim|e2pm|map|tekanan\s*absolut)\b/i);
+    } else if ([...codeSet].some((c) => /^P010[5-9]$|^P017[12]$/.test(c)) || /\b(map|vakum|manifold|pim)\b/i.test(hint)) {
+      const hasMaf = pool.some(p => /\b(vg\b|evg|e2g|maf)\b/i.test(`${p.pin} ${p.signal}`));
+      if (hasMaf && [...codeSet].some(c => /^P017[12]$/.test(c))) pats.push(/\b(vg\b|evg|e2g|maf)\b/i);
+      else pats.push(/\b(vcpm|pim|e2pm|map|tekanan\s*absolut)\b/i, /\b(vg\b|evg|e2g|maf)\b/i);
+    } else if ([...codeSet].some((c) => /^P003[0-2]$|^P013[0-5]$/.test(c))) {
+      if (isDiesel) return [];
+      pats.push(/\b(ha1a|a1a[+-]?|ht1a|ox1a|ox1|oxh1|ho2s-1|bank\s*1\s*sensor\s*1|o2\s*depan)\b/i);
+    } else if ([...codeSet].some((c) => /^P003[6-8]$|^P013[6-9]$|^P014[01]$/.test(c))) {
+      if (isDiesel) return [];
+      pats.push(/\b(ht1b|ox1b|ox2|ho2s-2|bank\s*1\s*sensor\s*2|o2\s*belakang)\b/i);
+    } else if ([...codeSet].some((c) => /^P012[0-4]$|^P022[0-3]$|^P0507$|^P21[013][0-9]$/.test(c))) {
+      pats.push(isDiesel ? /\b(vlu|lusl|diesel\s*throttle)\b/i : /\b(vta\d?|vcta|eta|vth|vc\b|tps|m\+|m-|throttle)\b/i);
+    } else if ([...codeSet].some((c) => /^P212[2-9]$|^P2138$/.test(c)) || /\b(pedal|app|vpa)\b/i.test(hint)) {
+      pats.push(/\b(vpa\d?|vcpa|vcp2|epa\d?|app|pedal)\b/i);
+    }
+
+    if (!pats.length) return [];
+
+    const matched = [];
+    const seen = new Set();
+    for (const pat of pats) {
+      const patSrc = pat.source;
+      for (const p of pool) {
+        const hay = `${p.pin || ''} ${p.signal || ''} ${p.function || ''}`;
+        if (isDiesel && /\b(igt\d|igf|spark|busi|koil|k14b)\b/i.test(hay)) continue;
+        if (patSrc.includes('g2') && /\b(ocv|oc1|oil\s*control)\b/i.test(hay)) continue;
+        if (patSrc.includes('ne[') && /\b(g2\b|n2[+-]|camshaft|poros\s*nok)\b/i.test(hay)) continue;
+        if (patSrc.includes('vta') && /\b(vpa\d?|vcpa|vcp2|epa\d?|pedal\s*akselerator|accelerator\s*pedal|oxygen|oksigen|\bo2\b|e8-2\b)\b/i.test(hay)) continue;
+        if (pat.test(hay)) {
+          const pk = String(p.pin || '').trim();
+          if (pk && !seen.has(pk)) {
+            seen.add(pk);
+            matched.push(p);
+            if (matched.length >= 10) break;
+          }
+        }
+      }
+      if (matched.length) break;
+    }
+    return cleanAndDedupePackPins(matched, packId).slice(0, 6);
+  }
+
+  async function enhanceOfflineSearchResultAsync(req, rawRes) {
+    const resolved = resolveVehicleApplicability(req.brand, req.model, req.year, req.engine_code);
+    let customPack = resolved.customPack;
+    if (customPack && customPack.pack_id && !Array.isArray(customPack.dtc_catalog)) {
+      const full = await ensureOfflinePackLoaded(customPack.pack_id);
+      if (full) customPack = full;
+    }
+    return enhanceOfflineSearchResult(req, rawRes, resolved.appInfo, customPack);
+  }
+
+  function enhanceOfflineSearchResult(req, rawRes, preAppInfo, preCustomPack) {
+    let appInfo = preAppInfo;
+    let customPack = preCustomPack;
+    if (!appInfo) {
+      const resv = resolveVehicleApplicability(req.brand, req.model, req.year, req.engine_code);
+      appInfo = resv.appInfo;
+      customPack = resv.customPack;
+    }
+    if (customPack && customPack.pack_id && !Array.isArray(customPack.dtc_catalog)) {
+      const loaded = getLoadedPackSync(customPack.pack_id);
+      if (loaded) customPack = loaded;
+    }
     const fuel = appInfo.resolved_fuel_type || 'Bensin';
+    const isDiesel = String(fuel).toLowerCase() === 'diesel';
     const adaptiveLive = evaluateAdaptiveLiveData(req);
     const reqCodes = extractReqDtcs(req.dtc);
 
@@ -657,7 +1070,14 @@
     if (reqCodes.length) {
       const firstCode = reqCodes[0];
       if (customPack && Array.isArray(customPack.dtc_catalog)) {
-        matchedCustomDtc = customPack.dtc_catalog.find((d) => String(d.code || '').toUpperCase() === firstCode) || null;
+        const cand = customPack.dtc_catalog.find((d) => String(d.code || '').toUpperCase() === firstCode) || null;
+        if (cand) {
+          const candTxt = `${cand.description_id || ''} ${cand.common_causes || ''} ${(cand.repair_steps || []).join(' ')} ${(cand.wiring_pinout || []).map((w) => w.pin).join(' ')}`;
+          const isErtigaK14bOnly = isDiesel && String(customPack.pack_id || '') === 'suzuki_ertiga_gen1_2012_2017' && /\b(k14b|c01-|koil|busi|ignition\s*coil)\b/i.test(candTxt);
+          if (!isErtigaK14bOnly && isFuelCompatible(candTxt, fuel)) {
+            matchedCustomDtc = cand;
+          }
+        }
       }
       if (!matchedCustomDtc) {
         const mh = lookupModernDtc(firstCode, fuel);
@@ -671,24 +1091,44 @@
 
     if (matchedCustomDtc) {
       const c = matchedCustomDtc.code.toUpperCase();
+      const effEng = appInfo.engine_code || req.engine_code || '';
+      const engNorm = normCode(effEng);
+      let dtcPins = Array.isArray(matchedCustomDtc.wiring_pinout) ? [...matchedCustomDtc.wiring_pinout] : [];
+      if (engNorm && engNorm.length >= 3 && dtcPins.length) {
+        const engFiltered = dtcPins.filter((p) => normCode(p.pin || '').includes(engNorm));
+        if (engFiltered.length) {
+          dtcPins = engFiltered;
+        } else if (dtcPins.some((p) => String(p.pin || '').includes('['))) {
+          const smartEngPins = selectCustomPackPins(customPack, [c], `${matchedCustomDtc.description_id || ''} ${matchedCustomDtc.common_causes || ''}`, effEng, fuel);
+          if (smartEngPins.length) dtcPins = smartEngPins;
+        }
+      }
+      if (!dtcPins.length) {
+        dtcPins = selectCustomPackPins(customPack, [c], `${matchedCustomDtc.description_id || ''} ${matchedCustomDtc.common_causes || ''}`, effEng, fuel);
+      }
+      if (isDiesel) {
+        dtcPins = dtcPins.filter((p) => !/\b(igt\d|igf|koil|busi|k14b|c01-)\b/i.test(`${p.pin} ${p.signal} ${p.function}`));
+      }
+      dtcPins = cleanAndDedupePackPins(dtcPins, customPack.pack_id);
+      const hasVerifiedPins = dtcPins.length > 0;
       out.top_case_code = `MANUAL-${c}`;
-      out.top_diagnosis = `${matchedCustomDtc.description_id || c} (DTC ${c})`;
+      out.top_diagnosis = `${cleanCustomPdfStr(matchedCustomDtc.description_id || c)} (DTC ${c})`;
       out.top_score_percent = 94.0;
       out.top_category_label = 'SANGAT MIRIP';
       out.top_headline = `${out.top_diagnosis} — 94.0% (Paket Manual Kustom Terverifikasi)`;
       out.direct_manual_advice = {
-        diagnosis_title: matchedCustomDtc.description_id || c,
+        diagnosis_title: cleanCustomPdfStr(matchedCustomDtc.description_id || c),
         system_category: 'Manual Kustom',
         group_category: customPack.title || 'Manual Kustom',
         manual_book_section: `${customPack.title || 'Manual Kustom'} — Kode ${c}`,
-        cause_summary: Array.isArray(matchedCustomDtc.common_causes) ? matchedCustomDtc.common_causes.join('; ') : String(matchedCustomDtc.common_causes || '-'),
-        cause_items: [{ category: 'Manual Kustom', detail: String(matchedCustomDtc.common_causes || matchedCustomDtc.description_id || '-') }],
-        repair_options: matchedCustomDtc.repair_options || [{ title: (matchedCustomDtc.repair_steps && matchedCustomDtc.repair_steps[0]) || 'Ikuti langkah SOP manual kustom', tag: 'Manual Kustom', priority: 'UTAMA', why: 'Sesuai paket manual terverifikasi.', verify: 'DTC hilang setelah uji jalan.' }],
-        step_by_step_repair: matchedCustomDtc.repair_steps || [],
+        cause_summary: cleanCustomPdfStr(Array.isArray(matchedCustomDtc.common_causes) ? matchedCustomDtc.common_causes.join('; ') : String(matchedCustomDtc.common_causes || '-')),
+        cause_items: [{ category: 'Manual Kustom', detail: cleanCustomPdfStr(String(matchedCustomDtc.common_causes || matchedCustomDtc.description_id || '-')) }],
+        repair_options: matchedCustomDtc.repair_options || [{ title: cleanCustomPdfStr((matchedCustomDtc.repair_steps && matchedCustomDtc.repair_steps[0]) || 'Ikuti langkah SOP manual kustom'), tag: 'Manual Kustom', priority: 'UTAMA', why: 'Sesuai paket manual terverifikasi.', verify: 'DTC hilang setelah uji jalan.' }],
+        step_by_step_repair: (matchedCustomDtc.repair_steps || []).map(cleanCustomPdfStr),
         sensor_standards: matchedCustomDtc.standard_specs || [],
-        wiring_pinout: matchedCustomDtc.wiring_pinout || customPack.wiring_pinouts || [],
+        wiring_pinout: hasVerifiedPins ? dtcPins : [{ pin: `Soket Komponen ${c}`, signal: `${customPack.brand} ${customPack.model}`, function: 'Pinout rinci kode ini belum terpetakan otomatis — verifikasi soket fisik memakai multitester.' }],
         relearn_reset_steps: [`1. Hapus DTC ${c} via scanner & lakukan test drive.`],
-        is_pinout_verified: true,
+        is_pinout_verified: hasVerifiedPins,
         active_pack_id: appInfo.active_pack_id,
         safety_warning: appInfo.safety_warning_desc,
         hv_safety_warning: appInfo.hv_safety_warning,
@@ -701,6 +1141,10 @@
     if (matchedModern) {
       const c = matchedModern.code;
       const causes = String(matchedModern.root_causes || '').split(';').map((s) => s.trim()).filter(Boolean);
+      const customPins = customPack
+        ? selectCustomPackPins(customPack, [c], `${matchedModern.title_id || ''} ${matchedModern.system_category || ''}`, appInfo.engine_code || req.engine_code, fuel)
+        : [];
+      const hasVerifiedCustomPins = customPins.length > 0;
       out.top_case_code = `MANUAL-${c}`;
       out.top_diagnosis = `${matchedModern.title_id} (DTC ${c})`;
       out.top_score_percent = 94.0;
@@ -710,18 +1154,23 @@
         diagnosis_title: matchedModern.title_id,
         system_category: matchedModern.system_category || 'Kelistrikan',
         group_category: `Universal ${fuel}`,
-        manual_book_section: `Katalog Universal ${fuel} / Modern OBD-II — Kode ${c}`,
+        manual_book_section: hasVerifiedCustomPins
+          ? `${customPack.title} + Katalog Modern ${fuel} — Kode ${c}`
+          : `Katalog Universal ${fuel} / Modern OBD-II — Kode ${c}`,
         cause_summary: matchedModern.root_causes || '-',
         cause_items: causes.slice(0, 6).map((d, i) => ({ category: i === 0 ? 'Prioritas Utama' : (i === 1 ? 'Kemungkinan Tinggi' : 'Cek Pendukung'), detail: d })),
         repair_options: matchedModern.repair_options || [],
         step_by_step_repair: matchedModern.repair_steps || [],
         sensor_standards: matchedModern.standard_specs || [],
-        wiring_pinout: (matchedModern.requires_hv_safety || fuel === 'EV')
-          ? [{ pin: 'Konektor HV / BMS (Wajib APD 1000V)', signal: 'Baterai HV / Inverter / CAN', function: 'Cek via Scanner BMS & Insulation Tester 500V (Jangan tusuk kabel oranye!)' }]
-          : [{ pin: `Soket Komponen ${c}`, signal: `Sirkuit ${matchedModern.system_category} (${fuel})`, function: 'Manual pinout OEM model ini belum diunggah — ukur fisik dengan multitester.' }],
+        wiring_pinout: hasVerifiedCustomPins
+          ? customPins
+          : ((matchedModern.requires_hv_safety || fuel === 'EV')
+            ? [{ pin: 'Konektor HV / BMS (Wajib APD 1000V)', signal: 'Baterai HV / Inverter / CAN', function: 'Cek via Scanner BMS & Insulation Tester 500V (Jangan tusuk kabel oranye!)' }]
+            : [{ pin: `Soket Komponen ${c}`, signal: `Sirkuit ${matchedModern.system_category} (${fuel})`, function: 'Manual pinout OEM untuk varian mesin ini belum tersedia — ukur fisik dengan multitester.' }]),
         relearn_reset_steps: [`1. Hapus DTC ${c} dengan scanner.`, '2. Lakukan learning/kalibrasi sistem terkait lalu uji jalan.'],
-        is_pinout_verified: false,
-        safety_warning: appInfo.safety_warning_desc,
+        is_pinout_verified: hasVerifiedCustomPins,
+        active_pack_id: hasVerifiedCustomPins ? appInfo.active_pack_id : 'universal',
+        safety_warning: hasVerifiedCustomPins ? appInfo.safety_warning_desc : (appInfo.safety_warning_desc || `Catatan: Pinout OEM khusus varian mesin ${appInfo.engine_code || fuel} belum tersedia di paket manual ini — verifikasi soket fisik dengan multitester.`),
         hv_safety_warning: (matchedModern.requires_hv_safety || appInfo.is_high_voltage) ? appInfo.hv_safety_warning : null,
         is_low_confidence_fallback: false,
         adaptive_live_findings: adaptiveLive
@@ -771,6 +1220,7 @@
         wiring_pinout: [{ pin: 'Soket Fisik Terkait', signal: `Pengukuran Aman (${fuel})`, function: 'Ukur langsung menggunakan multitester.' }],
         relearn_reset_steps: ['1. Reset DTC setelah perbaikan dan simpan kasus baru.'],
         is_pinout_verified: false,
+        active_pack_id: 'universal',
         safety_warning: appInfo.safety_warning_desc,
         hv_safety_warning: appInfo.hv_safety_warning,
         is_low_confidence_fallback: true,
@@ -779,12 +1229,45 @@
       return out;
     }
 
-    // 3. Terapkan guardrail wiring & HV safety pada hasil normal
+    // 3. Terapkan guardrail wiring & isolasi pinout asli paket kustom (ZERO false verified=True pada fallback JB420!)
     const adv = { ...(out.direct_manual_advice || {}) };
     adv.active_pack_id = appInfo.active_pack_id || 'universal';
     adv.adaptive_live_findings = adaptiveLive;
     adv.hv_safety_warning = appInfo.hv_safety_warning || adv.hv_safety_warning || null;
-    if (!appInfo.is_pinout_verified) {
+
+    if (customPack && appInfo.active_pack_id !== 'suzuki_jb420_builtin') {
+      const diagContext = `${adv.diagnosis_title || ''} ${out.top_diagnosis || ''} ${req.complaint || ''} ${req.symptom || ''}`;
+      const matchedPackPins = selectCustomPackPins(customPack, reqCodes, diagContext, appInfo.engine_code || req.engine_code, fuel);
+      if (matchedPackPins.length) {
+        adv.wiring_pinout = matchedPackPins;
+        adv.manual_book_section = `${customPack.title || `${customPack.brand} ${customPack.model}`} (Pinout OEM Terverifikasi)`;
+        adv.is_pinout_verified = true;
+        adv.safety_warning = appInfo.safety_warning_desc;
+        adv.repair_options = (adv.repair_options || []).map((o) => ({
+          ...o,
+          title: stripJb420Pins(o.title),
+          why: stripJb420Pins(o.why),
+          verify: stripJb420Pins(o.verify)
+        }));
+        adv.step_by_step_repair = (adv.step_by_step_repair || []).map(stripJb420Pins);
+      } else {
+        // ZERO kebocoran false verified=True! Jika tidak ada pinout asli utk mesin/BBM ini (mis. Ertiga D13A Diesel), tandai unverified!
+        adv.is_pinout_verified = false;
+        adv.active_pack_id = 'universal';
+        adv.safety_warning = `⚠️ Pinout OEM spesifik untuk ${appInfo.brand} ${appInfo.model} (${appInfo.engine_code || fuel}) pada kasus ini belum tersedia dalam paket manual — diagram di bawah hanya ILUSTRASI UMUM (Ref. JB420), JANGAN jumper sebelum ukur fisik!`;
+        adv.repair_options = (adv.repair_options || []).map((o) => ({
+          ...o,
+          title: stripJb420Pins(o.title),
+          why: stripJb420Pins(o.why),
+          verify: stripJb420Pins(o.verify)
+        }));
+        adv.step_by_step_repair = (adv.step_by_step_repair || []).map(stripJb420Pins);
+        adv.wiring_pinout = (adv.wiring_pinout || []).map((w) => ({
+          ...w,
+          function: String(w.function || '').includes('[Contoh Ref') ? w.function : `[Contoh Ref. JB420 — Cek Soket Fisik] ${w.function || ''}`
+        }));
+      }
+    } else if (!appInfo.is_pinout_verified) {
       adv.is_pinout_verified = false;
       adv.safety_warning = appInfo.safety_warning_desc;
       adv.repair_options = (adv.repair_options || []).map((o) => ({
@@ -810,6 +1293,7 @@
     getGenerations,
     getEngineDirectory,
     getModernDtcCatalog,
+    ensureOfflinePackLoaded,
     loadCustomPacks,
     saveCustomPack,
     deleteCustomPack,
@@ -821,6 +1305,7 @@
     getSecurityStatus,
     resolveVehicleApplicability,
     lookupModernDtc,
-    enhanceOfflineSearchResult
+    enhanceOfflineSearchResult,
+    enhanceOfflineSearchResultAsync
   };
 })(typeof window !== 'undefined' ? window : globalThis);

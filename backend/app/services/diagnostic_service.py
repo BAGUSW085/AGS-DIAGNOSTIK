@@ -738,6 +738,42 @@ class WeightedDiagnosticEngine:
             "possible_causes": "Relay atau kabel kontrol kipas pendingin 3 putus/konslet.",
             "severity_level": "HIGH",
         },
+        "P0105": {
+            "system": "Engine / Powertrain (ECM) — MAP / Barometric Pressure",
+            "description_id": "Malfungsi Sirkuit Sensor Tekanan Udara Intake (MAP Sensor)",
+            "possible_causes": "Selang vakum sensor MAP bocor/lepas, suplai +5V atau ground sensor MAP putus, atau sensor MAP rusak.",
+            "severity_level": "HIGH",
+        },
+        "P0106": {
+            "system": "Engine / Powertrain (ECM) — MAP / Barometric Pressure",
+            "description_id": "Rentang / Kinerja Sirkuit Sensor MAP Tidak Sesuai Spesifikasi",
+            "possible_causes": "Lubang vakum MAP tersumbat jelaga, kebocoran vakum intake, atau sensor MAP meleset.",
+            "severity_level": "MEDIUM",
+        },
+        "P0136": {
+            "system": "Engine / Powertrain (ECM) — HO2S-2 (Bank 1 Sensor 2)",
+            "description_id": "Malfungsi Sirkuit Sensor Oksigen Belakang (HO2S-2 / Bank 1 Sensor 2)",
+            "possible_causes": "Sensor HO2S-2 belakang rusak, kabel sinyal/heater terbakar knalpot, atau kebocoran gas buang sebelum sensor belakang.",
+            "severity_level": "MEDIUM",
+        },
+        "P0137": {
+            "system": "Engine / Powertrain (ECM) — HO2S-2 (Bank 1 Sensor 2)",
+            "description_id": "Tegangan Sirkuit Sensor Oksigen Belakang Terlalu Rendah (HO2S-2 Low)",
+            "possible_causes": "Kabel sinyal HO2S-2 hubung singkat ke massa, kebocoran knalpot, atau sensor HO2S-2 mati.",
+            "severity_level": "MEDIUM",
+        },
+        "P0138": {
+            "system": "Engine / Powertrain (ECM) — HO2S-2 (Bank 1 Sensor 2)",
+            "description_id": "Tegangan Sirkuit Sensor Oksigen Belakang Terlalu Tinggi (HO2S-2 High)",
+            "possible_causes": "Kabel sinyal HO2S-2 hubung singkat ke +B/heater, massa sensor putus, atau sensor HO2S-2 rusak.",
+            "severity_level": "MEDIUM",
+        },
+        "P0141": {
+            "system": "Engine / Powertrain (ECM) — HO2S-2 Heater",
+            "description_id": "Malfungsi Sirkuit Pemanas (Heater) Sensor Oksigen Belakang (HO2S-2)",
+            "possible_causes": "Elemen pemanas HO2S-2 putus (OL), suplai +12V Main Relay hilang, atau kabel kontrol heater ECM putus.",
+            "severity_level": "MEDIUM",
+        },
         "P0128": {
             "system": "Engine / Powertrain (ECM) — Cooling System",
             "description_id": "Suhu Kerja Coolant di Bawah Temperatur Regulasi Thermostat",
@@ -955,33 +991,47 @@ class WeightedDiagnosticEngine:
         dtc_clean = (dtc or "").upper()
         dtc_codes = set(split_dtc_codes(dtc_clean))
 
-        if "vakum" in diag_clean or "selang intake" in diag_clean or "P0171" in dtc_codes:
+        if (
+            "vakum" in diag_clean
+            or "selang intake" in diag_clean
+            or re.search(r"\bmap\b|manifold\s*absolute|tekanan\s*manifold", diag_clean)
+            or bool(dtc_codes & {"P0171", "P0105", "P0106", "P0107", "P0108", "P0109"})
+        ):
+            is_map_dtc = bool(dtc_codes & {"P0105", "P0106", "P0107", "P0108", "P0109"})
             return ManualRepairAdvice(
-                diagnosis_title="Kebocoran Udara / Vakum pada Saluran Intake (Lean Mixture)",
+                diagnosis_title=(
+                    "Gangguan Sirkuit Sensor Tekanan Udara Intake (MAP Sensor)"
+                    if is_map_dtc
+                    else "Kebocoran Udara / Vakum pada Saluran Intake (Lean Mixture)"
+                ),
                 system_category="Udara",
                 group_category="Pembakaran",
-                manual_book_section="Buku Pedoman Resmi Suzuki Vitara JB420 / Toyota 1NR-VE Bab 1A-68 (Air Metering) & Bab 1D (Intake Manifold)",
-                cause_summary="Udara liar (unmetered air) bocor masuk ke intake manifold setelah sensor MAF, menyebabkan campuran bensin terlalu kurus (Lean - P0171) dan mesin brebet saat idle.",
+                manual_book_section="Buku Pedoman Resmi Suzuki Grand Vitara JB420 Bab 1A-68 (MAP / Air Metering) & Bab 1D (Intake Manifold)",
+                cause_summary=(
+                    "Sensor MAP gagal membaca tekanan vakum intake manifold akibat suplai +5V (C37-14) atau sinyal (C37-55) terputus, selang vakum pecah, atau sensor MAP rusak."
+                    if is_map_dtc
+                    else "Udara liar (unmetered air) bocor masuk ke intake manifold setelah sensor MAF, menyebabkan campuran bensin terlalu kurus (Lean - P0171) dan mesin brebet saat idle."
+                ),
                 cause_items=[
                     {"badge": "Penyebab Utama #1", "title": "Selang Vakum & Gasket Intake Manifold Bocor", "desc": "Selang vakum booster rem, selang PCV, atau paking intake manifold getas/retak sehingga menghisap udara luar."},
-                    {"badge": "Penyebab #2", "title": "Sensor Aliran Udara (MAF Sensor) Kotor", "desc": "Kawat sensor MAF tertutup debu sehingga membaca debit udara lebih rendah dari kondisi nyata."},
-                    {"badge": "Penyebab #3", "title": "Tekanan Pompa Bensin (Fuel Pump) Lemah / Injektor Mampet", "desc": "Suplai tekanan fuel rail turun (< 3.0 bar) atau filter bensin tersumbat kotoran."},
+                    {"badge": "Penyebab #2", "title": "Sensor Tekanan Intake (MAP) / MAF Kotor atau Rusak", "desc": "Lubang vakum sensor MAP tersumbat jelaga oli atau kawat sensor MAF kotor sehingga bacaan beban mesin meleset."},
+                    {"badge": "Penyebab #3", "title": "Tekanan Pompa Bensin Lemah / Soket 3-Pin MAP Kendor", "desc": "Suplai tekanan fuel rail turun (< 3.0 bar) atau kabel referensi +5V / massa sensor putus."},
                 ],
                 repair_options=[
-                    {"tag": "Opsi 1 • Utama (Vakum)", "title": "Ganti Selang Vakum Retak & Rapatkan Gasket Intake", "desc": "Ganti selang vakum/PCV yang getas dengan selang SAE J30R7 dan kencangkan klem atau ganti paking intake."},
+                    {"tag": "Opsi 1 • Utama (Vakum & MAP)", "title": "Periksa Selang Vakum & Sensor MAP 3-Pin", "desc": "Ganti selang vakum/PCV retak dan uji tegangan +5V (C37-14), sinyal output (C37-55), serta ground (C37-57) pada soket MAP."},
                     {"tag": "Opsi 2 • Sensor Udara", "title": "Bersihkan Sensor MAF & Cek Belalai Karet Intake", "desc": "Semprot elemen sensor MAF dengan MAF cleaner khusus dan pastikan karet belalai udara tidak sobek."},
                     {"tag": "Opsi 3 • Sistem BBM", "title": "Servis Injektor & Periksa Tekanan Fuel Pump / Filter Bensin", "desc": "Ukur tekanan fuel rail (standar 3.0–3.5 bar), ganti filter bensin, atau servis injektor yang tersumbat."},
                 ],
                 sensor_standards=[
-                    {"parameter": "Tekanan Manifold MAP (Idle)", "normal_range": "30 - 42 kPa", "unit": "kPa"},
-                    {"parameter": "Aliran Udara MAF (Idle Mesin Hangat)", "normal_range": "2.0 - 3.2 g/s", "unit": "g/s"},
+                    {"parameter": "Tekanan Manifold MAP (Idle)", "normal_range": "30 - 42 kPa (~1.1 - 1.5 V)", "unit": "kPa"},
+                    {"parameter": "Tegangan Referensi +5V MAP (C37-14)", "normal_range": "4.8 - 5.2 V (IG ON)", "unit": "V"},
                     {"parameter": "Short Term Fuel Trim (STFT)", "normal_range": "-10% s/d +10%", "unit": "%"},
                     {"parameter": "Long Term Fuel Trim (LTFT)", "normal_range": "-10% s/d +10%", "unit": "%"},
                 ],
                 wiring_pinout=[
-                    {"pin": "C37-55", "signal": "MAP Sensor Output (RED/WHT)", "function": "Sinyal tekanan manifold ke ECM (idle: ~1.2V)"},
-                    {"pin": "C37-14", "signal": "Sensor +5V Reference (GRY/RED)", "function": "Tegangan referensi 5.0V dari regulator ECM"},
-                    {"pin": "C37-57", "signal": "Sensor Ground (GRY/GRN)", "function": "Massa sensor referensi ECM (tahanan < 0.5 Ohm)"},
+                    {"pin": "C37-14 (Pin 1)", "signal": "GRY/RED — Sensor +5V Reference", "function": "Tegangan referensi 4.8–5.2 V dari regulator ECM (Bab 1A-15)"},
+                    {"pin": "C37-55 (Pin 2)", "signal": "RED/WHT — MAP Sensor Signal Output", "function": "Sinyal tekanan manifold ke ECM (~3.9V KOEO | ~1.2V Idle)"},
+                    {"pin": "C37-57 (Pin 3)", "signal": "GRY/GRN — Sensor Ground", "function": "Massa sensor referensi ECM (< 0.3 V / < 0.5 Ohm)"},
                 ],
                 step_by_step_repair=[
                     "1. Lakukan smoke test atau semprotkan sedikit intake cleaner di sepanjang selang vakum dan sambungan intake saat idle. Bila RPM naik, titik bocor terkonfirmasi.",
@@ -1029,37 +1079,65 @@ class WeightedDiagnosticEngine:
                     "2. Nyalakan mesin dan amati kestabilan idle pada 750 ± 50 RPM.",
                 ],
             )
-        elif re.search(r"\bo2\b|oksigen|oxygen|lambda", diag_clean) or dtc_codes & {
+        elif re.search(r"\bo2\b|oksigen|oxygen|lambda|a/f\s*sensor", diag_clean) or dtc_codes & {
             "P0030", "P0031", "P0032", "P0036", "P0037", "P0038",
-            "P0130", "P0131", "P0132", "P0135", "P0136", "P0137", "P0138", "P0141",
+            "P0130", "P0131", "P0132", "P0133", "P0134", "P0135", "P0136", "P0137", "P0138", "P0140", "P0141",
         }:
+            is_rear_ho2s2 = bool(dtc_codes & {"P0036", "P0037", "P0038", "P0136", "P0137", "P0138", "P0140", "P0141"}) or "sensor 2" in diag_clean or "belakang" in diag_clean or "ho2s-2" in diag_clean
             return ManualRepairAdvice(
-                diagnosis_title="Gangguan Sensor Oksigen / Sirkuit Pemanas HO2S (Hulu & Hilir)",
+                diagnosis_title=(
+                    "Gangguan Sensor Oksigen Belakang / HO2S-2 (Bank 1 Sensor 2 — 4-Pin)"
+                    if is_rear_ho2s2
+                    else "Gangguan A/F Sensor Depan / Wideband Bank 1 Sensor 1 (6-Pin JB420)"
+                ),
                 system_category="Bahan Bakar",
                 group_category="Pembakaran",
-                manual_book_section="Suzuki Grand Vitara JB420 Manual Bab 1A-140 & Toyota Manual Section 1A (Oxygen Sensor)",
-                cause_summary="Elemen pemanas (heater) sensor O2 putus atau ujung keramik sensor tertutup jelaga karbon, sehingga pembacaan kadar oksigen gas buang meleset dan BBM menjadi boros.",
+                manual_book_section="Suzuki Grand Vitara JB420 Manual Bab 1A-15 (Hal. 73) & Bab 1A-140 (A/F & HO2S Inspection)",
+                cause_summary=(
+                    "Elemen pemanas (heater) atau sel sensor HO2S-2 belakang (4-pin) putus/korslet, atau soket kabel terbakar panas knalpot."
+                    if is_rear_ho2s2
+                    else "Elemen pemanas (heater), sel wideband, atau resistor kalibrasi pada A/F Sensor-1 depan (6-pin pada JB420) mengalami putus/korslet atau jenuh karbon."
+                ),
                 cause_items=[
-                    {"badge": "Penyebab Utama #1", "title": "Elemen Heater Putus / Sensor O2 Jenuh Karbon", "desc": "Kumparan pemanas internal sensor O2 putus (tahanan > 16 Ohm / ∞) atau ujung sensor tertutup jelaga tebal."},
-                    {"badge": "Penyebab #2", "title": "Soket 4-Pin Kendor / Kabel Meleleh Terkena Knalpot", "desc": "Isolasi kabel sensor O2 terkelupas atau hubung singkat karena menempel pada pipa exhaust manifold panas."},
-                    {"badge": "Penyebab #3", "title": "Kualitas Bahan Bakar Buruk / Kebocoran Paking Knalpot", "desc": "Kontaminasi aditif BBM kualitas rendah atau udara luar menyusup lewat paking knalpot yang bocor."},
+                    {"badge": "Penyebab Utama #1", "title": "Elemen Heater Putus / Sensor Jenuh Karbon", "desc": "Kumparan pemanas internal sensor putus (OL) atau ujung elemen keramik tertutup jelaga tebal."},
+                    {"badge": "Penyebab #2", "title": "Soket Kendor / Kabel Meleleh Terkena Knalpot", "desc": "Isolasi kabel sensor terkelupas atau hubung singkat karena menempel pada pipa exhaust manifold panas."},
+                    {"badge": "Penyebab #3", "title": "Suplai +12V Main Relay Drop / Kebocoran Knalpot", "desc": "Suplai daya heater (+12V Main Relay BLU/BLK) terputus atau paking exhaust manifold bocor."},
                 ],
                 repair_options=[
-                    {"tag": "Opsi 1 • Utama (Ganti Sensor)", "title": "Ganti Sensor Oksigen (HO2S) Baru", "desc": "Ganti unit sensor O2 yang putus heater/lemah menggunakan kunci soket 22 mm (torsi 44 N·m)."},
-                    {"tag": "Opsi 2 • Kelistrikan & Soket", "title": "Perbaiki Kabel Harness Sensor O2, Soket 4-Pin & Sekering", "desc": "Isolasi ulang kabel yang meleleh terkena knalpot, bersihkan pin konektor, dan cek sekering heater O2."},
-                    {"tag": "Opsi 3 • BBM & Knalpot", "title": "Bersihkan Jelaga Sensor, Ganti BBM & Rapatkan Paking Knalpot", "desc": "Bersihkan ujung pelindung sensor O2, gunakan BBM sesuai oktan mesin, dan cek kerapatan exhaust manifold."},
+                    {"tag": "Opsi 1 • Utama (Ganti Sensor)", "title": f"Ganti {'HO2S-2 (Belakang, 4-Pin)' if is_rear_ho2s2 else 'A/F Sensor-1 (Depan, 6-Pin)'} Baru", "desc": "Ganti unit sensor yang putus heater/lemah menggunakan kunci soket 22 mm (torsi 44 N·m)."},
+                    {"tag": "Opsi 2 • Kelistrikan & Soket", "title": "Perbaiki Kabel Harness, Soket Sensor & Cek Suplai Main Relay", "desc": "Pastikan suplai +12V heater dari Main Relay (BLU/BLK) masuk normal dan kontrol PWM ECM tidak putus."},
+                    {"tag": "Opsi 3 • BBM & Knalpot", "title": "Cek Kerapatan Paking Knalpot & Kualitas BBM", "desc": "Pastikan tidak ada kebocoran gas buang sebelum sensor dan gunakan BBM sesuai oktan mesin."},
                 ],
-                sensor_standards=[
-                    {"parameter": "Voltase Sinyal O2 (Closed Loop)", "normal_range": "0.10 - 0.90 V (berosilasi cepat)", "unit": "V"},
-                    {"parameter": "Frekuensi Osilasi (pada 2.500 RPM)", "normal_range": "> 1 Hz (minimal 1 kali per detik)", "unit": "Hz"},
-                    {"parameter": "Tahanan Pemanas Sensor (20°C)", "normal_range": "11.0 - 16.0 Ohm", "unit": "Ohm"},
-                ],
-                wiring_pinout=[
-                    {"pin": "E23-50 (Pin 1)", "signal": "Heater +12V Power (BLK/YEL)", "function": "Suplai arus +12V IG ke elemen pemanas sensor O2"},
-                    {"pin": "E23-49 (Pin 2)", "signal": "HT / Heater PWM Control (BLK/WHT)", "function": "Kontrol duty-cycle pemanas heater O2 dari ECM"},
-                    {"pin": "C37-65 (Pin 3)", "signal": "OX / Sinyal Output O2 (WHT/RED)", "function": "Tegangan sinyal pembacaan oksigen 0.1 - 0.9V ke ECM"},
-                    {"pin": "C37-57 (Pin 4)", "signal": "E2 / Massa Sensor O2 (GRY/GRN)", "function": "Ground referensi sinyal sensor O2 ke ECM"},
-                ],
+                sensor_standards=(
+                    [
+                        {"parameter": "Voltase Sinyal HO2S-2 (C37-11 RED)", "normal_range": "0.10 - 0.90 V (Idle Hangat)", "unit": "V"},
+                        {"parameter": "Suplai Heater +12V Main Relay (BLU/BLK)", "normal_range": "10.0 - 14.0 V (IG ON)", "unit": "V"},
+                        {"parameter": "Tahanan Pemanas HO2S-2 (20°C)", "normal_range": "5.0 - 15.0 Ohm", "unit": "Ohm"},
+                    ]
+                    if is_rear_ho2s2
+                    else [
+                        {"parameter": "A/F Signal (+) C37-38 WHT & (-) C37-37 BLK", "normal_range": "3.0-3.2 V (+) | 2.6-2.8 V (-)", "unit": "V"},
+                        {"parameter": "Adjusting Resistor C37-35 RED/YEL", "normal_range": "0.15 - 4.82 V (IG ON)", "unit": "V"},
+                        {"parameter": "Suplai Heater Main Relay (BLU/BLK) & Kontrol C37-32", "normal_range": "10.0 - 14.0 V (IG ON)", "unit": "V"},
+                    ]
+                ),
+                wiring_pinout=(
+                    [
+                        {"pin": "MAIN-RLY (Pin 1)", "signal": "BLU/BLK — Suplai +12V Heater HO2S-2 (Main Relay)", "function": "Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 14)"},
+                        {"pin": "C37-47 (Pin 2)", "signal": "BLK/RED — Kontrol Heater HO2S-2 (Low-Side ECM)", "function": "Kontrol ground PWM pemanas HO2S-2 oleh ECM (10–14 V OFF, Pulsa ON)"},
+                        {"pin": "C37-11 (Pin 3)", "signal": "RED — Sinyal HO2S-2 Belakang", "function": "Sinyal sensor oksigen hilir 0.1 – 0.9 V saat idle hangat"},
+                        {"pin": "GND-ENG (Pin 4)", "signal": "BLK/YEL — Massa Sensor HO2S-2", "function": "Jalur massa sensor HO2S-2 (< 0.3 V ke bodi/mesin)"},
+                    ]
+                    if is_rear_ho2s2
+                    else [
+                        {"pin": "MAIN-RLY (Pin 1)", "signal": "BLU/BLK — Suplai +12V Heater A/F (Main Relay)", "function": "Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 15; bukan dari C37-32!)"},
+                        {"pin": "C37-32 (Pin 2)", "signal": "PNK/BLU — Kontrol Heater A/F (Low-Side PWM ECM)", "function": "Kontrol ground PWM pemanas A/F Sensor-1 oleh ECM (Catatan: C37-31 BLK/YEL adalah ground heater internal ECM ke bodi)"},
+                        {"pin": "C37-38 (Pin 3)", "signal": "WHT — A/F Sensor Signal (+)", "function": "Sinyal sel wideband (+) 3.0 – 3.2 V saat idle"},
+                        {"pin": "C37-37 (Pin 4)", "signal": "BLK — A/F Sensor Signal (-)", "function": "Sinyal sel wideband (-) 2.6 – 2.8 V saat idle"},
+                        {"pin": "C37-35 (Pin 5)", "signal": "RED/YEL — A/F Adjusting Resistor Signal", "function": "Sinyal resistor kalibrasi A/F 0.15 – 4.82 V (IG ON)"},
+                        {"pin": "C37-34 (Pin 6)", "signal": "RED/BLU — A/F Adjusting Resistor Ground", "function": "Massa resistor kalibrasi A/F (< 0.3 V)"},
+                    ]
+                ),
                 step_by_step_repair=[
                     "1. Periksa kabel dan soket sensor O2 di exhaust manifold dari leleh/terbakar akibat panas knalpot.",
                     "2. Gunakan multimeter untuk mengukur tahanan heater pada 2 pin sensor O2 (normal 11-16 Ohm). Bila putus/infinite, sensor wajib ganti.",
@@ -1131,11 +1209,11 @@ class WeightedDiagnosticEngine:
                     {"parameter": "Tegangan MAF (Akselerasi Penuh WOT)", "normal_range": "3.50 - 4.50 V (>50 g/s)", "unit": "V"},
                 ],
                 wiring_pinout=[
-                    {"pin": "E23-31 (Pin 1)", "signal": "MAF +12V Power (BLK/WHT)", "function": "Suplai daya +12V Main Relay ke elemen Hot-Wire MAF"},
-                    {"pin": "C37-63 (Pin 2)", "signal": "MAF Ground (BLK/GRN)", "function": "Massa utama pemanas sensor MAF"},
-                    {"pin": "C37-62 (Pin 3)", "signal": "MAF Signal Output (PNK/BLK)", "function": "Sinyal debit aliran udara (idle ~1.15V) ke ECM"},
-                    {"pin": "C37-25 (Pin 4)", "signal": "IAT Signal +5V Pull-Up (LT GRN/BLK)", "function": "Sinyal sensor suhu udara masuk (IAT) terintegrasi"},
-                    {"pin": "C37-57 (Pin 5)", "signal": "IAT Sensor Ground (GRY/GRN)", "function": "Massa referensi sensor IAT ke ECM"},
+                    {"pin": "IG-MAIN (Pin 1)", "signal": "MAF +12V Power (BLU/BLK)", "function": "Suplai daya +10–14V Main Relay ke elemen Hot-Wire MAF"},
+                    {"pin": "C37-26 (Pin 2)", "signal": "MAF Signal Output (RED)", "function": "Sinyal debit aliran udara (0.5–1.0V KOEO | 1.3–1.8V idle) ke ECM"},
+                    {"pin": "C37-27 (Pin 3)", "signal": "MAF Ground (BLU)", "function": "Massa khusus sensor MAF (< 0.3 V / < 3 Ohm ke bodi)"},
+                    {"pin": "C37-25 (Pin 4)", "signal": "IAT Signal (LT GRN)", "function": "Sinyal sensor suhu udara masuk (IAT: 1.32–1.65V @ 40°C)"},
+                    {"pin": "C37-57 (Pin 5)", "signal": "IAT Sensor Ground (GRY/GRN)", "function": "Massa referensi sensor IAT ke ECM (< 0.3 V)"},
                 ],
                 step_by_step_repair=[
                     "1. Matikan kunci kontak, lepas konektor terminal sensor MAF di boks filter udara.",
@@ -1148,7 +1226,12 @@ class WeightedDiagnosticEngine:
                     "2. Hidupkan mesin dan tes akselerasi mendadak: pastikan nilai MAF g/s melonjak responsif.",
                 ],
             )
-        elif "throttle" in diag_clean or "trotel" in diag_clean or "P0507" in dtc_codes:
+        elif (
+            "throttle" in diag_clean
+            or "trotel" in diag_clean
+            or re.search(r"\btps\b", diag_clean)
+            or bool(dtc_codes & {"P0120", "P0121", "P0122", "P0123", "P0124", "P0220", "P0221", "P0222", "P0223", "P0507", "P2100", "P2101", "P2119", "P2135"})
+        ):
             return ManualRepairAdvice(
                 diagnosis_title="Endapan Karbon pada Throttle Body / Malfungsi Idle Air Control",
                 system_category="Udara",
@@ -1172,12 +1255,12 @@ class WeightedDiagnosticEngine:
                     {"parameter": "Target RPM Idle (AC ON)", "normal_range": "850 ± 50 RPM", "unit": "RPM"},
                 ],
                 wiring_pinout=[
-                    {"pin": "E23-42 (Pin 1)", "signal": "Throttle Motor M+ (RED)", "function": "Penggerak motor aktuator katup gas (+)"},
-                    {"pin": "E23-41 (Pin 2)", "signal": "Throttle Motor M- (YLW)", "function": "Penggerak motor aktuator katup gas (-)"},
-                    {"pin": "C37-14 (Pin 3)", "signal": "TPS +5V Reference (GRY/RED)", "function": "Suplai referensi 5.0V untuk TPS1 & TPS2"},
-                    {"pin": "C37-66 (Pin 4)", "signal": "VTA1 / TPS 1 Main (GRN)", "function": "Sinyal utama bukaan katup gas (~0.68V saat idle)"},
-                    {"pin": "C37-67 (Pin 5)", "signal": "VTA2 / TPS 2 Sub (WHT)", "function": "Sinyal redundansi pembanding (~4.32V saat idle)"},
-                    {"pin": "C37-57 (Pin 6)", "signal": "E2 / TPS Ground Return (GRY/GRN)", "function": "Massa referensi sensor posisi throttle ke ECM"},
+                    {"pin": "C37-44 (Pin 1)", "signal": "Throttle Actuator Motor + (BLU/RED)", "function": "Penggerak motor aktuator katup gas (0 – 1 V / PWM)"},
+                    {"pin": "C37-45 (Pin 2)", "signal": "Throttle Actuator Motor - (BLU/YEL)", "function": "Penggerak motor aktuator katup gas (0 – 1 V / PWM)"},
+                    {"pin": "C37-53 (Pin 3)", "signal": "TPS +5V Power Source (WHT)", "function": "Suplai referensi 4.5 – 5.5 V untuk TPS Main & Sub"},
+                    {"pin": "C37-54 (Pin 4)", "signal": "TPS Main Signal (BLK)", "function": "Sinyal utama bukaan katup gas (0.72–1.04V idle | 3.67–4.25V WOT)"},
+                    {"pin": "C37-40 (Pin 5)", "signal": "TPS Sub Signal (RED)", "function": "Sinyal pembanding TPS Sub (1.60–1.91V idle | 3.88–4.45V WOT)"},
+                    {"pin": "C37-41 (Pin 6)", "signal": "TPS Sensor Ground (GRN)", "function": "Massa referensi sensor posisi throttle (< 0.3 V / < 3 Ohm)"},
                 ],
                 step_by_step_repair=[
                     "1. Lepas selang belalai intake duct dari moncong throttle body.",
@@ -1297,12 +1380,23 @@ class WeightedDiagnosticEngine:
                     {"parameter": "Tegangan Suplai Konektor Koil (IG ON)", "normal_range": "11.5 - 14.2 V", "unit": "V"},
                     {"parameter": "Misfire Counter per Silinder (Idle/RPM Tinggi)", "normal_range": "0 count", "unit": "hit"},
                 ],
-                wiring_pinout=[
-                    {"pin": "IG-FUSE (Pin 1)", "signal": "+12V Ignition Feed (BLK/WHT)", "function": "Arus positif utama ke soket 4-pin Ignition Coil"},
-                    {"pin": "E23-35 (Pin 2)", "signal": "IGT1-4 Trigger (WHT/RED)", "function": "Pulsa pemicu pengapian 5V dari ECM ke Igniter Koil"},
-                    {"pin": "E23-40 (Pin 3)", "signal": "IGF Confirmation (YEL/GRN)", "function": "Sinyal konfirmasi percikan pengapian balik ke ECM"},
-                    {"pin": "GND-ENG (Pin 4)", "signal": "Cylinder Head Ground (BLK)", "function": "Titik massa igniter koil pada kepala silinder (< 0.3 Ohm)"},
-                ],
+                wiring_pinout=(
+                    [
+                        {"pin": "IG-COIL (Pin 1)", "signal": "BLK/WHT — Suplai +12V IG1 Koil (Fuse IG COIL)", "function": "Suplai daya +10–14 V IG ON dari Ignition Switch → Fuse IG COIL di J/B (Bab 1H-2 Hal. 430; BUKAN dari ECM)"},
+                        (
+                            {"pin": "C37-21 (Pin 2)", "signal": "BRN — Trigger ECM Koil Silinder #1", "function": "Sinyal pemicu pulsa 5V dari ECM ke igniter Koil #1 (0–0.6V IG ON, Pulsa Idle; Koil #2: C37-20, #3: C37-19, #4: C37-18)"}
+                            if bool(dtc_codes & {"P0301", "P0351"}) else
+                            {"pin": "C37-20 (Pin 2)", "signal": "BRN/BLK — Trigger ECM Koil Silinder #2", "function": "Sinyal pemicu pulsa 5V dari ECM ke igniter Koil #2 (0–0.6V IG ON, Pulsa Idle; Koil #1: C37-21, #3: C37-19, #4: C37-18)"}
+                            if bool(dtc_codes & {"P0302", "P0352"}) else
+                            {"pin": "C37-19 (Pin 2)", "signal": "BRN/WHT — Trigger ECM Koil Silinder #3", "function": "Sinyal pemicu pulsa 5V dari ECM ke igniter Koil #3 (0–0.6V IG ON, Pulsa Idle; Koil #1: C37-21, #2: C37-20, #4: C37-18)"}
+                            if bool(dtc_codes & {"P0303", "P0353"}) else
+                            {"pin": "C37-18 (Pin 2)", "signal": "BRN/YEL — Trigger ECM Koil Silinder #4", "function": "Sinyal pemicu pulsa 5V dari ECM ke igniter Koil #4 (0–0.6V IG ON, Pulsa Idle; Koil #1: C37-21, #2: C37-20, #3: C37-19)"}
+                            if bool(dtc_codes & {"P0304", "P0354"}) else
+                            {"pin": "C37-21..18 (Pin 2)", "signal": "BRN / BRN-BLK / BRN-WHT / BRN-YEL — Trigger ECM Koil #1–#4", "function": "Tiap soket 3-pin koil menerima 1 kabel trigger dari ECM: #1 C37-21 (BRN), #2 C37-20 (BRN/BLK), #3 C37-19 (BRN/WHT), #4 C37-18 (BRN/YEL)"}
+                        ),
+                        {"pin": "GND-ENG (Pin 3)", "signal": "BLK/ORN — Ground Massa Koil (Blok Mesin)", "function": "Massa langsung ke blok/kepala silinder mesin (< 0.3 V / < 1 Ohm; BUKAN ke ECM — Bab 1H-2)"},
+                    ]
+                ),
                 step_by_step_repair=[
                     "1. Lepas konektor dan baut 10 mm pengikat Ignition Coil, periksa karet selongsong (boot) koil dari retakan atau jejak loncatan bunga api putih.",
                     "2. Buka keempat busi menggunakan kunci busi magnet 16 mm (atau 14 mm sesuai tipe mesin), periksa warna keramik dan ukur celah elektroda menggunakan feeler gauge (standar 0.8 - 1.1 mm).",
@@ -1345,37 +1439,61 @@ class WeightedDiagnosticEngine:
                     "1. Reset nilai adaptasi ECM dan lakukan uji jalan akselerasi.",
                 ],
             )
-        elif "ckp" in diag_clean or "cmp" in diag_clean or bool(dtc_codes & {"P0335", "P0340"}):
+        elif "ckp" in diag_clean or "cmp" in diag_clean or bool(dtc_codes & {"P0335", "P0336", "P0337", "P0338", "P0339", "P0340", "P0341", "P0342", "P0343", "P0344"}):
+            is_cmp = bool(dtc_codes & {"P0340", "P0341", "P0342", "P0343", "P0344"}) or ("cmp" in diag_clean and "ckp" not in diag_clean)
             return ManualRepairAdvice(
-                diagnosis_title="Malfungsi Sirkuit Sensor Posisi Poros Engkol / Camshaft (CKP / CMP Sensor)",
+                diagnosis_title=(
+                    "Malfungsi Sirkuit Sensor Posisi Poros Nok / Camshaft (CMP Sensor — 3-Pin Hall-IC)"
+                    if is_cmp
+                    else "Malfungsi Sirkuit Sensor Posisi Poros Engkol / Crankshaft (CKP Sensor — 2-Pin Induktif)"
+                ),
                 system_category="Pengapian",
                 group_category="Pembakaran",
-                manual_book_section="Suzuki Grand Vitara JB420 Manual Bab 1A-95 & Bab 1A-101 (CKP & CMP Sensor)",
-                cause_summary="Kumparan/Hall-IC sensor CKP/CMP melemah saat suhu mesin panas atau ujung sensor tertutup serbuk besi, menyebabkan sinyal putaran mesin hilang mendadak (P0335/P0340) dan mesin mati/sulit starter.",
+                manual_book_section="Suzuki Grand Vitara JB420 Manual Bab 1H-2 (Hal. 430) & Bab 1A-15 (CKP 2-Pin & CMP 3-Pin)",
+                cause_summary=(
+                    "IC Hall sensor CMP (3-pin) melemah saat mesin panas atau suplai +12V Main Relay (BLU/BLK) / sinyal C37-52 (WHT/RED) terputus, memicu DTC P0340 dan sulit starter."
+                    if is_cmp
+                    else "Kumparan induktif sensor CKP (2-pin + shield) melemah saat panas atau ujung magnet tertutup serbuk besi, menyebabkan sinyal C37-51 (BLU) & C37-36 (PNK) hilang (P0335) dan mesin mati mendadak."
+                ),
                 cause_items=[
-                    {"badge": "Penyebab Utama #1", "title": "Sensor CKP / CMP Melemah Saat Mesin Panas", "desc": "Kumparan atau IC Hall di dalam sensor putus kontak ketika suhu kerja mesin tinggi sehingga mesin mati mendadak."},
+                    {"badge": "Penyebab Utama #1", "title": f"Sensor {'CMP (3-Pin Hall-IC)' if is_cmp else 'CKP (2-Pin Induktif)'} Melemah Saat Mesin Panas", "desc": "Kumparan atau IC Hall di dalam sensor putus kontak ketika suhu kerja mesin tinggi sehingga mesin mati mendadak."},
                     {"badge": "Penyebab #2", "title": "Ujung Magnet Sensor Tertutup Gram Besi / Oli", "desc": "Kotoran serbuk logam menempel pada kepala sensor sehingga mengganggu pembacaan gigi reluctor."},
-                    {"badge": "Penyebab #3", "title": "Soket 3-Pin Kendor / Kabel Putus atau Timing Melar", "desc": "Konektor sensor kemasukan rembesan oli atau posisi rantai timing (timing chain) bergeser."},
+                    {"badge": "Penyebab #3", "title": "Soket Kendor / Kabel Putus atau Timing Chain Melar", "desc": "Konektor sensor kemasukan rembesan oli atau posisi rantai timing (timing chain) bergeser."},
                 ],
                 repair_options=[
-                    {"tag": "Opsi 1 • Utama (Ganti Sensor)", "title": "Ganti Sensor CKP / CMP Baru (Orisinil)", "desc": "Ganti unit sensor CKP/CMP yang lemah beserta O-ring baru (kencangkan baut 10 mm torsi 10 N·m)."},
-                    {"tag": "Opsi 2 • Pembersihan & Soket", "title": "Bersihkan Ujung Sensor dari Gram Besi & Perbaiki Soket", "desc": "Bersihkan kepala magnet sensor, semprot soket 3-pin dengan contact cleaner, dan periksa kabel C37-46/47."},
-                    {"tag": "Opsi 3 • Mekanis Timing", "title": "Periksa Ketepatan Timing Chain / Belt & Roda Gigi Reluctor", "desc": "Periksa tanda top timing mesin jika kode CKP/CMP tetap muncul setelah ganti sensor."},
+                    {"tag": "Opsi 1 • Utama (Ganti Sensor)", "title": f"Ganti Sensor {'CMP' if is_cmp else 'CKP'} Baru (Orisinil)", "desc": "Ganti unit sensor yang lemah beserta O-ring baru (kencangkan baut 10 mm torsi 10 N·m)."},
+                    {"tag": "Opsi 2 • Pembersihan & Soket", "title": "Bersihkan Ujung Sensor dari Gram Besi & Perbaiki Soket", "desc": f"Bersihkan kepala magnet sensor, semprot soket dengan contact cleaner, dan cek jalur {'C37-52 (WHT/RED), +12V BLU/BLK & GND BLK/YEL' if is_cmp else 'C37-51 (BLU) & C37-36 (PNK)'}."},
+                    {"tag": "Opsi 3 • Mekanis Timing", "title": "Periksa Ketepatan Timing Chain & Roda Gigi Reluctor", "desc": "Periksa tanda top timing mesin jika kode CKP/CMP tetap muncul setelah ganti sensor."},
                 ],
-                sensor_standards=[
-                    {"parameter": "Tegangan Suplai Sensor (IG ON)", "normal_range": "10.5 - 14.0 V (atau Vref 5.0 V)", "unit": "V"},
-                    {"parameter": "Sinyal Output CKP/CMP (Saat Starter)", "normal_range": "Pulsa gelombang kotak 0 - 5.0 V", "unit": "V"},
-                    {"parameter": "Celah Udara (Air Gap) Ujung Sensor", "normal_range": "0.5 - 1.5 mm", "unit": "mm"},
-                ],
-                wiring_pinout=[
-                    {"pin": "C37-47", "signal": "CKP Sensor Signal (PNK)", "function": "Input pulsa posisi poros engkol ke ECM"},
-                    {"pin": "C37-46", "signal": "CMP Sensor Signal (BLU)", "function": "Input pulsa posisi poros nok ke ECM"},
-                    {"pin": "C37-57", "signal": "Sensor Ground (GRY/GRN)", "function": "Ground referensi sensor"},
-                ],
+                sensor_standards=(
+                    [
+                        {"parameter": "Suplai +12V Sensor CMP (Main Relay BLU/BLK)", "normal_range": "10.0 - 14.0 V (IG ON)", "unit": "V"},
+                        {"parameter": "Sinyal Output CMP C37-52 (WHT/RED)", "normal_range": "Pulsa kotak 0 - 5.0 V saat Crank/Idle", "unit": "V"},
+                        {"parameter": "Ground Sensor CMP (BLK/YEL ke Massa)", "normal_range": "< 0.3 V (< 1.0 Ohm)", "unit": "V"},
+                    ]
+                    if is_cmp
+                    else [
+                        {"parameter": "Tahanan Kumparan CKP (Pin 1–2 pada 20°C)", "normal_range": "1.6 - 2.7 kOhm (Induktif 2-Pin)", "unit": "kOhm"},
+                        {"parameter": "Sinyal AC Output CKP C37-51/36 (Saat Crank)", "normal_range": "Pulsa AC > 0.5 V AC (Simetris)", "unit": "VAC"},
+                        {"parameter": "Celah Udara (Air Gap) Ujung Sensor", "normal_range": "0.5 - 1.5 mm (Bebas serbuk besi)", "unit": "mm"},
+                    ]
+                ),
+                wiring_pinout=(
+                    [
+                        {"pin": "MAIN-RLY (Pin 1)", "signal": "BLU/BLK — Suplai +12V Sensor CMP (Main Relay)", "function": "Suplai daya 10–14 V IG ON dari Main Relay (Bab 1H-2 & 1A-15)"},
+                        {"pin": "C37-52 (Pin 2)", "signal": "WHT/RED — Sinyal Output Sensor CMP", "function": "Input pulsa kotak 0–5 V posisi poros nok ke ECM"},
+                        {"pin": "GND-ENG (Pin 3)", "signal": "BLK/YEL — Massa Sensor CMP (Blok Mesin)", "function": "Massa sensor Hall-IC CMP ke blok mesin (< 0.3 V)"},
+                    ]
+                    if is_cmp
+                    else [
+                        {"pin": "C37-51 (Pin 1)", "signal": "BLU — CKP Sensor Signal (+)", "function": "Input pulsa AC (+) poros engkol ke ECM (Induktif 2-Pin; shield BLK — Bab 1H-2 & 1A-15)"},
+                        {"pin": "C37-36 (Pin 2)", "signal": "PNK — CKP Sensor Signal (-)", "function": "Input pulsa AC (-) / return poros engkol ke ECM"},
+                    ]
+                ),
                 step_by_step_repair=[
-                    "1. Periksa soket 3-pin sensor CKP/CMP dari rembesan oli mesin atau kabel yang getas.",
+                    f"1. Periksa soket {'3-pin CMP (+12V BLU/BLK, Sinyal WHT/RED, GND BLK/YEL)' if is_cmp else '2-pin CKP (BLU & PNK + kabel shield BLK)'} dari rembesan oli mesin atau kabel getas.",
                     "2. Lepas baut pengikat sensor (10 mm), bersihkan ujung magnet sensor dari kotoran gram besi.",
-                    "3. Ganti sensor CKP/CMP dengan part orisinil beserta O-ring baru, kencangkan baut dengan torsi 10 N·m.",
+                    "3. Ganti sensor dengan part orisinil beserta O-ring baru, kencangkan baut dengan torsi 10 N·m.",
                 ],
                 relearn_reset_steps=[
                     "1. Hapus kode DTC P0335/P0340 via scanner.",
@@ -1397,7 +1515,7 @@ class WeightedDiagnosticEngine:
                 diagnosis_title=f"Malfungsi Sirkuit Kontrol Kipas Radiator {fan_label} ({dtc_tag})",
                 system_category="Pendingin",
                 group_category="Pendukung",
-                manual_book_section="Buku Pedoman Resmi Suzuki Grand Vitara JB420 Vol 1.pdf Bab 1A-133 (Hal. 191) & Bab 1A-233 (Hal. 291)",
+                manual_book_section="Buku Pedoman Resmi Suzuki Grand Vitara JB420 Vol 1.pdf Bab 1A-15 (Item 46-48) & Bab 1A-133",
                 cause_summary=(
                     f"ECM mendeteksi rangkaian terbuka (putus) atau hubung singkat pada jalur kendali Relay Kipas Radiator {fan_label} "
                     f"(terminal ECM {fan_pin} kabel {fan_wire}), sehingga kipas pendingin tidak dapat diaktifkan secara normal."
@@ -1419,10 +1537,10 @@ class WeightedDiagnosticEngine:
                     {"parameter": "Suhu ECT Aktivasi Kipas Low-Speed (Bab 1A-233)", "normal_range": "ON ≥ 97.5°C / OFF ≤ 93.0°C", "unit": "°C"},
                 ],
                 wiring_pinout=[
-                    {"pin": "E23-46 (Pin 1)", "signal": "Cooling Fan Relay No.1 (RED/BLK)", "function": "Output kendali massa ECM ke koil Relay Kipas No.1 (10-14V OFF, <1V ON)"},
-                    {"pin": "E23-47 (Pin 2)", "signal": "Cooling Fan Relay No.2 (RED)", "function": "Output kendali massa ECM ke koil Relay Kipas No.2 (High Speed / A/C)"},
-                    {"pin": "C37-24 (Pin 3)", "signal": "ECT Sensor Signal (PPL/YEL)", "function": "Sinyal suhu air radiator ke ECM pemicu kipas (0.40-0.53V @ 100°C)"},
-                    {"pin": "C37-57 (Pin 4)", "signal": "Sensor Ground (GRY/GRN)", "function": "Massa referensi sensor suhu pendingin ke ECM (< 0.3V)"},
+                    {"pin": "IG1-FUSE (Koil +)", "signal": "BLK/WHT — Suplai +12V IG1 ke 3 Koil Relay Kipas", "function": "Suplai +10–14 V IG ON ke kumparan Relay Kipas No.1, No.2 & No.3 (Bab 1A-15 Item 46–48)"},
+                    {"pin": "E23-46 (Relay #1)", "signal": "RED/BLK — Kontrol Massa Relay Kipas No.1 (Low)", "function": "Output kendali ground ECM ke koil Relay Kipas No.1 (10–14 V OFF, <1 V ON)"},
+                    {"pin": "E23-47 (Relay #2)", "signal": "RED — Kontrol Massa Relay Kipas No.2 (High)", "function": "Output kendali ground ECM ke koil Relay Kipas No.2 (High Speed / A/C)"},
+                    {"pin": "E23-48 (Relay #3)", "signal": "RED/YEL — Kontrol Massa Relay Kipas No.3 (Sub)", "function": "Output kendali ground ECM ke koil Relay Kipas No.3 (Sub Fan / A/C)"},
                 ],
                 step_by_step_repair=[
                     "1. Buka tutup Fuse & Relay Box di ruang mesin, periksa sekering utama Cooling Fan (30A/40A) dan sekering IG koil relay dari putus atau kaki gosong.",
@@ -1918,6 +2036,265 @@ class WeightedDiagnosticEngine:
             ],
         )
 
+    @staticmethod
+    def _clean_and_dedupe_pack_pins(
+        raw_pins: list[dict[str, Any]],
+        pack_id: str,
+        year: int | None = None,
+        model_hint: str = "",
+    ) -> list[dict[str, str]]:
+        """
+        Membersihkan baris non-kabel dari ekstraksi tabel pengecekan Toyota (seperti uji tahanan '1 - 2',
+        uji isolasi '... atau ... - Masa bodi/Body ground', dan string gabungan 4 koil 1 baris)
+        serta men-deduplikasi konektor beda tahun/model (C75 vs E11 di Fortuner; C20 vs C23 di Yaris/Vios).
+        """
+        if not raw_pins:
+            return []
+
+        cleaned: list[dict[str, str]] = []
+        for pw in raw_pins:
+            pin_s = str(pw.get("pin", "")).strip()
+            sig_s = str(pw.get("signal", "-")).strip()
+            fn_s = str(pw.get("function", "-")).strip()
+            if not pin_s:
+                continue
+            pin_body = re.sub(r"^\[[^\]]+\]\s*", "", pin_s).strip()
+            # 1. Buang baris uji tahanan komponen telanjang '1 - 2' (tidak memuat kode konektor!)
+            if re.match(r"^\d\s*[-–]\s*\d$", pin_body):
+                continue
+            # 2. Buang baris uji isolasi short-to-ground ('... atau ... - Masa bodi / Body ground')
+            if re.search(r"\batau\b.*(masa\s*bodi|body\s*ground)", pin_body, re.I):
+                continue
+            # 3. Buang baris rusak yang menggabungkan beberapa IGT sekaligus dalam satu sel ('IGT1 (...) IGT2 (...)')
+            if len(re.findall(r"\bIGT\d\b", pin_body)) >= 2:
+                continue
+            cleaned.append({"pin": pin_s, "signal": sig_s, "function": fn_s})
+
+        if not cleaned:
+            cleaned = [
+                {"pin": str(pw.get("pin", "-")), "signal": str(pw.get("signal", "-")), "function": str(pw.get("function", "-"))}
+                for pw in raw_pins
+            ]
+
+        pid = (pack_id or "").lower()
+        # 4. Deduplikasi konektor beda generasi pada Fortuner (2005: E10/E11 vs 2012: C75/C76)
+        if "fortuner" in pid:
+            has_c75 = any(re.search(r"\bC7[0-6]-", x["pin"]) for x in cleaned)
+            has_e10 = any(re.search(r"\bE1[01]-", x["pin"]) for x in cleaned)
+            if has_c75 and has_e10:
+                if year is not None and year <= 2008:
+                    cleaned = [x for x in cleaned if not re.search(r"\bC7[0-6]-", x["pin"])]
+                else:
+                    cleaned = [x for x in cleaned if not re.search(r"\bE1[01]-", x["pin"])]
+
+        # 5. Deduplikasi konektor beda model pada Yaris/Vios (Yaris: C20/A21 vs Vios: C23/A20)
+        if "yaris_vios" in pid:
+            has_c20 = any(re.search(r"\b(C20|A21)-", x["pin"]) for x in cleaned)
+            has_c23 = any(re.search(r"\b(C23|A20)-", x["pin"]) for x in cleaned)
+            if has_c20 and has_c23:
+                if "vios" in (model_hint or "").lower():
+                    cleaned = [x for x in cleaned if not re.search(r"\b(C20|A21)-", x["pin"])]
+                else:
+                    cleaned = [x for x in cleaned if not re.search(r"\b(C23|A20)-", x["pin"])]
+
+        # 6. Deduplikasi pin duplikat persis
+        out: list[dict[str, str]] = []
+        seen: set[str] = set()
+        for x in cleaned:
+            k = x["pin"].upper()
+            if k not in seen:
+                seen.add(k)
+                out.append(x)
+        return out
+
+    @staticmethod
+    def _select_custom_pack_pins(
+        custom_pack: dict[str, Any],
+        engine_code: str,
+        fuel_type: str,
+        diag_text: str,
+        dtc_codes: Sequence[str],
+        year: int | None = None,
+        model_hint: str = "",
+    ) -> list[dict[str, str]]:
+        """
+        Memilih pinout ASLI dari custom_pack secara presisi berdasarkan:
+        1) Isolasi ketat kode mesin & bahan bakar (ZERO kebocoran lintas mesin seperti 3ZR-FE ke 2AZ-FE atau Bensin ke Diesel!)
+        2) Blokir modul non-mesin ([AUDIO], [PARK ASSIST], [STARTING], [METER], [IMMOBILISER]) untuk DTC Engine Control
+        3) Pencocokan komponen terpisah ketat (CKP vs CMP, HO2S-1 vs HO2S-2, Koil spesifik silinder, MAP vs MAF, ETC vs APP)
+        4) Deduplikasi konektor beda tahun/model (Fortuner C75 vs E11; Yaris C20 vs Vios C23)
+        """
+        all_pins = list(custom_pack.get("wiring_pinouts", []))
+        if not all_pins:
+            return []
+
+        pack_id = str(custom_pack.get("pack_id", "")).lower()
+        eng_clean = re.sub(r"[^a-z0-9]", "", (engine_code or "").lower())
+        codes_up = [str(c).upper() for c in dtc_codes]
+        text_low = (diag_text or "").lower()
+
+        # Pengaman khusus Ertiga Gen 1: tabel pinout C01/E01 hanya untuk K14B Bensin, BUKAN D13A Diesel!
+        if pack_id == "suzuki_ertiga_gen1_2012_2017" and (fuel_type == "Diesel" or "d13a" in eng_clean):
+            return []
+
+        # Pengaman khusus Ertiga K14B untuk P0101-P0104 (MAF): K14B pakai Speed-Density (MAP + IAT), BUKAN MAF!
+        if pack_id == "suzuki_ertiga_gen1_2012_2017" and any(re.match(r"^P010[0-4]$", c) for c in codes_up):
+            return [
+                {"pin": "C01-2", "signal": "GRY/RED — Suplai +5V Sensor MAP (K14B tanpa MAF)", "function": "Mesin K14B memakai MAP+IAT (tanpa MAF); Suplai +4.5–5.5 V IG ON"},
+                {"pin": "C01-29", "signal": "RED/BLK — Sinyal Sensor MAP", "function": "Sinyal vakum intake manifold (3.85–4.35 V KOEO | 1.0–1.6 V Idle)"},
+                {"pin": "C01-34", "signal": "BLK/YEL — Sinyal Sensor IAT", "function": "Sinyal suhu udara masuk (2.2–2.6 V @20°C | 1.3–1.7 V @40°C)"},
+                {"pin": "C01-20", "signal": "GRY/BLU — Massa Sensor MAP & IAT", "function": "Massa sensor referensi ECM (< 0.3 V)"},
+            ]
+
+        # 1. Isolasi ketat berdasarkan tag kode mesin pada pack multi-mesin
+        non_engine_mod_re = re.compile(r"^\[(AUDIO|PARK\s*ASSIST|STARTING|METER|ENGINE\s*IMMOBILIS|A/T|AIR\s*BAG|SRS|ABS|VSC|CRUISE)", re.I)
+        is_fan_dtc = any(re.match(r"^P048[0-5]$", c) for c in codes_up) or bool(re.search(r"\b(kipas|cooling\s*fan|radiator\s*fan)\b", text_low))
+
+        pool = [
+            pw for pw in all_pins
+            if not non_engine_mod_re.search(str(pw.get("pin", "")))
+            and (is_fan_dtc or not re.match(r"^\[AIR\s*CONDITIONING", str(pw.get("pin", "")), re.I))
+        ]
+        if not pool:
+            pool = all_pins
+
+        has_engine_tags = any(re.search(r"\[(1|2|3|4|k3|ej|d13)[a-z0-9\-]{2,}", str(pw.get("pin", "")), re.I) for pw in pool)
+        if eng_clean and len(eng_clean) >= 3 and has_engine_tags:
+            eng_matched = [
+                pw for pw in pool
+                if eng_clean in re.sub(r"[^a-z0-9]", "", str(pw.get("pin", "")).lower())
+            ]
+            if eng_matched:
+                pool = eng_matched
+            else:
+                # GUARDRAIL KETAT: JANGAN diam-diam memakai pinout mesin lain (mis. 3ZR-FE untuk 2AZ-FE)!
+                return []
+        elif fuel_type == "Diesel":
+            diesel_only = [
+                pw for pw in pool
+                if re.search(r"\[(1kd|2kd|1gd|2gd|d13a|4d56|4n15)", str(pw.get("pin", "")), re.I)
+            ]
+            if diesel_only:
+                pool = diesel_only
+            elif has_engine_tags:
+                return []
+
+        # 2. Tentukan pola regex pin yang TERPISAH KETAT per subsistem
+        pin_patterns: list[str] = []
+
+        if any(re.match(r"^P030[0-8]$|^P035[1-8]$", c) for c in codes_up) or re.search(r"\b(misfire|koil|coil|pengapian|ignition|busi)\b", text_low):
+            if fuel_type != "Diesel":
+                pin_patterns.append(r"\b(igt[1-8]|igf\d?|ig[1-4](?!d)|koil\s*pengapian|ignition\s*coil)\b")
+            else:
+                pin_patterns.append(r"\b(inj\d?|injektor|injector|pcr|scv|edu)\b")
+        elif any(re.match(r"^P008[78]$|^P0093$|^P019[0-4]$", c) for c in codes_up) or re.search(r"\b(fuel\s*rail|common.?rail|scv|pcr)\b", text_low):
+            pin_patterns.append(r"\b(pcr\d?|pr\d?|scv|vcs|rail|injektor|injector)\b")
+        elif any(re.match(r"^P033[5-9]$", c) for c in codes_up) or (re.search(r"\b(ckp|crankshaft|poros\s*engkol)\b", text_low) and not re.search(r"\b(cmp|camshaft)\b", text_low)):
+            pin_patterns.append(r"\b(ne[+-]?|n1[+-]?|ckp|crankshaft|poros\s*engkol)\b")
+        elif any(re.match(r"^P034[0-9]$", c) for c in codes_up) or re.search(r"\b(cmp|camshaft|poros\s*nok)\b", text_low):
+            pin_patterns.append(r"(?<![A-Z0-9])\b(g2[+-]?(?!-\d)|n2[+-]?|vv1[+-]?|cmp|camshaft|poros\s*nok)\b")
+        elif any(re.match(r"^P001[0-7]$", c) for c in codes_up) or re.search(r"\b(ocv|vvt)\b", text_low):
+            pin_patterns.append(r"\b(ocv[+-]?|vvt|oil\s*control\s*valve)\b")
+        elif any(re.match(r"^P011[5-9]$|^P012[58]$", c) for c in codes_up) or re.search(r"\b(ect|coolant|suhu\s*air|water\s*temp|thermostat)\b", text_low):
+            pin_patterns.append(r"\b(thw|ethw|ect|coolant|suhu\s*air|water\s*temp)\b")
+        elif any(re.match(r"^P011[0-4]$", c) for c in codes_up) or re.search(r"\b(iat|intake\s*air\s*temp|suhu\s*udara)\b", text_low):
+            pin_patterns.append(r"\b(tha|etha|iat|intake\s*air\s*temp)\b")
+        elif any(re.match(r"^P010[0-4]$", c) for c in codes_up) or re.search(r"\b(maf|mass\s*air\s*flow)\b", text_low):
+            pin_patterns.append(r"\b(vg|e2g|evg|maf|mass\s*air\s*flow)\b")
+            pin_patterns.append(r"\b(vcpm|pim|e2pm|map|tekanan\s*absolut)\b")
+        elif any(re.match(r"^P010[5-9]$", c) for c in codes_up) or re.search(r"\b(map|pim|vakum|manifold)\b", text_low):
+            pin_patterns.append(r"\b(vcpm|pim|e2pm|map|tekanan\s*absolut|manifold)\b")
+            pin_patterns.append(r"\b(vg|e2g|evg|maf)\b")
+        elif any(re.match(r"^P017[12]$", c) for c in codes_up):
+            # P0171/P0172: Prioritaskan MAF jika mesin pakai MAF, atau MAP jika Speed-Density (jangan digabung dengan O2 ke 1 soket!)
+            has_maf = any(re.search(r"\b(vg|e2g|evg|maf)\b", f"{pw.get('pin','')} {pw.get('signal','')}", re.I) for pw in pool)
+            if has_maf:
+                pin_patterns.append(r"\b(vg|e2g|evg|maf|tha|etha)\b")
+            else:
+                pin_patterns.append(r"\b(vcpm|pim|e2pm|map|c01-2\b|c01-29\b|c01-20\b)\b")
+        elif any(re.match(r"^P003[0-2]$|^P013[0-5]$", c) for c in codes_up):
+            if fuel_type == "Diesel":
+                return []
+            pin_patterns.append(r"\b(ha1a|a1a[+-]?|ht1a|ox1a|ox1|oxh1|ho2s-1|bank\s*1\s*sensor\s*1|o2\s*depan)\b")
+        elif any(re.match(r"^P003[6-8]$|^P013[6-9]$|^P014[0-1]$", c) for c in codes_up):
+            if fuel_type == "Diesel":
+                return []
+            pin_patterns.append(r"\b(ht1b|ox1b|ox2|ho2s-2|bank\s*1\s*sensor\s*2|o2\s*belakang)\b")
+        elif re.search(r"\b(o2|ho2s|oxygen|oksigen|a/f|lambda)\b", text_low):
+            if fuel_type == "Diesel":
+                return []
+            pin_patterns.append(r"\b(ha1a|a1a[+-]?|ht1a|ox1a|ox1|oxh1|ho2s-1|o2\s*depan)\b")
+        elif any(re.match(r"^P012[0-4]$|^P022[0-3]$|^P0507$|^P21[013][0-9]$", c) for c in codes_up):
+            # HARUS SEBELUM pedal/APP karena deskripsi OBD-II P0121 memuat frasa "Throttle/Pedal Position Sensor"!
+            if fuel_type == "Diesel":
+                pin_patterns.append(r"\b(vlu|lusl|diesel\s*throttle|throttle\s*control)\b")
+            else:
+                pin_patterns.append(r"\b(vta\d?|vcta|eta|vth|vc\b|tps|tp\s*sensor|m\+|m-|aktuator\s*throttle|throttle)\b")
+        elif any(re.match(r"^P212[2-9]$|^P2138$", c) for c in codes_up) or re.search(r"\b(pedal|app|vpa)\b", text_low):
+            pin_patterns.append(r"\b(vpa\d?|epa\d?|vcpa|vcp2|app|pedal)\b")
+        elif re.search(r"\b(throttle|tps|vta|etc)\b", text_low):
+            if fuel_type == "Diesel":
+                pin_patterns.append(r"\b(vlu|lusl|diesel\s*throttle|throttle\s*control)\b")
+            else:
+                pin_patterns.append(r"\b(vta\d?|vcta|eta|vth|vc\b|tps|tp\s*sensor|m\+|m-|aktuator\s*throttle|throttle)\b")
+        elif is_fan_dtc:
+            pin_patterns.append(r"\b(fan\d?|fanl|fanh|rfc|kipas\s*radiator|fan\s*radiator|cooling\s*fan)\b")
+        elif any(re.match(r"^P020[0-8]$", c) for c in codes_up) or re.search(r"\b(injektor|injector)\b", text_low):
+            pin_patterns.append(r"\b(inj\d?|#10|#20|#30|#40|injektor|injector)\b")
+
+        matched: list[dict[str, str]] = []
+        seen_p: set[str] = set()
+        for pat in pin_patterns:
+            rx = re.compile(pat, re.I)
+            for pw in pool:
+                hay = f"{pw.get('pin', '')} {pw.get('signal', '')} {pw.get('function', '')}"
+                if rx.search(hay):
+                    # Jangan masukkan pinout bensin (koil/busi) pada mesin Diesel
+                    if fuel_type == "Diesel" and re.search(r"\b(igt|igf|koil|ignition\s*coil)\b", hay, re.I):
+                        continue
+                    # Jangan masukkan pin Sensor O2 (VTH E8-2) saat mencari TPS (VTH E8-20) pada Avanza!
+                    if "throttle" in pat and re.search(r"oxygen|oksigen|\bo2\b|oxh|e8-2\b", hay, re.I):
+                        continue
+                    # Jangan masukkan pin Pedal Gas (VPA/VCPA/EPA) saat mencari Throttle Body (VTA/TPS)!
+                    if "vta" in pat and re.search(r"\b(vpa\d?|vcpa|vcp2|epa\d?|pedal\s*akselerator|accelerator\s*pedal)\b", hay, re.I):
+                        continue
+                    # Jangan masukkan Solenoid OCV (OC1+/OCV+) ke Sensor CMP (P0340)!
+                    if "g2" in pat and re.search(r"\b(ocv|oc1|oil\s*control|katup\s*kontrol\s*oli)\b", hay, re.I):
+                        continue
+                    # Jangan masukkan Sensor CMP (G2/N2) ke Sensor CKP (P0335)!
+                    if "ne[" in pat and re.search(r"\b(g2\b|n2[+-]|camshaft|poros\s*nok)\b", hay, re.I):
+                        continue
+                    pk = str(pw.get("pin", "-"))
+                    if pk not in seen_p:
+                        seen_p.add(pk)
+                        matched.append({
+                            "pin": pk,
+                            "signal": str(pw.get("signal", "-")),
+                            "function": str(pw.get("function", "-")),
+                        })
+                    if len(matched) >= 10:
+                        break
+            if matched:
+                break
+
+        cleaned = WeightedDiagnosticEngine._clean_and_dedupe_pack_pins(
+            matched, pack_id=pack_id, year=year, model_hint=model_hint
+        )
+
+        # Hanya tambahkan ground sensor (C01-20) bila format pin SUZUKI tunggal (bukan pasangan Toyota 'PinA - PinB'!)
+        if len(cleaned) == 1 and " - " not in cleaned[0]["pin"] and pack_id.startswith("suzuki_"):
+            for pw in pool:
+                hay = f"{pw.get('pin', '')} {pw.get('signal', '')}"
+                if re.search(r"\bc01-20\b", hay, re.I):
+                    cleaned.append({
+                        "pin": str(pw.get("pin", "-")),
+                        "signal": str(pw.get("signal", "-")),
+                        "function": str(pw.get("function", "-")),
+                    })
+                    break
+
+        return cleaned[:6]
+
     @classmethod
     async def search_weighted_cases(
         cls,
@@ -1981,19 +2358,28 @@ class WeightedDiagnosticEngine:
                 )
                 if code in custom_dtc_map:
                     cd = custom_dtc_map[code]
-                    causes_val = cd.get("common_causes", "")
-                    if isinstance(causes_val, list):
-                        causes_val = "; ".join(str(x) for x in causes_val)
-                    steps_val = cd.get("repair_steps", [])
-                    manual_dtc_entries.append({
-                        "code": code,
-                        "system": str(custom_pack.get("title", "Buku Manual Kustom")),
-                        "description_id": str(cd.get("description_id", f"DTC {code}")),
-                        "possible_causes": str(causes_val or cd.get("description_id", "")),
-                        "recommended_fix": "\n".join(str(s) for s in steps_val) if isinstance(steps_val, list) else str(cd.get("recommended_fix", "")),
-                        "severity_level": str(cd.get("severity_level", "HIGH")),
-                    })
-                elif use_modern and modern_hit:
+                    cd_desc = str(cd.get("description_id", f"DTC {code}"))
+                    cd_causes_raw = cd.get("common_causes", "")
+                    causes_val = "; ".join(str(x) for x in cd_causes_raw) if isinstance(cd_causes_raw, list) else str(cd_causes_raw)
+                    # Guardrail BBM: cegah DTC khusus Bensin (mis. P0300 K14B Koil/Busi) masuk ke kendaraan Diesel (D13A)!
+                    is_k14b_on_diesel = (
+                        vehicle_fuel == "Diesel"
+                        and ("k14b" in cd_desc.lower() or not is_text_compatible_with_fuel(f"{cd_desc} {causes_val}", vehicle_fuel))
+                        and "d13a" not in cd_desc.lower()
+                        and "diesel" not in cd_desc.lower()
+                    )
+                    if not is_k14b_on_diesel:
+                        steps_val = cd.get("repair_steps", [])
+                        manual_dtc_entries.append({
+                            "code": code,
+                            "system": str(custom_pack.get("title", "Buku Manual Kustom")),
+                            "description_id": cd_desc,
+                            "possible_causes": str(causes_val or cd_desc),
+                            "recommended_fix": "\n".join(str(s) for s in steps_val) if isinstance(steps_val, list) else str(cd.get("recommended_fix", "")),
+                            "severity_level": str(cd.get("severity_level", "HIGH")),
+                        })
+                        continue
+                if use_modern and modern_hit:
                     modern_dtc_entries_map[code] = modern_hit
                     manual_dtc_entries.append({
                         "code": code,
@@ -2175,10 +2561,22 @@ class WeightedDiagnosticEngine:
             scored_items.append(item)
 
         # 2. Suntikkan kandidat resmi langsung dari BUKU MANUAL PERBAIKAN (OEM Pack Terpilih / Katalog JB420)
+        custom_pinout_verified = False
         if manual_dtc_entries:
             primary_dtc = manual_dtc_entries[0]
             p_code_up = primary_dtc["code"].upper()
-            if custom_pack and p_code_up in custom_dtc_map:
+            eff_eng_code = (app_info.engine_code or req.engine_code or "").strip()
+            is_ertiga_diesel = (
+                custom_pack is not None
+                and str(custom_pack.get("pack_id", "")).lower() == "suzuki_ertiga_gen1_2012_2017"
+                and (vehicle_fuel == "Diesel" or "d13a" in eff_eng_code.lower())
+            )
+            custom_entry_used = (
+                custom_pack is not None
+                and p_code_up in custom_dtc_map
+                and primary_dtc.get("system") == str(custom_pack.get("title", "Buku Manual Kustom"))
+            )
+            if custom_entry_used:
                 cd_entry = custom_dtc_map[p_code_up]
                 def _clean_pdf_str(raw_s: str) -> str:
                     s = str(raw_s or "")
@@ -2195,7 +2593,7 @@ class WeightedDiagnosticEngine:
                 if cd_entry.get("description_id"):
                     manual_advice.diagnosis_title = f"DTC {p_code_up}: {_clean_pdf_str(cd_entry['description_id'])}"
 
-                # Bersihkan sisa nomor pin JB420 (C37/E23) yang terbawa dari template spesialis umum agar tidak bercampur dengan pinout manual aktif (mis. Ertiga C01/E01)
+                # Bersihkan sisa nomor pin JB420 (C37/E23) yang terbawa dari template spesialis umum agar tidak bercampur dengan pinout manual aktif
                 cleaned_causes: list[dict[str, str]] = []
                 for ci in manual_advice.cause_items:
                     cic = dict(ci)
@@ -2218,31 +2616,72 @@ class WeightedDiagnosticEngine:
                     for st in manual_advice.step_by_step_repair
                     if str(st).strip()
                 ]
-                # Tambahkan referensi halaman manual resmi jika tersedia di custom pack
                 page_no = cd_entry.get("page")
                 if page_no and not any(f"Hal. PDF {page_no}" in st or f"Hal. {page_no}" in st for st in manual_advice.step_by_step_repair):
                     manual_advice.step_by_step_repair.append(
                         f"Referensi Resmi {custom_pack.get('brand', '')} {custom_pack.get('model', '')}: Lihat detail diagram pada Hal. PDF {page_no} ({pack_title})."
                     )
 
-                if cd_entry.get("wiring_pinout"):
-                    manual_advice.wiring_pinout = [
-                        {
-                            "pin": str(pw.get("pin", "-")),
-                            "signal": str(pw.get("signal", "-")),
-                            "function": str(pw.get("function", "-")),
-                        }
-                        for pw in cd_entry["wiring_pinout"][:8]
-                    ]
-                elif custom_pack.get("wiring_pinouts"):
-                    manual_advice.wiring_pinout = [
-                        {
-                            "pin": str(pw.get("pin", "-")),
-                            "signal": str(pw.get("signal", "-")),
-                            "function": str(pw.get("function", "-")),
-                        }
-                        for pw in custom_pack["wiring_pinouts"][:6]
-                    ]
+                # Pilih pinout ASLI sesuai kode mesin & bahan bakar!
+                if is_ertiga_diesel:
+                    # Tabel pinout C01/E01 di pack Ertiga hanya untuk bensin K14B; JANGAN pakai untuk Diesel D13A!
+                    manual_advice.wiring_pinout = [{
+                        "pin": "Konektor ECM Diesel D13A DDiS",
+                        "signal": f"Sirkuit {p_code_up} (Varian Diesel D13A)",
+                        "function": "Pinout tabel C01/E01 yang tersimpan khusus mesin bensin K14B — verifikasi pin soket ECM Diesel D13A secara fisik dengan multitester atau lihat Bab 1A Diesel Hal. PDF 220+.",
+                    }]
+                    custom_pinout_verified = False
+                else:
+                    eng_norm = re.sub(r"[^a-z0-9]", "", eff_eng_code.lower())
+                    pack_id_cur = str(custom_pack.get("pack_id", "")).lower()
+                    raw_dtc_pins = cls._clean_and_dedupe_pack_pins(
+                        list(cd_entry.get("wiring_pinout") or []),
+                        pack_id=pack_id_cur,
+                        year=req.year,
+                        model_hint=req.model or "",
+                    )
+                    if eng_norm and len(eng_norm) >= 3 and raw_dtc_pins:
+                        eng_filtered_pins = [
+                            pw for pw in raw_dtc_pins
+                            if eng_norm in re.sub(r"[^a-z0-9]", "", str(pw.get("pin", "")).lower())
+                        ]
+                        if eng_filtered_pins:
+                            raw_dtc_pins = eng_filtered_pins
+                        elif any("[" in str(pw.get("pin", "")) for pw in raw_dtc_pins):
+                            # Pin DTC ini milik varian mesin lain (mis. [3ZR-FE] saat pengguna memilih 2AZ-FE)!
+                            # Cari pinout asli untuk mesin yang diminta; bila tidak ada, KOSONGKAN (jangan bocor lintas mesin!)
+                            raw_dtc_pins = cls._select_custom_pack_pins(
+                                custom_pack, eff_eng_code, vehicle_fuel,
+                                f"{manual_advice.diagnosis_title} {req.complaint or ''}", [p_code_up],
+                                year=req.year, model_hint=req.model or "",
+                            )
+                    if raw_dtc_pins:
+                        manual_advice.wiring_pinout = [
+                            {
+                                "pin": str(pw.get("pin", "-")),
+                                "signal": str(pw.get("signal", "-")),
+                                "function": str(pw.get("function", "-")),
+                            }
+                            for pw in raw_dtc_pins[:6]
+                        ]
+                        custom_pinout_verified = True
+                    else:
+                        smart_pins = cls._select_custom_pack_pins(
+                            custom_pack, eff_eng_code, vehicle_fuel,
+                            f"{manual_advice.diagnosis_title} {req.complaint or ''}", [p_code_up],
+                            year=req.year, model_hint=req.model or "",
+                        )
+                        if smart_pins:
+                            manual_advice.wiring_pinout = smart_pins
+                            custom_pinout_verified = True
+                        else:
+                            manual_advice.wiring_pinout = [{
+                                "pin": f"Konektor {p_code_up} ({custom_pack.get('brand', '')} {custom_pack.get('model', '')})",
+                                "signal": "Belum ada tabel pinout khusus kode/mesin ini",
+                                "function": "Diagnosa & langkah dari buku manual resmi, namun pinout konektor spesifik kode/mesin ini wajib dicek fisik dengan multitester.",
+                            }]
+                            custom_pinout_verified = False
+
                 if cd_entry.get("standard_specs"):
                     manual_advice.sensor_standards = [
                         {
@@ -2481,52 +2920,65 @@ class WeightedDiagnosticEngine:
             if app_info.is_high_voltage and not direct_advice.hv_safety_warning:
                 direct_advice.hv_safety_warning = app_info.hv_safety_warning
 
-        # 3. Terapkan Guardrail Keamanan Wiring jika model+tahun belum memiliki file manual spesifik
+        # 3. Terapkan Guardrail Keamanan Wiring jika model+tahun belum memiliki pinout asli yang terverifikasi
         direct_advice.active_pack_id = app_info.active_pack_id
         if not is_low_conf:
-            if app_info.is_pinout_verified:
+            eff_eng_code = (app_info.engine_code or req.engine_code or "").strip()
+            has_verified_pinout = False
+
+            if app_info.active_pack_id == "suzuki_jb420_builtin":
+                has_verified_pinout = True
+            elif custom_pack:
+                if custom_pinout_verified:
+                    has_verified_pinout = True
+                else:
+                    # DTC tidak ada di custom_dtc_map (mis. Innova/Fortuner/Yaris + P0300) atau diagnosa tanpa DTC (K005):
+                    # Cari pinout ASLI dari custom_pack["wiring_pinouts"] sesuai kode mesin & komponen!
+                    smart_pins = cls._select_custom_pack_pins(
+                        custom_pack,
+                        eff_eng_code,
+                        vehicle_fuel,
+                        f"{direct_advice.diagnosis_title} {req.complaint or ''} {req.symptom or ''}",
+                        req_codes,
+                        year=req.year,
+                        model_hint=req.model or "",
+                    )
+                    if smart_pins:
+                        direct_advice.wiring_pinout = smart_pins
+                        has_verified_pinout = True
+                        direct_advice.manual_book_section = f"{app_info.active_manual_source} (Pinout Resmi {eff_eng_code or custom_pack.get('model', '')})"
+                    else:
+                        has_verified_pinout = False
+
+                # Bersihkan selalu referensi pin JB420 (C37/E23) dari teks langkah & opsi pada paket manual non-JB420!
+                direct_advice.step_by_step_repair = [
+                    strip_unverified_jb420_pins_from_text(st) for st in direct_advice.step_by_step_repair
+                ]
+                cleaned_c_opts: list[dict[str, str]] = []
+                for opt in direct_advice.repair_options:
+                    oc = dict(opt)
+                    for k_fld in ("title", "desc", "why", "verify"):
+                        if k_fld in oc and isinstance(oc[k_fld], str):
+                            oc[k_fld] = strip_unverified_jb420_pins_from_text(oc[k_fld])
+                    cleaned_c_opts.append(oc)
+                direct_advice.repair_options = cleaned_c_opts
+
+            if has_verified_pinout:
                 direct_advice.is_pinout_verified = True
                 direct_advice.safety_warning = app_info.safety_warning_desc
-                if custom_pack:
+                if custom_pack and "Pinout Resmi" not in direct_advice.manual_book_section and str(custom_pack.get("title", "")) not in direct_advice.manual_book_section:
                     direct_advice.manual_book_section = f"{app_info.active_manual_source}"
-                    if not manual_dtc_entries and custom_pack.get("wiring_pinouts"):
-                        # Pilih pinout dari custom pack yang paling relevan dengan keluhan/diagnosis
-                        diag_hint = f"{direct_advice.diagnosis_title} {req.complaint or ''} {req.symptom or ''}".lower()
-                        rel_pins = [
-                            pw for pw in custom_pack["wiring_pinouts"]
-                            if any(
-                                kw in f"{pw.get('signal', '')} {pw.get('function', '')}".lower()
-                                for kw in [
-                                    k for k in ("koil", "coil", "injektor", "map", "ect", "iat", "tps", "throttle", "app", "ckp", "cmp", "ocv", "o2", "ho2s", "kipas", "fan")
-                                    if k in diag_hint
-                                ]
-                            )
-                        ]
-                        chosen_pins = rel_pins[:6] if len(rel_pins) >= 2 else custom_pack["wiring_pinouts"][:6]
-                        direct_advice.wiring_pinout = [
-                            {
-                                "pin": str(pw.get("pin", "-")),
-                                "signal": str(pw.get("signal", "-")),
-                                "function": str(pw.get("function", "-")),
-                            }
-                            for pw in chosen_pins
-                        ]
-                    # Pastikan tidak ada teks pin JB420 (C37/E23) yang bocor ke paket manual kustom
-                    direct_advice.step_by_step_repair = [
-                        strip_unverified_jb420_pins_from_text(st) for st in direct_advice.step_by_step_repair
-                    ]
-                    cleaned_c_opts: list[dict[str, str]] = []
-                    for opt in direct_advice.repair_options:
-                        oc = dict(opt)
-                        for k_fld in ("title", "desc", "why", "verify"):
-                            if k_fld in oc and isinstance(oc[k_fld], str):
-                                oc[k_fld] = strip_unverified_jb420_pins_from_text(oc[k_fld])
-                        cleaned_c_opts.append(oc)
-                    direct_advice.repair_options = cleaned_c_opts
             else:
                 direct_advice.is_pinout_verified = False
-                direct_advice.safety_warning = app_info.safety_warning_desc
-                if (req.brand.strip() or req.model.strip()) and "Katalog Universal" not in direct_advice.manual_book_section:
+                if custom_pack:
+                    direct_advice.safety_warning = (
+                        f"Paket manual {custom_pack.get('brand', '')} {custom_pack.get('model', '')} terpasang, "
+                        f"namun tabel pinout khusus varian/kode ini ({eff_eng_code or vehicle_fuel}) belum tersedia — "
+                        "diagram & pin di bawah bersifat ilustrasi umum (Ref. JB420), WAJIB ukur fisik dengan multitester."
+                    )
+                else:
+                    direct_advice.safety_warning = app_info.safety_warning_desc
+                if (req.brand.strip() or req.model.strip()) and "Katalog Universal" not in direct_advice.manual_book_section and not custom_pack:
                     direct_advice.manual_book_section = (
                         f"Mode Universal OBD-II ({app_info.resolved_generation_label}) — "
                         "File Manual Spesifik Model Ini Belum Diunggah"
@@ -2535,7 +2987,7 @@ class WeightedDiagnosticEngine:
                 cleaned_opts: list[dict[str, str]] = []
                 for opt in direct_advice.repair_options:
                     oc = dict(opt)
-                    for k_fld in ("title", "why", "verify"):
+                    for k_fld in ("title", "desc", "why", "verify"):
                         if k_fld in oc and isinstance(oc[k_fld], str):
                             oc[k_fld] = strip_unverified_jb420_pins_from_text(oc[k_fld])
                     cleaned_opts.append(oc)
@@ -2544,14 +2996,29 @@ class WeightedDiagnosticEngine:
                     strip_unverified_jb420_pins_from_text(st) for st in direct_advice.step_by_step_repair
                 ]
                 tagged_pinouts: list[dict[str, str]] = []
-                for wp in direct_advice.wiring_pinout:
-                    wp_copy = dict(wp)
-                    func_str = str(wp_copy.get("function", ""))
-                    pin_str = str(wp_copy.get("pin", ""))
-                    if "[Contoh Ref" not in func_str and "Cek dengan Scanner" not in func_str and "Manual pinout spesifik" not in func_str:
-                        if re.search(r"\b[ECGB]\d{2}-\d{1,2}\b", pin_str) or "IG-FUSE" in pin_str or "Terminal ECM" in pin_str:
-                            wp_copy["function"] = f"[Contoh Ref. JB420 — Cek Soket Fisik] {func_str}"
-                    tagged_pinouts.append(wp_copy)
+                if vehicle_fuel == "Diesel":
+                    # GUARDRAIL KETAT DIESEL: jangan pernah bocorkan pinout Bensin (C37 A/F, O2, Koil Pengapian) ke mesin Diesel!
+                    petrol_leak = any(
+                        re.search(r"\b(c37-|e23-|a/f|ho2s|koil|coil|igt|igf)\b", f"{wp.get('pin','')} {wp.get('signal','')}", re.I)
+                        for wp in direct_advice.wiring_pinout
+                    )
+                    if petrol_leak or not direct_advice.wiring_pinout:
+                        tagged_pinouts = [{
+                            "pin": f"Konektor Diesel ({eff_eng_code or app_info.resolved_generation_label})",
+                            "signal": f"Sirkuit Mesin Diesel ({', '.join(req_codes) or 'Verifikasi Fisik'})",
+                            "function": "Pinout Bensin (Koil/Sensor O2 Bensin) diblokir untuk keamanan mesin Diesel — cek jalur sensor/injektor Common-Rail langsung dengan multitester.",
+                        }]
+                    else:
+                        tagged_pinouts = list(direct_advice.wiring_pinout)
+                else:
+                    for wp in direct_advice.wiring_pinout:
+                        wp_copy = dict(wp)
+                        func_str = str(wp_copy.get("function", ""))
+                        pin_str = str(wp_copy.get("pin", ""))
+                        if "[Contoh Ref" not in func_str and "Cek dengan Scanner" not in func_str and "Manual pinout spesifik" not in func_str and "verifikasi pin soket" not in func_str.lower():
+                            if re.search(r"\b[ECGB]\d{2}-\d{1,2}\b", pin_str) or "IG-FUSE" in pin_str or "IG-COIL" in pin_str or "MAIN-RLY" in pin_str or "Terminal ECM" in pin_str:
+                                wp_copy["function"] = f"[Contoh Ref. JB420 — Cek Soket Fisik] {func_str}"
+                        tagged_pinouts.append(wp_copy)
                 direct_advice.wiring_pinout = tagged_pinouts
 
         return WeightedCaseSearchResponse(

@@ -105,7 +105,7 @@ def sync() -> None:
     # 1. Ganti title & icon path agar relatif (file:// / Capacitor WebView)
     html = html.replace('href="/static/icon-192.png"', 'href="icon-192.png"')
     html = html.replace('src="/static/icon-192.png"', 'src="icon-192.png"')
-    html = html.replace('>App v2.0<', '>APK Offline v2.0<')
+    html = html.replace('>App v2.0<', '>APK Offline v2.2<')
     html = html.replace('href="/manifest.json"', '')
     html = html.replace(
         "<title>AGOS SMART DIAGNOSTIK by Agos Corporation — Aplikasi Bengkel AI</title>",

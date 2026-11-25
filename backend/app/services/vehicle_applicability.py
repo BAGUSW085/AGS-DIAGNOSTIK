@@ -966,7 +966,9 @@ def _get_readable_packs_path() -> Path:
 class CustomManualPackSummary(BaseModel):
     pack_id: str
     brand: str
+    brand_aliases: list[str] = []
     model: str
+    model_aliases: list[str] = []
     generation_id: str | None = None
     generation_label: str = ""
     year_start: int
@@ -1185,7 +1187,9 @@ def list_all_manual_pack_summaries() -> list[CustomManualPackSummary]:
             CustomManualPackSummary(
                 pack_id=str(p.get("pack_id", "")),
                 brand=str(p.get("brand", "")),
+                brand_aliases=list(p.get("brand_aliases", [])),
                 model=str(p.get("model", "")),
+                model_aliases=list(p.get("model_aliases", [])),
                 generation_id=p.get("generation_id"),
                 generation_label=str(p.get("generation_label", p.get("model", ""))),
                 year_start=int(p.get("year_start", 2010)),
@@ -1207,6 +1211,7 @@ def _matches_brand_and_model(
     entry_brand: str,
     entry_model: str,
     aliases: list[str] | None = None,
+    brand_aliases: list[str] | None = None,
 ) -> bool:
     b_low = (brand_q or "").strip().lower()
     m_low = (model_q or "").strip().lower()
@@ -1216,14 +1221,23 @@ def _matches_brand_and_model(
     if not m_low:
         return False
 
-    if b_low and eb_low and (b_low not in eb_low and eb_low not in b_low):
+    # Dukung paket lintas merek saudara kembar (mis. Toyota Avanza / Daihatsu Xenia / Terios / Gran Max / Luxio)
+    allowed_brands = [eb_low] + [str(ba).strip().lower() for ba in (brand_aliases or []) if str(ba).strip()]
+    alias_list_low = [str(al).strip().lower() for al in (aliases or []) if str(al).strip()]
+    full_query = f"{b_low} {m_low}".strip()
+    brand_ok = (
+        not b_low
+        or any(ab and (b_low in ab or ab in b_low) for ab in allowed_brands)
+        or any(b_low in al for al in alias_list_low)
+        or (full_query in alias_list_low)
+    )
+    if not brand_ok:
         return False
 
     if em_low and (em_low in m_low or m_low in em_low):
         return True
-    for al in aliases or []:
-        al_low = al.lower()
-        if al_low in m_low or m_low in al_low:
+    for al_low in alias_list_low:
+        if al_low in m_low or m_low in al_low or (full_query and (al_low in full_query or full_query in al_low)):
             return True
     return False
 
@@ -1274,9 +1288,10 @@ def find_matching_custom_pack(
     candidates: list[tuple[int, dict[str, Any]]] = []
     for p in packs:
         p_brand = str(p.get("brand", ""))
+        p_brand_aliases = list(p.get("brand_aliases", []))
         p_model = str(p.get("model", ""))
         p_aliases = list(p.get("model_aliases", [p_model]))
-        if not _matches_brand_and_model(brand, model, p_brand, p_model, p_aliases):
+        if not _matches_brand_and_model(brand, model, p_brand, p_model, p_aliases, p_brand_aliases):
             continue
 
         p_codes = [_norm_code(str(ec)) for ec in p.get("engine_codes", []) if str(ec).strip()]
