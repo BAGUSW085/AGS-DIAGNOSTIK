@@ -634,6 +634,7 @@ class ManualRepairAdvice(BaseModel):
     hv_safety_warning: str | None = None
     is_low_confidence_fallback: bool = False
     adaptive_live_findings: list[dict[str, str]] = []
+    customer_summary: str | None = None
 
 
 class WeightedCaseMatchItem(BaseModel):
@@ -643,6 +644,13 @@ class WeightedCaseMatchItem(BaseModel):
     model: str
     year: int | None
     engine_capacity: str | None
+    engine_code: str | None = None
+    odometer_km: int | None = None
+    km_diff: int | None = None
+    year_diff: int | None = None
+    license_plate: str | None = None
+    mechanic_name: str | None = None
+    verification_status: str = "TERVERIFIKASI"
     complaint: str
     symptom: str
     dtc: str
@@ -852,78 +860,169 @@ class WeightedDiagnosticEngine:
         req: WeightedCaseSearchRequest,
         case: HistoricalCase,
     ) -> float:
-        """Menghitung skor teks berbobot (0.0 - 1.0) sesuai bobot formula Excel."""
-        # 1. Merk (bobot 0.10)
-        sim_brand = 0.0
+        """
+        Menghitung skor kemiripan kasus berbobot PRD v2.2.0 (REQ-14):
+        S_total = (0.10*S_merek + 0.15*S_model + 0.10*S_tahun + 0.15*S_km
+                   + 0.25*S_keluhan + 0.25*S_dtc) / sum(active_weights)
+        Dengan redistribusi bobot otomatis bila variabel (mis. DTC/KM/Tahun) kosong.
+        """
+        weighted_sum = 0.0
+        active_weight = 0.0
+
+        def _norm_eng(val: str | None) -> str:
+            return re.sub(r"[^a-z0-9]", "", (val or "").lower())
+
+        req_eng = _norm_eng(req.engine_code)
+        case_eng = _norm_eng(getattr(case, "engine_code", None))
+
+        # Kelompok platform lintas-merek (Toyota-Daihatsu, Suzuki-Mazda, Mitsubishi-Nissan)
+        shared_platform_pairs = [
+            ({"toyota", "daihatsu"}, {"avanza", "xenia", "rush", "terios", "agya", "ayla", "calya", "sigra", "raize", "rocky"}),
+            ({"suzuki", "mazda"}, {"ertiga", "vx-1", "vx1"}),
+            ({"mitsubishi", "nissan"}, {"xpander", "livina"}),
+        ]
+
+        # 1. Merek (Bobot 0.10): persis = 1.0 | satu platform/kode mesin lintas merek = 0.8 | beda = 0.0
         if req.brand.strip():
             b_req = req.brand.strip().lower()
             b_case = (case.brand or "").strip().lower()
+            m_req_low = (req.model or "").strip().lower()
+            m_case_low = (case.model or "").strip().lower()
+            sim_brand = 0.0
             if b_req == b_case or b_req in b_case or b_case in b_req:
                 sim_brand = 1.0
+            elif req_eng and case_eng and req_eng == case_eng:
+                sim_brand = 0.8
+            else:
+                for brands_set, models_set in shared_platform_pairs:
+                    if b_req in brands_set and b_case in brands_set:
+                        if any(t in m_req_low for t in models_set) and any(t in m_case_low for t in models_set):
+                            sim_brand = 0.8
+                            break
+            weighted_sum += 0.10 * sim_brand
+            active_weight += 0.10
 
-        # 2. Model (bobot 0.15)
-        sim_model = 0.0
+        # 2. Model (Bobot 0.15): persis = 1.0 | sebagian token cocok = 0.7 | beda = 0.0
         if req.model.strip():
-            m_req = set(req.model.strip().lower().split())
-            m_case = set((case.model or "").strip().lower().split())
-            if m_req and m_case:
-                overlap = len(m_req.intersection(m_case))
-                sim_model = overlap / max(len(m_req), len(m_case))
+            m_req_str = req.model.strip().lower()
+            m_case_str = (case.model or "").strip().lower()
+            m_req_toks = set(re.findall(r"[a-z0-9]+", m_req_str))
+            m_case_toks = set(re.findall(r"[a-z0-9]+", m_case_str))
+            sim_model = 0.0
+            if m_req_str == m_case_str:
+                sim_model = 1.0
+            elif m_req_toks and m_case_toks:
+                overlap = m_req_toks.intersection(m_case_toks)
+                if overlap:
+                    sim_model = 1.0 if m_req_toks == m_case_toks else 0.7
+            weighted_sum += 0.15 * sim_model
+            active_weight += 0.15
 
-        # 3. Keluhan (bobot 0.20)
-        sim_complaint = 0.0
-        if req.complaint.strip():
-            c_req = set(preprocess_symptom_tokens(req.complaint))
-            c_case = set(preprocess_symptom_tokens(case.complaint or ""))
+        # 3. Kedekatan Tahun (Bobot 0.10): max(0, 1 - |T_input - T_kasus| / 10)
+        if req.year is not None and case.year is not None:
+            sim_year = max(0.0, 1.0 - (abs(int(req.year) - int(case.year)) / 10.0))
+            weighted_sum += 0.10 * sim_year
+            active_weight += 0.10
+
+        # 4. Kedekatan Kilometer (Bobot 0.15): max(0, 1 - |KM_input - KM_kasus| / 50000)
+        case_km = getattr(case, "odometer_km", None)
+        if req.odometer_km is not None and case_km is not None:
+            sim_km = max(0.0, 1.0 - (abs(int(req.odometer_km) - int(case_km)) / 50000.0))
+            weighted_sum += 0.15 * sim_km
+            active_weight += 0.15
+
+        # 5. Keluhan & Gejala (Bobot 0.25): Jaccard Similarity pasca normalisasi sinonim bengkel
+        req_text = f"{req.complaint or ''} {req.symptom or ''}".strip()
+        if req_text:
+            c_req = set(preprocess_symptom_tokens(req_text))
+            c_case = set(preprocess_symptom_tokens(f"{case.complaint or ''} {case.symptom or ''}"))
+            sim_complaint = 0.0
             if c_req and c_case:
-                overlap = len(c_req.intersection(c_case))
-                sim_complaint = overlap / max(len(c_req), len(c_case))
+                union_cnt = len(c_req.union(c_case))
+                sim_complaint = (len(c_req.intersection(c_case)) / union_cnt) if union_cnt > 0 else 0.0
+            weighted_sum += 0.25 * sim_complaint
+            active_weight += 0.25
 
-        # 4. Gejala (bobot 0.20)
-        sim_symptom = 0.0
-        if req.symptom.strip():
-            s_req = set(preprocess_symptom_tokens(req.symptom))
-            s_case = set(preprocess_symptom_tokens(case.symptom or ""))
-            if s_req and s_case:
-                overlap = len(s_req.intersection(s_case))
-                sim_symptom = overlap / max(len(s_req), len(s_case))
-
-        # 5. DTC (bobot 0.20) — hanya cocok penuh atau satu keluarga sensor/aktuator yang sama
+        # 6. Kode DTC (Bobot 0.25): persis = 1.0 | satu keluarga subsistem = 0.6 | beda = 0.0
+        # Jika input DTC kosong -> bobot 0.25 otomatis diredistribusikan ke variabel aktif lain!
         req_codes = set(cls._extract_all_request_dtcs(req))
         case_codes = set(split_dtc_codes(case.dtc))
-        if not req_codes and not case_codes:
-            sim_dtc = 1.0  # sama-sama tanpa kode error
-        elif not req_codes or not case_codes:
-            sim_dtc = 0.0
-        else:
-            matched = 0.0
-            for code in req_codes:
-                if code in case_codes:
-                    matched += 1.0
-                elif any(cls._are_same_dtc_subsystem(code, other) for other in case_codes):
-                    matched += 0.60
-            sim_dtc = min(matched / max(len(req_codes), len(case_codes)), 1.0)
+        sim_dtc: float | None = None
+        if req_codes:
+            if not case_codes:
+                sim_dtc = 0.0
+            else:
+                matched = 0.0
+                for code in req_codes:
+                    if code in case_codes:
+                        matched += 1.0
+                    elif any(cls._are_same_dtc_subsystem(code, other) for other in case_codes):
+                        matched += 0.60
+                sim_dtc = min(matched / max(len(req_codes), len(case_codes)), 1.0)
+            weighted_sum += 0.25 * sim_dtc
+            active_weight += 0.25
 
-        # Formula Excel: (0.10*B + 0.15*M + 0.20*C + 0.20*S + 0.20*DTC) / 0.85
-        total_text = (
-            (0.10 * sim_brand)
-            + (0.15 * sim_model)
-            + (0.20 * sim_complaint)
-            + (0.20 * sim_symptom)
-            + (0.20 * sim_dtc)
-        )
-        normalized_text = min(total_text / 0.85, 1.0)
-        # Penalti bila pengguna mengisi kode DTC spesifik namun kasus historis memiliki DTC berbeda sistem
+        if active_weight <= 0.0:
+            return 0.0
+
+        normalized_score = min(max(weighted_sum / active_weight, 0.0), 1.0)
+        # Penalti moderat bila pengguna memasukkan DTC spesifik tapi kasus historis tidak cocok subsistem
         if req_codes and sim_dtc == 0.0:
-            normalized_text *= 0.30
-        # Penyesuaian generasi/tahun kendaraan: beri prioritas jika satu era/generasi tahun yang berdekatan
-        if req.year is not None and case.year is not None and sim_model >= 0.5:
-            year_diff = abs(int(req.year) - int(case.year))
-            if year_diff <= 3:
-                normalized_text = min(normalized_text * 1.05, 1.0)
-            elif year_diff >= 8:
-                normalized_text *= 0.90
-        return normalized_text
+            normalized_score *= 0.45
+        return normalized_score
+
+    @classmethod
+    def _build_customer_summary(
+        cls,
+        advice: ManualRepairAdvice,
+        app_info: VehicleApplicabilityInfo,
+        req_codes: list[str],
+    ) -> str:
+        """Menghasilkan ringkasan bahasa awam yang mudah dipahami pemilik mobil (REQ-07)."""
+        veh_name = f"{app_info.brand} {app_info.model}".strip() or "kendaraan Anda"
+        sys_cat = (advice.system_category or "mesin").lower()
+        code_txt = f" (kode komputer {', '.join(req_codes[:2])})" if req_codes else ""
+        first_action = ""
+        if advice.repair_options:
+            first_action = str(advice.repair_options[0].get("title", "")).strip()
+
+        if "pengapian" in sys_cat or any(c.startswith(("P030", "P035")) for c in req_codes):
+            core = (
+                f"Sistem pengapian (busi atau koil pemantik api) pada {veh_name} terdeteksi tidak membakar bensin secara sempurna{code_txt}, "
+                "sehingga mesin terasa bergetar/pincang dan tenaga berkurang."
+            )
+        elif "udara" in sys_cat or any(c in {"P0171", "P0101", "P0105", "P0107", "P0507"} for c in req_codes):
+            core = (
+                f"Aliran udara yang masuk ke mesin {veh_name} tidak seimbang{code_txt}—umumnya karena selang udara/vakum bocor, "
+                "kotoran pada saluran throttle, atau sensor pembaca udara kotor sehingga mesin terasa brebet dan boros BBM."
+            )
+        elif "pendingin" in sys_cat or any(c.startswith(("P011", "P0128", "P048")) for c in req_codes):
+            core = (
+                f"Sistem pendingin mesin {veh_name} (sensor suhu air atau kipas radiator) terdeteksi bermasalah{code_txt}. "
+                "Segera ditangani agar suhu mesin tetap aman dan terhindar dari overheat."
+            )
+        elif "bahan bakar" in sys_cat or "emisi" in sys_cat or any(c.startswith(("P013", "P014", "P003", "P0172", "P0087")) for c in req_codes):
+            core = (
+                f"Pengaturan campuran bahan bakar atau sensor gas buang pada {veh_name} perlu diperiksa{code_txt}. "
+                "Perbaikan akan mengembalikan tarikan mesin agar halus kembali sekaligus menghemat konsumsi bahan bakar."
+            )
+        elif app_info.resolved_fuel_type in {"EV", "Hybrid"}:
+            core = (
+                f"Sistem kelistrikan tegangan tinggi (Hybrid/EV) pada {veh_name} mencatat peringatan keamanan{code_txt}. "
+                "Pemeriksaan wajib dilakukan teknisi bersertifikat menggunakan alat isolasi khusus."
+            )
+        else:
+            core = (
+                f"Komputer mesin {veh_name} mendeteksi gangguan pada bagian {advice.system_category or 'mesin'}{code_txt} "
+                f"({advice.diagnosis_title})."
+            )
+
+        rec = (
+            f" Langkah yang disarankan bengkel: {first_action}, lalu lakukan uji jalan untuk memastikan lampu indikator tidak menyala kembali."
+            if first_action
+            else " Mekanik akan melakukan pengukuran komponen terkait terlebih dahulu sebelum penggantian suku cadang."
+        )
+        return core + rec
 
     @classmethod
     def _calculate_live_similarity(
@@ -2521,8 +2620,25 @@ class WeightedDiagnosticEngine:
             else:
                 tot_score = t_score
 
+            # Bonus tie-breaker +2% (maks 100%) untuk kasus TERVERIFIKASI Kepala Bengkel (REQ-14)
+            ver_status = (getattr(case, "verification_status", None) or "TERVERIFIKASI").upper()
+            if ver_status == "TERVERIFIKASI" and tot_score > 0.0:
+                tot_score = min(tot_score + 0.02, 1.0)
+
             tot_score = round(min(max(tot_score, 0.0), 1.0), 4)
             cat_label = cls._determine_category(tot_score)
+
+            case_km_val = getattr(case, "odometer_km", None)
+            km_diff_val = (
+                abs(int(req.odometer_km) - int(case_km_val))
+                if (req.odometer_km is not None and case_km_val is not None)
+                else None
+            )
+            year_diff_val = (
+                abs(int(req.year) - int(case.year))
+                if (req.year is not None and case.year is not None)
+                else None
+            )
 
             case_codes_set = set(split_dtc_codes(case.dtc))
             if req_codes_set and req_codes_set.intersection(case_codes_set):
@@ -2544,6 +2660,13 @@ class WeightedDiagnosticEngine:
                 model=case.model,
                 year=case.year,
                 engine_capacity=case.engine_capacity,
+                engine_code=getattr(case, "engine_code", None),
+                odometer_km=case_km_val,
+                km_diff=km_diff_val,
+                year_diff=year_diff_val,
+                license_plate=getattr(case, "license_plate", None),
+                mechanic_name=getattr(case, "mechanic_name", None),
+                verification_status=ver_status,
                 complaint=case.complaint,
                 symptom=case.symptom,
                 dtc=case.dtc or "Tidak ada",
@@ -3020,6 +3143,11 @@ class WeightedDiagnosticEngine:
                                 wp_copy["function"] = f"[Contoh Ref. JB420 — Cek Soket Fisik] {func_str}"
                         tagged_pinouts.append(wp_copy)
                 direct_advice.wiring_pinout = tagged_pinouts
+
+        if not direct_advice.customer_summary:
+            direct_advice.customer_summary = cls._build_customer_summary(
+                direct_advice, app_info, req_codes
+            )
 
         return WeightedCaseSearchResponse(
             top_headline=top_headline,

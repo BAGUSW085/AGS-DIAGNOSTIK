@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AGOS Wiring Diagram &amp; Alur Sinyal Interaktif (Multi-Merek · BYOD)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #0b1220;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: #f59e0b;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 13px;
+      user-select: none;
+    }
+    .app-shell { display: flex; flex-direction: column; width: 100%; height: 100dvh; }
+
+    /* Top Header */
+    .topbar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 8px 12px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .topbar-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .brand-pill {
+      padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px;
+      background: var(--primary); color: #fff; letter-spacing: 0.3px;
+    }
+    .btn {
+      padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn:hover { background: #334155; }
+    .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-amber { background: var(--accent); border-color: var(--accent); color: #0f172a; }
+    .btn-amber:hover { background: #d97706; }
+    .btn-active { background: #334155; border-color: #60a5fa; color: #fff; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .segmented button { border: none; border-radius: 0; padding: 5px 9px; font-size: 12px; font-weight: 600; cursor: pointer; background: var(--surface-2); color: var(--muted); }
+    .segmented button.active { background: var(--primary); color: #fff; }
+
+    select, input[type="text"] {
+      padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: 12px; outline: none;
+    }
+    select:focus, input[type="text"]:focus { border-color: #60a5fa; }
+
+    /* Sub-toolbar (Context Controls) */
+    .subbar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 6px; padding: 6px 12px;
+      background: var(--surface-2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* Main Split Horizontal Workspace */
+    .workspace { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+    .canvas-pane {
+      flex: 1 1 64%; display: flex; flex-direction: column; min-width: 0;
+      border-right: 1px solid var(--border); background: #ffffff; position: relative;
+    }
+    .canvas-toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 6px;
+      padding: 5px 10px; background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; overflow-x: auto;
+    }
+    .stepper-row { display: flex; align-items: center; gap: 4px; overflow-x: auto; flex: 1; }
+    .step-pill {
+      padding: 4px 8px; border-radius: 5px; font-size: 11.5px; font-weight: 600;
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--muted);
+      cursor: pointer; white-space: nowrap;
+    }
+    .step-pill.done { background: #1e3a8a; border-color: #3b82f6; color: #dbeafe; }
+    .step-pill.active { background: var(--primary); border-color: #60a5fa; color: #fff; }
+
+    #ewd-viewport {
+      flex: 1; position: relative; overflow: hidden; background: #ffffff;
+      cursor: grab; touch-action: none;
+    }
+    #ewd-viewport:active { cursor: grabbing; }
+    #ewd-svg-host { width: 100%; height: 100%; }
+    #ewd-svg-host svg { width: 100%; height: 100%; display: block; }
+    #ewd-svg-host a { cursor: pointer; transition: opacity 0.2s ease; }
+
+    /* Dedicated Footer Bar OUTSIDE Canvas (0% Diagram Covered!) */
+    .canvas-footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 5px 10px; background: var(--surface); border-top: 1px solid var(--border);
+      font-size: 11.5px; flex-shrink: 0;
+    }
+    .legend-chip { padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; }
+    .chip-from { background: #fef08a; color: #78350f; }
+    .chip-to { background: #bfdbfe; color: #1e3a8a; }
+
+    /* Right Inspector Panel */
+    .inspector-pane {
+      width: 380px; max-width: 44vw; min-width: 280px;
+      display: flex; flex-direction: column;
+      background: var(--surface); overflow: hidden; flex-shrink: 0;
+      transition: width 0.2s ease;
+    }
+    .inspector-pane.collapsed { width: 0 !important; min-width: 0 !important; border: none; }
+    .insp-scroll { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+    .insp-footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 6px;
+      padding: 8px 12px; border-top: 1px solid var(--border); background: var(--surface-2);
+      flex-shrink: 0;
+    }
+
+    .badge-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+    .mono-badge { padding: 3px 7px; border-radius: 5px; font-family: Consolas, monospace; font-weight: 700; font-size: 11.5px; }
+    .cat-POWER { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1px solid rgba(239,68,68,0.45); }
+    .cat-INPUT { background: rgba(59,130,246,0.18); color: #93c5fd; border: 1px solid rgba(59,130,246,0.45); }
+    .cat-OUTPUT { background: rgba(249,115,22,0.18); color: #fdba74; border: 1px solid rgba(249,115,22,0.45); }
+    .cat-FEEDBACK { background: rgba(168,85,247,0.18); color: #d8b4fe; border: 1px solid rgba(168,85,247,0.45); }
+    .cat-GROUND { background: rgba(148,163,184,0.2); color: #e2e8f0; border: 1px solid rgba(148,163,184,0.45); }
+
+    .stage-title { font-size: 14px; font-weight: 700; line-height: 1.35; color: #fff; }
+    .dir-box {
+      padding: 7px 9px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border);
+      font-family: Consolas, monospace; font-size: 11.5px; line-height: 1.45; color: #e2e8f0;
+    }
+    .func-text { color: #cbd5e1; line-height: 1.5; font-size: 12.5px; }
+    .note-box {
+      padding: 7px 9px; border-radius: 6px; background: rgba(59,130,246,0.14);
+      border: 1px solid rgba(59,130,246,0.4); color: #dbeafe; line-height: 1.45; font-size: 12px;
+    }
+
+    /* 3-Row Clean Anti-Salah Card */
+    .anti-salah {
+      border-radius: 7px; border: 1px solid rgba(245,158,11,0.5); background: rgba(245,158,11,0.12);
+      padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .as-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; }
+    .as-row + .as-row { border-top: 1px solid rgba(245,158,11,0.22); padding-top: 5px; }
+    .as-lbl { font-weight: 700; color: #fcd34d; white-space: nowrap; }
+    .as-val { text-align: right; color: #fff; font-weight: 600; }
+    .as-val.mono { font-family: Consolas, monospace; color: #fde68a; }
+
+    /* Wire Cards (2-Row Zero Collision) */
+    .wire-card {
+      width: 100%; text-align: left; padding: 7px 9px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+      cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+    }
+    .wire-card:hover { border-color: #60a5fa; }
+    .wire-card.active { border: 2px solid var(--accent); background: rgba(245,158,11,0.15); }
+    .wire-card-top { font-family: Consolas, monospace; font-size: 12px; font-weight: 700; color: #fff; }
+    .wire-card-bot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 11.5px; }
+    .color-pill {
+      padding: 1px 6px; border-radius: 4px; font-family: Consolas, monospace;
+      background: var(--surface); border: 1px solid #475569; color: #f8fafc; font-weight: 600;
+    }
+    .handoff-box {
+      padding: 8px 10px; border-radius: 6px; background: rgba(37,99,235,0.16);
+      border: 1px solid rgba(96,165,250,0.4); color: #e0f2fe; font-size: 12px; line-height: 1.45;
+    }
+
+    /* PDF Container */
+    #pdf-pane { width: 100%; height: 100%; display: none; flex-direction: column; background: #1e293b; }
+    #pdf-frame { flex: 1; width: 100%; border: none; background: #fff; }
+
+    /* X-Ray & Animated Directional Flow CSS (Safe for 2-Color Toyota & Suzuki Wires!) */
+    svg.xray-mode > a[data-ewd-code],
+    svg.xray-mode > a[data-ewd-lineID],
+    svg.xray-mode .sz-node,
+    svg.xray-mode .sz-wire { opacity: 0.08 !important; }
+    svg.xray-mode > path { opacity: 0.20; }
+    svg.xray-mode > text { opacity: 0.34; }
+    svg.xray-mode > a.chain-prev-node, svg.xray-mode .sz-prev-node { opacity: 0.42 !important; }
+    svg.xray-mode > a.chain-prev-wire, svg.xray-mode .sz-prev-wire { opacity: 0.35 !important; }
+
+    svg.xray-mode > a.xray-node, svg.xray-mode .sz-node-from, svg.xray-mode .sz-node-to { opacity: 1 !important; }
+    svg.xray-mode > a.xray-node-from path:first-child,
+    svg.xray-mode .sz-node-from rect.box-bg { fill: #fef08a !important; stroke: #d97706 !important; stroke-width: 2.8px !important; }
+    svg.xray-mode > a.xray-node-to path:first-child,
+    svg.xray-mode .sz-node-to rect.box-bg { fill: #dbeafe !important; stroke: #2563eb !important; stroke-width: 2.8px !important; }
+
+    svg.xray-mode > a.xray-wire, svg.xray-mode .sz-wire-active { opacity: 1 !important; }
+    svg > a.ewd-focus-wire, svg .sz-wire-focus {
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 3px #f59e0b) drop-shadow(0 0 6px #dc2626) !important;
+    }
+    svg > a.ewd-focus-wire path:first-child, svg .sz-wire-focus path.w-base { stroke-width: 8.5px !important; }
+
+    @keyframes flowFwd { from { stroke-dashoffset: 32; } to { stroke-dashoffset: 0; } }
+    @keyframes flowRev { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 32; } }
+    .flow-pulse-fwd {
+      fill: none; stroke: #ffffff; stroke-width: 2.4; stroke-dasharray: 5 11; stroke-linecap: round;
+      pointer-events: none; filter: drop-shadow(0 0 2.5px #f59e0b); animation: flowFwd 0.85s linear infinite;
+    }
+    .flow-pulse-rev {
+      fill: none; stroke: #ffffff; stroke-width: 2.4; stroke-dasharray: 5 11; stroke-linecap: round;
+      pointer-events: none; filter: drop-shadow(0 0 2.5px #f59e0b); animation: flowRev 0.85s linear infinite;
+    }
+    .hidden { display: none !important; }
+    .loading-overlay {
+      position: absolute; inset: 0; background: rgba(15,23,42,0.75); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-weight: 700; z-index: 20;
+    }
+    /* BYOD Empty State & Local File Picker (REQ-10) */
+    .byod-empty {
+      position: absolute; inset: 0; z-index: 15;
+      background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+      color: var(--text); display: flex; align-items: center; justify-content: center;
+      padding: 20px; overflow-y: auto;
+    }
+    .byod-card {
+      max-width: 520px; width: 100%; border-radius: 12px; padding: 20px;
+      background: rgba(15,23,42,0.92); border: 1px solid #334155;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 12px;
+      text-align: center;
+    }
+    .byod-card h3 { font-size: 15px; font-weight: 800; color: #38bdf8; }
+    .byod-card p { font-size: 12.5px; line-height: 1.55; color: #cbd5e1; }
+    .byod-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+
+    /* Safety Guardrail Banners (REQ-12) */
+    .safety-banner {
+      border-radius: 7px; padding: 8px 10px; font-size: 12px; font-weight: 700; line-height: 1.45;
+      display: flex; align-items: flex-start; gap: 7px;
+    }
+    .safety-ohm {
+      background: rgba(245,158,11,0.18); border: 1px solid rgba(245,158,11,0.65); color: #fde68a;
+    }
+    .safety-hv {
+      background: rgba(220,38,38,0.22); border: 1px solid rgba(248,113,113,0.75); color: #fecaca;
+    }
+
+    /* Mode Tooltip Strip & Deep-link Chip (REQ-11 & REQ-12) */
+    .mode-hint-bar {
+      padding: 4px 12px; font-size: 11.5px; color: #bae6fd; background: rgba(14,165,233,0.12);
+      border-bottom: 1px solid rgba(56,189,248,0.25); display: flex; align-items: center;
+      justify-content: space-between; gap: 8px; flex-shrink: 0;
+    }
+    .deeplink-chip {
+      padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.55); color: #fcd34d;
+      white-space: nowrap;
+    }
+
+    /* Touch-friendly Zoom Buttons >= 44x44px (REQ-12) */
+    .btn-zoom {
+      min-width: 44px; min-height: 44px; justify-content: center; font-size: 14px; font-weight: 700;
+      padding: 4px 8px;
+    }
+
+    /* OEM Wire Color Legend Modal (REQ-12) */
+    .ewd-modal-backdrop {
+      position: fixed; inset: 0; z-index: 60; background: rgba(2,6,23,0.78);
+      display: flex; align-items: center; justify-content: center; padding: 14px;
+    }
+    .ewd-modal-box {
+      max-width: 480px; width: 100%; border-radius: 12px; background: var(--surface);
+      border: 1px solid #475569; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+      max-height: 88dvh; overflow-y: auto; box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+    }
+    .color-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .color-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px;
+      background: var(--surface-2); border: 1px solid var(--border); font-size: 12px;
+    }
+    .swatch {
+      width: 18px; height: 18px; border-radius: 4px; border: 1px solid #64748b; flex-shrink: 0;
+    }
+
+    /* Compact Mobile Bottom Bar (<= 640px, REQ-12) */
+    .mobile-ewd-bar { display: none; }
+
+    @media (max-width: 780px) {
+      .inspector-pane { width: 300px; min-width: 250px; }
+      .topbar { padding: 5px 8px; }
+    }
+    @media (max-width: 640px) {
+      .desktop-secondary-controls { display: none !important; }
+      .topbar { flex-wrap: nowrap; overflow-x: auto; padding: 4px 6px; gap: 4px; -webkit-overflow-scrolling: touch; }
+      .topbar .topbar-group { flex-wrap: nowrap; flex-shrink: 0; }
+      .topbar .btn, .segmented button { white-space: nowrap; flex-shrink: 0; }
+      .brand-pill { font-size: 10px; padding: 3px 6px; white-space: nowrap; flex-shrink: 0; }
+      .segmented button { padding: 4px 7px; font-size: 10.5px; }
+      .subbar { flex-wrap: nowrap; overflow-x: auto; padding: 4px 6px; gap: 4px; }
+      .subbar .topbar-group { flex-wrap: nowrap; min-width: 0; }
+      .subbar label { display: none; }
+      .subbar select { min-width: 0 !important; max-width: 100% !important; font-size: 11px; padding: 4px 6px; }
+      .subbar .btn { white-space: nowrap; padding: 4px 7px; font-size: 11px; flex-shrink: 0; }
+      #btn-chain-pdf { display: none !important; }
+      .canvas-toolbar { padding: 3px 6px; gap: 4px; }
+      .canvas-footer { display: none; }
+      .mode-hint-bar { display: none; }
+      .workspace { position: relative; }
+      .canvas-pane { flex: 1 1 100%; border-right: none; }
+      .inspector-pane {
+        position: absolute; right: 0; top: 0; bottom: 0; z-index: 30;
+        width: 88vw; max-width: 360px; box-shadow: -8px 0 24px rgba(0,0,0,0.6);
+      }
+      .inspector-pane.collapsed { display: none !important; }
+      .mobile-ewd-bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 4px;
+        padding: 4px 6px; background: var(--surface); border-top: 1px solid var(--border);
+        flex-shrink: 0; z-index: 35;
+      }
+      .mobile-ewd-bar .btn { padding: 5px 8px; font-size: 11px; min-height: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <input type="file" id="byod-local-file-input" accept=".pdf,.svg,.svgz" class="hidden" onchange="handleLocalByodFile(this)" />
+  <div class="app-shell" id="ewd-app-shell">
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-group">
+        <a href="index.html" class="btn" title="Kembali ke Dashboard Utama AGOS">← Dashboard</a>
+        <span class="brand-pill">AGOS WIRING VIEWER v2.2.0</span>
+        <div class="segmented">
+          <button type="button" id="mode-btn-chains" class="active" onclick="switchAppMode('chains')">1. Alur Sinyal Berantai</button>
+          <button type="button" id="mode-btn-toyota" onclick="switchAppMode('toyota')">2. Diagram Vektor OEM (.svgz · BYOD)</button>
+          <button type="button" id="mode-btn-pdf" onclick="switchAppMode('pdf')">3. Dokumen Manual PDF Lokal (BYOD)</button>
+        </div>
+      </div>
+      <div class="topbar-group desktop-secondary-controls">
+        <div class="segmented" title="Mode Junior: panduan fungsi & cara pasang probe • Mode Senior: pinout & spek padat">
+          <button type="button" id="exp-btn-junior" class="active" onclick="setExpMode('junior')" title="Menampilkan penjelasan fungsi tiap komponen & panduan cara pasang probe merah/hitam multimeter">Mode Junior</button>
+          <button type="button" id="exp-btn-senior" onclick="setExpMode('senior')" title="Menampilkan ringkasan pinout, warna kabel, dan nilai ukur standar secara padat">Mode Senior</button>
+        </div>
+        <button type="button" id="btn-xray" class="btn btn-amber" onclick="toggleXray()" title="Meredupkan kabel lain agar hanya jalur sinyal aktif yang menyala terang">X-Ray: ON</button>
+        <button type="button" class="btn" onclick="toggleInspector()" title="Sembunyikan/Tampilkan panel inspeksi kanan">◧ Panel</button>
+      </div>
+    </div>
+
+    <!-- MODE TOOLTIP & DEEP-LINK CONTEXT STRIP (REQ-11 & REQ-12) -->
+    <div id="mode-hint-bar" class="mode-hint-bar">
+      <span id="mode-hint-text">💡 <b>Mode Junior Aktif:</b> Menampilkan penjelasan fungsi tiap komponen &amp; panduan cara pasang probe multimeter. <b>X-Ray ON</b> meredupkan kabel lain agar jalur sinyal aktif menyala terang.</span>
+      <span id="deeplink-context-badge" class="deeplink-chip hidden"></span>
+    </div>
+
+    <!-- SUB-BAR: MODE 1 (CURATED SIGNAL CHAINS) -->
+    <div id="subbar-chains" class="subbar">
+      <div class="topbar-group" style="flex:1;">
+        <label style="color:var(--muted);font-weight:600;">Pilih Alur Kasus:</label>
+        <select id="chain-select" onchange="loadChain(this.value)" style="min-width:260px;max-width:540px;flex:1;"></select>
+      </div>
+      <div class="topbar-group">
+        <button type="button" id="btn-chain-pdf" class="btn hidden" onclick="openChainPdf()">📄 Buka Halaman PDF Asli</button>
+        <button type="button" class="btn" onclick="showFullChain()">🔗 Rantai Penuh</button>
+      </div>
+    </div>
+
+    <!-- SUB-BAR: MODE 2 (BYOD OEM SVGZ + LOCAL UPLOAD) -->
+    <div id="subbar-toyota" class="subbar hidden">
+      <div class="topbar-group" style="flex:1;">
+        <select id="ty-model-select" onchange="onToyotaModelChange()" style="max-width:240px;"></select>
+        <input type="text" id="ty-sys-filter" oninput="filterToyotaSystems()" placeholder="Filter sistem (ECS, ABS, CAN, AC)..." style="width:190px;" />
+        <select id="ty-sys-select" onchange="loadToyotaSystem(this.value)" style="max-width:280px;flex:1;"></select>
+      </div>
+      <div class="topbar-group">
+        <select id="ty-part-picker" onchange="freeTraceByDomIndex(this.value)" style="max-width:200px;">
+          <option value="">🔍 Cari Komponen di Skema...</option>
+        </select>
+        <button type="button" class="btn btn-primary" onclick="triggerLocalByodUpload('.svg,.svgz')">📂 Buka File SVGZ Lokal</button>
+      </div>
+    </div>
+
+    <!-- SUB-BAR: MODE 3 (BYOD LOCAL PDF VIEWER) -->
+    <div id="subbar-pdf" class="subbar hidden">
+      <div class="topbar-group" style="flex:1;">
+        <select id="pdf-model-select" onchange="onPdfModelChange()" style="max-width:250px;"></select>
+        <input type="text" id="pdf-doc-filter" oninput="filterPdfDocs()" placeholder="Cari dokumen EWD..." style="width:180px;" />
+        <select id="pdf-doc-select" onchange="openSelectedPdf()" style="max-width:280px;flex:1;"></select>
+      </div>
+      <div class="topbar-group">
+        <button type="button" class="btn btn-amber" onclick="triggerLocalByodUpload('.pdf')">📂 Buka File PDF Lokal</button>
+        <button type="button" id="pdf-open-newtab" disabled onclick="openActivePdfInNewTab()" class="btn btn-primary" title="Buka dokumen PDF yang sedang aktif di tab baru">↗ Buka PDF di Tab Baru</button>
+      </div>
+    </div>
+
+    <!-- MAIN HORIZONTAL WORKSPACE -->
+    <div class="workspace">
+      <!-- LEFT: VECTOR CANVAS OR PDF IFRAME -->
+      <div class="canvas-pane">
+        <!-- Stepper & Touch-Friendly Zoom Controls (REQ-12) -->
+        <div id="vector-toolbar" class="canvas-toolbar">
+          <div id="stepper-host" class="stepper-row"></div>
+          <div class="topbar-group" style="flex-shrink:0;">
+            <button type="button" class="btn" onclick="toggleColorLegendModal(true)" title="Legenda kode warna kabel standar pabrikan OEM">🎨 Kode Warna Kabel</button>
+            <button type="button" class="btn btn-zoom" onclick="zoomCanvas(1.35)" title="Perbesar Diagram">+</button>
+            <button type="button" class="btn btn-zoom" onclick="zoomCanvas(0.74)" title="Perkecil Diagram">−</button>
+            <button type="button" class="btn btn-zoom" onclick="resetCanvasView()" title="Tampilkan Diagram Utuh">Utuh</button>
+            <button type="button" class="btn btn-zoom" id="btn-fullscreen" onclick="toggleFullscreenViewer()" title="Mode Layar Penuh (Fullscreen)">⛶</button>
+            <span id="zoom-readout" style="font-family:Consolas,monospace;color:var(--muted);min-width:34px;text-align:right;">1.0x</span>
+          </div>
+        </div>
+
+        <!-- SVG Interactive Viewport -->
+        <div id="ewd-viewport">
+          <div id="ewd-svg-host"></div>
+          <div id="loading-overlay" class="loading-overlay hidden">Memuat diagram vektor OEM...</div>
+          <!-- BYOD Empty State Overlay for Tab 2 / Unavailable Cloud SVGZ (REQ-10) -->
+          <div id="byod-svg-empty" class="byod-empty hidden">
+            <div class="byod-card">
+              <div style="font-size:32px;">🛡️</div>
+              <h3>Mode BYOD Lokal — Aset Diagram Vektor OEM</h3>
+              <p>File diagram <code>.svgz</code> / Manual PDF dikelola secara lokal di perangkat bengkel Anda (Arsitektur BYOD — Aman HKI). Pilih file dari perangkat Anda atau gunakan <b>Tab 1 (Alur Sinyal Vektor Built-in)</b>.</p>
+              <div class="byod-actions">
+                <button type="button" class="btn btn-primary" onclick="triggerLocalByodUpload('.svg,.svgz,.pdf')">📂 Buka File PDF / SVGZ Lokal</button>
+                <button type="button" class="btn btn-amber" onclick="switchAppMode('chains')">⚡ Kembali ke Tab 1 (Alur Sinyal Built-in)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Native Vector PDF Pane (Mode 3) -->
+        <div id="pdf-pane" style="position:relative;">
+          <div id="pdf-quick-pages" class="canvas-toolbar" style="justify-content:flex-start;"></div>
+          <iframe id="pdf-frame" title="Dokumen Manual PDF Lokal (BYOD)"></iframe>
+          <div id="pdf-byod-empty" class="byod-empty hidden">
+            <div class="byod-card">
+              <div style="font-size:32px;">📄</div>
+              <h3>Dokumen Manual PDF Lokal (Arsitektur BYOD)</h3>
+              <p>File diagram <code>.svgz</code> / Manual PDF dikelola secara lokal di perangkat bengkel Anda (Arsitektur BYOD — Aman HKI). Pilih file PDF resmi dari perangkat Anda atau gunakan <b>Tab 1 (Alur Sinyal Vektor Built-in)</b>.</p>
+              <div class="byod-actions">
+                <button type="button" class="btn btn-primary" onclick="triggerLocalByodUpload('.pdf')">📂 Buka File PDF / SVGZ Lokal</button>
+                <button type="button" class="btn btn-amber" onclick="switchAppMode('chains')">⚡ Gunakan Tab 1 (Alur Sinyal Built-in)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Dedicated Footer Bar (Outside SVG so 0% of Diagram is Covered!) -->
+        <div class="canvas-footer">
+          <span id="canvas-hud" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">✨ Titik putih bergerak = arah sinyal/arus • Scroll/Pinch untuk Zoom • Klik kotak/kabel untuk inspeksi</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <span class="legend-chip chip-from">ASAL</span>
+            <span style="color:var(--muted);">→</span>
+            <span class="legend-chip chip-to">TUJUAN</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: ADAPTIVE JUNIOR/SENIOR INSPECTOR PANEL -->
+      <div id="inspector-pane" class="inspector-pane">
+        <div class="insp-scroll">
+          <div class="badge-row">
+            <span id="insp-stage-badge" class="mono-badge" style="background:var(--primary);color:#fff;">TAHAP 1 / 5</span>
+            <span id="insp-cat-badge" class="mono-badge cat-INPUT">🔵 INPUT SINYAL</span>
+          </div>
+
+          <div id="insp-title" class="stage-title">Memuat Katalog Wiring AGOS...</div>
+          <div id="insp-direction" class="dir-box"></div>
+
+          <!-- Safety Guardrail Banners (REQ-12: Ohm & Hybrid/EV HV) -->
+          <div id="safety-ohm-banner" class="safety-banner safety-ohm hidden">
+            <span>⚠️</span>
+            <span>WAJIB Kunci Kontak OFF &amp; Lepas Soket sebelum ukur tahanan (Ohm / Kontinuitas)!</span>
+          </div>
+          <div id="safety-hv-banner" class="safety-banner safety-hv hidden">
+            <span>⚡</span>
+            <span>TEGANGAN TINGGI (HV): Wajib APD Sarung Tangan Class 0 (1000V) &amp; Cabut Service Plug!</span>
+          </div>
+
+          <!-- Junior Explanation Block -->
+          <div id="junior-block" style="display:flex;flex-direction:column;gap:8px;">
+            <div id="insp-func" class="func-text"></div>
+            <div id="insp-note" class="note-box hidden"></div>
+          </div>
+
+          <!-- 3-Row Clean Anti-Salah Card -->
+          <div id="anti-salah-card" class="anti-salah">
+            <div class="as-row"><span class="as-lbl">🔑 Kunci / Soket:</span><span id="as-key" class="as-val">-</span></div>
+            <div class="as-row"><span class="as-lbl">📟 Mode Alat:</span><span id="as-tool" class="as-val">-</span></div>
+            <div class="as-row"><span class="as-lbl">✅ Standar OEM:</span><span id="as-spec" class="as-val mono">-</span></div>
+          </div>
+
+          <!-- Clickable Wire Cards (2-Row Zero Overlap) -->
+          <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:12px;">
+              <span>Kabel &amp; Pin Asli (Klik Sorot 1 Kabel):</span>
+              <span id="insp-wire-count" style="font-family:Consolas,monospace;color:var(--muted);"></span>
+            </div>
+            <div id="insp-wires-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+          </div>
+
+          <div id="insp-handoff" class="handoff-box"></div>
+        </div>
+
+        <!-- Bottom Prev/Next Navigation -->
+        <div class="insp-footer">
+          <button type="button" id="btn-prev" class="btn" onclick="stepChain(-1)">◀ Lalu</button>
+          <span id="insp-scope" style="font-family:Consolas,monospace;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">AGOS EWD v2.2.0</span>
+          <button type="button" id="btn-next" class="btn btn-primary" onclick="stepChain(1)">Lanjut Tahap ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPACT MOBILE BOTTOM TOOLBAR (<= 640px, REQ-12) -->
+    <div id="mobile-ewd-bar" class="mobile-ewd-bar">
+      <button type="button" id="mob-exp-btn" class="btn" onclick="setExpMode(expMode === 'junior' ? 'senior' : 'junior')">🎓 Junior</button>
+      <button type="button" id="mob-xray-btn" class="btn btn-amber" onclick="toggleXray()">X-Ray: ON</button>
+      <button type="button" class="btn" onclick="toggleColorLegendModal(true)">🎨 Warna</button>
+      <button type="button" id="mob-panel-btn" class="btn btn-primary" onclick="toggleInspector()">◧ Info</button>
+    </div>
+  </div>
+
+  <!-- OEM WIRE COLOR LEGEND MODAL (REQ-12) -->
+  <div id="modal-wire-colors" class="ewd-modal-backdrop hidden" onclick="if(event.target===this) toggleColorLegendModal(false)">
+    <div class="ewd-modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:14px;font-weight:800;color:#38bdf8;">🎨 Legenda Kode Warna Kabel Standar OEM</h3>
+        <button type="button" class="btn" onclick="toggleColorLegendModal(false)">✕ Tutup</button>
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;line-height:1.45;">
+        Format 2 warna (garis strip): huruf <b>pertama</b> = warna dasar kabel, huruf <b>kedua</b> = warna garis strip. Contoh: <code>B/W</code> atau <code>B-W</code> = <b>Hitam garis Putih</b>.
+      </div>
+      <div class="color-grid">
+        <div class="color-row"><span class="swatch" style="background:#111827;"></span><b>B / BLK</b> — Hitam</div>
+        <div class="color-row"><span class="swatch" style="background:#f8fafc;"></span><b>W / WHT</b> — Putih</div>
+        <div class="color-row"><span class="swatch" style="background:#dc2626;"></span><b>R / RED</b> — Merah</div>
+        <div class="color-row"><span class="swatch" style="background:#16a34a;"></span><b>G / GRN</b> — Hijau</div>
+        <div class="color-row"><span class="swatch" style="background:#2563eb;"></span><b>L / BLU</b> — Biru</div>
+        <div class="color-row"><span class="swatch" style="background:#eab308;"></span><b>Y / YEL</b> — Kuning</div>
+        <div class="color-row"><span class="swatch" style="background:#92400e;"></span><b>BR / BRN</b> — Cokelat</div>
+        <div class="color-row"><span class="swatch" style="background:#64748b;"></span><b>GR / GRY</b> — Abu-abu</div>
+        <div class="color-row"><span class="swatch" style="background:#4ade80;"></span><b>LG / LT GRN</b> — Hijau Muda</div>
+        <div class="color-row"><span class="swatch" style="background:#f97316;"></span><b>O / ORN</b> — Oranye (HV!)</div>
+        <div class="color-row"><span class="swatch" style="background:#ec4899;"></span><b>P / PNK</b> — Pink</div>
+        <div class="color-row"><span class="swatch" style="background:#9333ea;"></span><b>V / PPL</b> — Ungu</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // STATE & CONSTANTS
+    // =========================================================================
+    const COLOR_ID = {
+      'R': 'Merah', 'B': 'Hitam', 'W': 'Putih', 'G': 'Hijau', 'L': 'Biru', 'Y': 'Kuning',
+      'O': 'Oranye', 'P': 'Pink', 'V': 'Ungu', 'BR': 'Cokelat', 'GR': 'Abu-abu',
+      'LG': 'Hijau Muda', 'SB': 'Biru Langit', 'BE': 'Krem'
+    };
+    function decodeColor(code) {
+      if (!code) return '-';
+      if (code.includes('(') || code.includes('/')) return code;
+      const parts = code.split('-').map((p) => COLOR_ID[p] || p);
+      return parts.length === 2 ? `${code} (${parts[0]}-${parts[1]})` : `${code} (${parts[0]})`;
+    }
+
+    let catalogData = { models: [], signal_chains: [] };
+    let chainsMap = {};
+    let appMode = 'chains'; // 'chains' | 'toyota' | 'pdf'
+    let expMode = 'junior'; // 'junior' | 'senior'
+    let xrayOn = true;
+
+    // Active schematic state
+    let activeRenderKind = 'toyota_svgz'; // 'toyota_svgz' | 'suzuki_schematic'
+    let activeChainId = 'toyota_ckp_to_inj';
+    let activeStageIdx = 0;
+    let activeEdges = [];
+    let activeSysCode = '';
+    let baseVB = [0, 0, 780, 460];
+    let curVB = [0, 0, 780, 460];
+    let domPartAnchors = [];
+    let codeToTitle = {};
+
+    // =========================================================================
+    // POLISHED SUZUKI v6.1 VECTOR SCHEMATICS (780x460, 1:1 PIN ALIGNMENT)
+    // =========================================================================
+    function szWire(id, d, baseC, stripeC, px, py, pw, lbl) {
+      const st = stripeC
+        ? `<path d="${d}" fill="none" stroke="#ffffff" stroke-width="2.2"/><path d="${d}" fill="none" stroke="${stripeC}" stroke-width="1.2"/>`
+        : '';
+      return `<a class="sz-wire" data-wire-id="${id}" onclick="spotlightWire('${id}', null)">
+        <path class="w-base" d="${d}" fill="none" stroke="${baseC}" stroke-width="4.6" stroke-linejoin="round"/>
+        ${st}
+        <g pointer-events="none">
+          <rect x="${px - pw / 2}" y="${py - 9}" width="${pw}" height="15" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.9"/>
+          <text x="${px}" y="${py + 1.5}" text-anchor="middle" style="font-size:8.8px;font-family:Arial,sans-serif;font-weight:700;fill:#0f172a;">${lbl}</text>
+        </g>
+      </a>`;
+    }
+    function szNode(id, x, y, w, h, title, s1, s2 = '', extra = '') {
+      const s2El = s2 ? `<text x="${x + w / 2}" y="${y + 42}" text-anchor="middle" style="font-size:8.5px;font-family:Arial,sans-serif;fill:#475569;">${s2}</text>` : '';
+      return `<a class="sz-node" data-node-id="${id}">
+        <rect class="box-bg" x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#f1f5f9" stroke="#1e293b" stroke-width="1.6"/>
+        <text x="${x + w / 2}" y="${y + 17}" text-anchor="middle" style="font-size:10.5px;font-family:Arial,sans-serif;font-weight:700;fill:#0f172a;">${title}</text>
+        <text x="${x + w / 2}" y="${y + 30}" text-anchor="middle" style="font-size:8.5px;font-family:Arial,sans-serif;fill:#475569;">${s1}</text>
+        ${s2El}${extra}
+      </a>`;
+    }
+    function szPin(xDot, y, lbl, align = 'left', col = '#0f172a') {
+      const tx = align === 'left' ? xDot + 8 : xDot - 8;
+      const anc = align === 'left' ? 'start' : 'end';
+      return `<circle cx="${xDot}" cy="${y}" r="3.2" fill="${col}" stroke="#ffffff" stroke-width="1"/>
+        <text x="${tx}" y="${y + 3}" text-anchor="${anc}" style="font-size:9px;font-family:Consolas,monospace;font-weight:700;fill:${col};">${lbl}</text>`;
+    }
+
+    const SUZUKI_SVGS = {
+      'GV_P0335': `<svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg">
+        ${szNode('FUSE_BOX', 18, 22, 165, 62, '9. Box Sikring No.2', '10. FI  •  11. ST', '12. ST SIG  •  14. IGN')}
+        ${szNode('MAIN_RELAY', 248, 22, 145, 62, '4. Main Relay', 'Suplai +12V Utama ECM', 'Kontrol Pin C37-22')}
+        ${szNode('IGN_SW', 18, 155, 165, 58, '5. Kunci Kontak', 'Posisi IG ON & START', 'Suplai Sinyal Starter')}
+        ${szNode('ST_RELAY', 248, 155, 155, 62, '7. Relay Starter Control', 'Mengaktifkan Motor Starter', '& Lapor Sinyal ke ECM')}
+        ${szNode('STARTER', 18, 300, 165, 58, '6 & 15. Starting Motor', 'Magnet Clutch & Starter', 'Memutar Kruk As')}
+        ${szNode('TR_SW', 248, 300, 165, 62, '8. Trans. Range SW', '[A] Model A/T: BLK/RED', '[B] Model M/T: BLK (Massa)')}
+        ${szNode('ECM', 505, 22, 255, 228, '3. ECM (E23 & C37)', 'Grand Vitara JB420 / J20A', '',
+          `<line x1="515" y1="39" x2="750" y2="39" stroke="#cbd5e1" stroke-width="1"/>` +
+          szPin(505, 55, 'E23-1/16/29/60 (+B 12V)', 'left', '#b91c1c') +
+          szPin(505, 80, 'C37-22 (Kontrol Main Rly)', 'left', '#1e3a8a') +
+          szPin(505, 174, 'C37-30 / 58 (Sinyal Starter)', 'left', '#c2410c') +
+          szPin(550, 250, 'C37-36 (PNK)', 'left', '#be185d') +
+          szPin(645, 250, 'C37-51 (BLU)', 'left', '#1d4ed8') +
+          `<circle cx="735" cy="250" r="3.2" fill="#111827" stroke="#ffffff" stroke-width="1"/>
+           <text x="748" y="236" text-anchor="end" style="font-size:8.5px;font-family:Consolas,monospace;font-weight:700;fill:#334155;">C37-15/29/48 (GND)</text>`
+        )}
+        ${szNode('CKP_GV', 490, 315, 200, 68, '1. CKP Sensor (2-Pin)', '2. Baca Gigi Sensor Plate', 'Induktif: PNK (+) & BLU (-)',
+          `<circle cx="550" cy="315" r="3.2" fill="#be185d" stroke="#ffffff" stroke-width="1"/>
+           <circle cx="645" cy="315" r="3.2" fill="#1d4ed8" stroke="#ffffff" stroke-width="1"/>`
+        )}
+        ${szNode('GND_GV', 560, 405, 195, 42, 'Massa Blok Mesin (GND)', 'Tahanan wajib < 1 Ω ke Aki (-)')}
+        ${szWire('GV_W1', 'M 183,52 L 248,52', '#111827', '#ef4444', 216, 40, 56, 'BLK/RED')}
+        ${szWire('GV_W2', 'M 393,55 L 505,55', '#2563eb', '#111827', 449, 43, 66, 'BLU/BLK +12V')}
+        ${szWire('GV_W3', 'M 505,80 L 393,80', '#111827', '#ffffff', 449, 95, 62, 'BLK/WHT')}
+        ${szWire('GV_W4', 'M 100,84 L 100,155', '#111827', '#eab308', 100, 120, 74, 'BLK/YEL ST')}
+        ${szWire('GV_W5', 'M 183,184 L 248,184', '#111827', '#eab308', 216, 171, 56, 'BLK/YEL')}
+        ${szWire('GV_W6', 'M 403,174 L 505,174', '#111827', '#f97316', 454, 161, 62, 'BLK/ORN')}
+        ${szWire('GV_W7', 'M 248,200 L 214,200 L 214,328 L 183,328', '#111827', '#eab308', 214, 258, 66, 'Ke Starter')}
+        ${szWire('GV_W8', 'M 330,217 L 330,300', '#111827', '#ef4444', 330, 258, 96, '[A]BLK/RED [B]BLK')}
+        ${szWire('GV_W9', 'M 550,315 L 550,250', '#ec4899', null, 550, 283, 44, 'PNK')}
+        ${szWire('GV_W10', 'M 645,315 L 645,250', '#2563eb', null, 645, 283, 44, 'BLU')}
+        ${szWire('GV_W11', 'M 735,250 L 735,405', '#111827', null, 735, 345, 58, 'BLK GND')}
+      </svg>`,
+      'ERTIGA_K14B': `<svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg">
+        ${szNode('ER_MAIN', 18, 28, 175, 64, 'Main Relay & Aki +12V', 'Suplai +B1 / +B2 ECM', 'Dikontrol Pin E01-54')}
+        ${szNode('ER_CKP', 18, 155, 175, 66, 'Sensor CKP (3-Pin)', 'Tipe Hall-Effect Digital', 'Pulsa 0–1V ↔ 4–5V')}
+        ${szNode('ER_CMP', 18, 265, 175, 66, 'Sensor CMP (Camshaft)', 'Sinkronisasi Noken As', 'Urutan 1-3-4-2')}
+        ${szNode('ER_GND', 288, 392, 195, 48, 'Ground Utama ECM', 'Pin C01-50 & C01-51 (BLK)', 'Tegangan < 0,3 V')}
+        ${szNode('ER_ECM', 278, 28, 215, 320, 'ECM Ertiga K14B', 'Konektor C01 & E01 (OEM)', '',
+          `<line x1="288" y1="45" x2="483" y2="45" stroke="#cbd5e1" stroke-width="1"/>` +
+          szPin(278, 56, 'E01-55/56 (+B 12V)', 'left', '#b91c1c') +
+          szPin(278, 82, 'E01-54 (Main Rly)', 'left', '#78350f') +
+          szPin(278, 188, 'C01-9 (CKP PNK)', 'left', '#be185d') +
+          szPin(278, 298, 'C01-8 (CMP RED/YEL)', 'left', '#dc2626') +
+          szPin(493, 108, 'Koil 1–4 (C01-4/17/5/6)', 'right', '#15803d') +
+          szPin(493, 215, 'Inj 1–4 (C01-13/37/25/1)', 'right', '#1d4ed8') +
+          szPin(493, 315, 'Fuel Pump (E01-49)', 'right', '#b45309') +
+          `<circle cx="385" cy="348" r="3.2" fill="#111827" stroke="#ffffff" stroke-width="1"/>`
+        )}
+        ${szNode('ER_COIL', 575, 68, 185, 76, '4× Koil Pengapian', 'GRN/YEL  •  GRN/WHT', 'BRN  •  LT GRN (0–1V IG ON)')}
+        ${szNode('ER_INJ', 575, 176, 185, 76, '4× Injektor Bensin', 'BLU/YEL  •  BLU/WHT', 'BLU/RED  •  LT GRN/BLK')}
+        ${szNode('ER_FP', 575, 282, 185, 70, 'Relay Pompa Bensin', 'Priming 2 dtk saat IG ON', '& Aktif saat Mesin Hidup')}
+        ${szWire('ER_W1', 'M 193,56 L 278,56', '#111827', '#ef4444', 236, 44, 58, 'BLK/RED')}
+        ${szWire('ER_W2', 'M 278,82 L 193,82', '#92400e', '#ffffff', 236, 97, 62, 'BRN/WHT')}
+        ${szWire('ER_W3', 'M 385,348 L 385,392', '#111827', null, 385, 372, 62, 'BLK GND')}
+        ${szWire('ER_W4', 'M 193,188 L 278,188', '#ec4899', null, 236, 175, 44, 'PNK')}
+        ${szWire('ER_W5', 'M 193,298 L 278,298', '#dc2626', '#eab308', 236, 285, 58, 'RED/YEL')}
+        ${szWire('ER_W6', 'M 493,108 L 575,108', '#16a34a', '#eab308', 534, 95, 62, '4 Kabel Koil')}
+        ${szWire('ER_W7', 'M 493,215 L 575,215', '#2563eb', '#eab308', 534, 202, 66, '4 Kabel Inj.')}
+        ${szWire('ER_W8', 'M 493,315 L 575,315', '#eab308', '#ef4444', 534, 302, 58, 'YEL/RED')}
+      </svg>`,
+      'ERTIGA_MAP': `<svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg">
+        ${szNode('MAP_ECM', 28, 32, 245, 390, 'ECM Ertiga K14B (C01)', 'Speed-Density MAP + IAT', 'Tanpa MAF (PDF Hal. 9A-53)',
+          `<line x1="38" y1="84" x2="263" y2="84" stroke="#cbd5e1" stroke-width="1"/>` +
+          szPin(273, 135, 'C01-2 (+5V Vref)', 'right', '#b91c1c') +
+          szPin(273, 185, 'C01-29 (MAP SIG)', 'right', '#dc2626') +
+          szPin(273, 250, 'C01-20 (SGND)', 'right', '#1d4ed8') +
+          szPin(273, 352, 'C01-34 (IAT SIG)', 'right', '#111827')
+        )}
+        ${szNode('MAP_SENS', 510, 52, 242, 198, 'Sensor MAP (3-Pin)', 'Manifold Absolute Pressure', 'KOEO: 3.8–4.3V • Idle: 1.0–1.6V',
+          `<line x1="520" y1="102" x2="742" y2="102" stroke="#cbd5e1" stroke-width="1"/>` +
+          szPin(510, 135, 'Pin 3 (VCC +5V)', 'left', '#b91c1c') +
+          szPin(510, 185, 'Pin 2 (SIG P0107)', 'left', '#dc2626') +
+          szPin(510, 228, 'Pin 1 (E2 GND)', 'left', '#1d4ed8')
+        )}
+        ${szNode('MAP_IAT', 510, 278, 242, 144, 'Sensor IAT (2-Pin)', 'Suhu Udara Masuk (NTC)', 'Berbagi Massa C01-20',
+          `<line x1="520" y1="326" x2="742" y2="326" stroke="#cbd5e1" stroke-width="1"/>` +
+          szPin(510, 352, 'Pin 1 (IAT SIG)', 'left', '#111827') +
+          szPin(510, 392, 'Pin 2 (E2 GND)', 'left', '#1d4ed8')
+        )}
+        ${szWire('MAP_W1', 'M 273,135 L 510,135', '#64748b', '#ef4444', 392, 122, 92, 'GRY/RED +5V')}
+        ${szWire('MAP_W2', 'M 510,185 L 273,185', '#dc2626', '#111827', 392, 172, 96, 'RED/BLK SIG')}
+        ${szWire('MAP_W3', 'M 510,228 L 430,228 L 430,250 L 273,250 M 510,392 L 430,392 L 430,250', '#64748b', '#2563eb', 352, 237, 92, 'GRY/BLU GND')}
+        ${szWire('MAP_W4', 'M 510,352 L 273,352', '#111827', '#eab308', 352, 339, 92, 'BLK/YEL IAT')}
+      </svg>`,
+      'HV_INTERLOCK': `<svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg">
+        ${szNode('HV_BATT', 24, 52, 190, 118, 'Baterai HV (300–400V)', 'WAJIB APD 1000V Class 0', 'Jangan Sentuh Kabel Oranye!')}
+        ${szNode('HV_PLUG', 286, 52, 195, 118, 'Service Plug & SMR', 'Pemutus Mekanis + Relay', 'Cabut & Tunggu 10 Menit')}
+        ${szNode('HV_INV', 552, 52, 200, 118, 'Inverter / Converter', 'Kapasitor HV + AC EV', 'Residual wajib < 10V DC')}
+        ${szNode('HV_BMS', 240, 285, 290, 115, 'BMS / HV Control ECU', 'Monitor Isolasi (> 10 MΩ) & Loop HVIL', 'DTC P0A0D / P0AA6')}
+        ${szWire('HV_W1', 'M 214,110 L 286,110', '#f97316', null, 250, 96, 62, 'HV ORANYE')}
+        ${szWire('HV_W2', 'M 481,110 L 552,110', '#f97316', null, 516, 96, 62, 'HV ORANYE')}
+        ${szWire('HV_W3', 'M 385,285 L 385,170 M 530,340 L 652,340 L 652,170', '#eab308', '#111827', 520, 252, 108, 'Y-B HVIL Interlock')}
+      </svg>`
+    };
+
+    function buildDynamicChainSvg(chain) {
+      // Fallback vektor built-in aman HKI jika .svgz lokal tidak ada di server cloud (Vercel BYOD)
+      const stages = chain.stages || [];
+      const uniqueNodes = [];
+      const seenN = new Set();
+      stages.forEach((st) => {
+        [...(st.fromNodes || []), ...(st.toNodes || [])].forEach((n) => {
+          if (n && !seenN.has(n)) { seenN.add(n); uniqueNodes.push(n); }
+        });
+      });
+      const nodeCoords = {};
+      const cols = Math.min(3, Math.max(2, Math.ceil(uniqueNodes.length / 2)));
+      const boxW = 195, boxH = 66;
+      uniqueNodes.slice(0, 6).forEach((nid, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const x = 35 + col * 255;
+        const y = 48 + row * 195;
+        nodeCoords[nid] = { x, y, cx: x + boxW / 2, cy: y + boxH / 2 };
+      });
+      let wiresHtml = '';
+      const drawnW = new Set();
+      stages.forEach((st, sIdx) => {
+        const fromId = (st.fromNodes || [])[0];
+        const toId = (st.toNodes || [])[0] || fromId;
+        const fc = nodeCoords[fromId] || { cx: 130, cy: 90 };
+        const tc = nodeCoords[toId] || { cx: 560, cy: 260 };
+        (st.wires || []).forEach((w, wIdx) => {
+          const wid = String(w.lineId || w.id || `w_${sIdx}_${wIdx}`);
+          if (drawnW.has(wid)) return;
+          drawnW.add(wid);
+          const off = (wIdx - ((st.wires.length - 1) / 2)) * 22;
+          const midX = (fc.cx + tc.cx) / 2;
+          const midY = (fc.cy + tc.cy) / 2 + off;
+          const d = `M ${fc.cx},${fc.cy + off * 0.4} Q ${midX},${midY} ${tc.cx},${tc.cy + off * 0.4}`;
+          const colHex = /R/i.test(w.color || '') ? '#dc2626' : (/L|B/i.test(w.color || '') ? '#2563eb' : (/G/i.test(w.color || '') ? '#16a34a' : '#d97706'));
+          wiresHtml += szWire(wid, d, colHex, null, midX, midY, 84, `${w.color || 'OEM'} #${wid}`);
+        });
+      });
+      let nodesHtml = '';
+      uniqueNodes.slice(0, 6).forEach((nid) => {
+        const nc = nodeCoords[nid];
+        nodesHtml += szNode(nid, nc.x, nc.y, boxW, boxH, `Konektor / Modul ${nid}`, chain.brand || 'OEM', 'Skema Vektor Built-In BYOD');
+      });
+      return `<svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="780" height="460" fill="#f8fafc"/>
+        <text x="16" y="22" style="font-size:11px;font-family:Arial,sans-serif;font-weight:700;fill:#0369a1;">Mode Vektor Built-In BYOD — ${chain.scope || chain.label}</text>
+        ${wiresHtml}${nodesHtml}
+      </svg>`;
+    }
+
+    const BUILTIN_CHAINS_FALLBACK = {
+      suzuki_ertiga_map: {
+        chain_id: 'suzuki_ertiga_map', brand: 'Suzuki',
+        label: 'Suzuki Ertiga K14B — Sensor MAP (DTC P0107 / P0108) & IAT → ECM C01 (Hal. 9A-53)',
+        render_mode: 'suzuki_schematic', schematic_key: 'ERTIGA_MAP',
+        scope: 'Suzuki Ertiga Gen 1 K14B (Speed-Density MAP + IAT)',
+        stages: [
+          { shortLabel: '1. +5V & Massa MAP', cat: 'POWER', badge: '🔴 REFERENSI +5V & MASSA', title: 'Suplai Referensi +5V (C01-2 GRY/RED) & Massa (C01-20 GRY/BLU)', direction: 'ECM C01-2 (+5V) ──▶ Sensor MAP Pin 3 | Pin 1 ──▶ ECM C01-20', fromNodes: ['MAP_ECM'], toNodes: ['MAP_SENS'], wireIds: ['MAP_W1', 'MAP_W3'], func: 'Ertiga K14B memakai Sensor MAP+IAT (tanpa MAF). Pastikan referensi +5V dan massa C01-20 stabil.', prereq: 'Putusnya +5V memicu DTC P0107 (Low Input).', asKey: 'IG ON, Soket MAP Dilepas', asTool: 'Multimeter DC Volt (V)', asSpec: '4.5 – 5.5 V', wires: [{ id: 'MAP_W1', from: 'ECM C01-2', to: 'MAP Pin 3 (VCC)', color: 'GRY/RED', role: 'Suplai +5V MAP' }, { id: 'MAP_W3', from: 'MAP Pin 1', to: 'ECM C01-20', color: 'GRY/BLU', role: 'Massa Sensor MAP & IAT' }], nextHandoff: 'Lanjut ukur sinyal vakum MAP (C01-29).' },
+          { shortLabel: '2. Sinyal MAP (P0107)', cat: 'INPUT', badge: '🔵 INPUT SINYAL VAKUM', title: 'Sinyal Tekanan Vakum MAP → ECM C01-29 (RED/BLK)', direction: 'Sensor MAP Pin 2 (SIG) ──▶ ECM C01-29 (RED/BLK)', fromNodes: ['MAP_SENS'], toNodes: ['MAP_ECM'], wireIds: ['MAP_W2'], func: 'KOEO: 3.8–4.3V • Idle hangat: 1.0–1.6V.', prereq: 'Bila < 0.3V saat IG ON, cek short to ground.', asKey: 'IG ON & Idle', asTool: 'Multimeter DC Volt (V)', asSpec: 'KOEO 3.8–4.3V • Idle 1.0–1.6V', wires: [{ id: 'MAP_W2', from: 'MAP Pin 2 (SIG)', to: 'ECM C01-29', color: 'RED/BLK', role: 'Sinyal MAP (P0107)' }], nextHandoff: 'Lanjut uji tahanan Ohm kabel saat IG OFF.' },
+          { shortLabel: '3. Sinyal IAT & Ohm', cat: 'GROUND', badge: '⚫ CEK HARNESS OHM', title: 'Uji Kontinuitas Harness MAP/IAT & Sinyal IAT C01-34', direction: 'Sensor IAT ──▶ ECM C01-34 (BLK/YEL)', fromNodes: ['MAP_IAT'], toNodes: ['MAP_ECM'], wireIds: ['MAP_W4', 'MAP_W3'], func: 'Ukur kontinuitas kabel ujung-ke-ujung dalam kondisi IG OFF.', prereq: '', asKey: 'IG OFF, Soket Lepas', asTool: 'Multimeter Mode Ohm (Ω) / Kontinuitas', asSpec: '< 1 Ω • Isolasi ≥ 10 kΩ', wires: [{ id: 'MAP_W4', from: 'IAT Pin 1', to: 'ECM C01-34', color: 'BLK/YEL', role: 'Sinyal Suhu IAT' }], nextHandoff: 'Selesai.' }
+        ]
+      },
+      suzuki_gv_p0335: {
+        chain_id: 'suzuki_gv_p0335', brand: 'Suzuki',
+        label: 'Suzuki Grand Vitara JB420 — DTC P0335 CKP & Starter (Hal. 1A-115)',
+        render_mode: 'suzuki_schematic', schematic_key: 'GV_P0335',
+        scope: 'Suzuki Grand Vitara JB420 (J20A 2.0L)',
+        stages: [
+          { shortLabel: '1. CKP → ECM', cat: 'INPUT', badge: '🔵 INPUT PULSA CKP', title: 'Sensor CKP (PNK & BLU) → ECM C37-36 & C37-51', direction: 'Sensor CKP ──▶ ECM C37-36 (PNK) & C37-51 (BLU)', fromNodes: ['CKP_GV'], toNodes: ['ECM'], wireIds: ['GV_W9', 'GV_W10'], func: 'Sensor CKP induktif 2-pin membaca gigi crank plate saat starter & hidup.', prereq: 'Cek tahanan koil sensor CKP saat IG OFF.', asKey: 'IG OFF, Soket CKP Lepas', asTool: 'Multimeter Mode Ohm (Ω)', asSpec: '1.8 – 2.5 kΩ (20°C)', wires: [{ id: 'GV_W9', from: 'CKP (+)', to: 'ECM C37-36', color: 'PNK', role: 'Sinyal CKP' }, { id: 'GV_W10', from: 'CKP (-)', to: 'ECM C37-51', color: 'BLU', role: 'Sinyal CKP' }], nextHandoff: 'Cek Ground ECM & Starter.' }
+        ]
+      },
+      hv_safety_interlock: {
+        chain_id: 'hv_safety_interlock', brand: 'Hybrid / EV',
+        label: 'Sistem Hybrid / EV — Interlock Tegangan Tinggi (HV 350V) & Service Plug',
+        render_mode: 'suzuki_schematic', schematic_key: 'HV_INTERLOCK',
+        scope: 'Hybrid / EV (Wajib APD 1000V)',
+        stages: [
+          { shortLabel: '1. Service Plug HV', cat: 'POWER', badge: '🔴 KESELAMATAN HV', title: 'Cabut Service Plug & Tunggu 10 Menit', direction: 'Baterai HV ──▶ Service Plug ──▶ Inverter', fromNodes: ['HV_BATT'], toNodes: ['HV_PLUG', 'HV_INV'], wireIds: ['HV_W1', 'HV_W2'], func: 'Putus rangkaian seri HV dan tunggu kapasitor kosong (< 10V DC).', prereq: 'Wajib APD Sarung Tangan Class 0 (1000V).', asKey: 'IG OFF • Service Plug Dicabut', asTool: 'Insulation Tester 500V', asSpec: '< 10V DC • > 10 MΩ', wires: [{ id: 'HV_W1', from: 'Baterai HV', to: 'Service Plug', color: 'O (Oranye HV)', role: 'Bus 350V DC' }], nextHandoff: 'Selesai.' }
+        ]
+      }
+    };
+
+    // =========================================================================
+    // CAMERA ENGINE (VIEWPORT-ASPECT-AWARE + BBOX-FIT + TOUCH PINCH/PAN)
+    // =========================================================================
+    const vp = document.getElementById('ewd-viewport');
+    function normCodes(raw) {
+      return raw ? raw.split(',').map((s) => s.trim().replace(/-[A-Z]$/, '')).filter(Boolean) : [];
+    }
+    function getVpAspect() {
+      return (vp.clientWidth || 720) / Math.max(1, vp.clientHeight || 460);
+    }
+    function applyVB() {
+      const svg = document.querySelector('#ewd-svg-host svg');
+      if (!svg) return;
+      const padX = Math.max(40, baseVB[2] * 0.06);
+      const padY = Math.max(40, baseVB[3] * 0.06);
+      curVB[0] = Math.max(-padX, Math.min(Math.max(-padX, baseVB[2] - curVB[2] + padX), curVB[0]));
+      curVB[1] = Math.max(-padY, Math.min(Math.max(-padY, baseVB[3] - curVB[3] + padY), curVB[1]));
+      svg.setAttribute('viewBox', `${curVB[0].toFixed(1)} ${curVB[1].toFixed(1)} ${curVB[2].toFixed(1)} ${curVB[3].toFixed(1)}`);
+      document.getElementById('zoom-readout').textContent = (baseVB[3] / Math.max(40, curVB[3])).toFixed(1) + 'x';
+    }
+    function zoomCanvas(factor, rx = 0.5, ry = 0.5) {
+      const aspect = getVpAspect();
+      const maxH = Math.max(baseVB[3] * 1.15, baseVB[2] / aspect);
+      const newH = Math.min(maxH, Math.max(85, curVB[3] / factor));
+      const newW = newH * aspect;
+      const fx = curVB[0] + curVB[2] * rx;
+      const fy = curVB[1] + curVB[3] * ry;
+      curVB = [fx - newW * rx, fy - newH * ry, newW, newH];
+      applyVB();
+    }
+    function resetCanvasView() {
+      const aspect = getVpAspect();
+      let w = baseVB[2], h = w / aspect;
+      if (h < baseVB[3]) { h = baseVB[3]; w = h * aspect; }
+      curVB = [(baseVB[2] - w) / 2, (baseVB[3] - h) / 2, w, h];
+      applyVB();
+    }
+    function fitElements(els) {
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      els.forEach((el) => {
+        try {
+          const b = el.getBBox();
+          if (b && (b.width > 0 || b.height > 0)) {
+            minX = Math.min(minX, b.x); minY = Math.min(minY, b.y);
+            maxX = Math.max(maxX, b.x + b.width); maxY = Math.max(maxY, b.y + b.height);
+          }
+        } catch (_) {}
+      });
+      if (!isFinite(minX)) { resetCanvasView(); return; }
+      const aspect = getVpAspect();
+      const desiredH = Math.max(200, Math.min(baseVB[3], Math.max((maxY - minY) + 120, ((maxX - minX) + 130) / aspect)));
+      const desiredW = desiredH * aspect;
+      curVB = [(minX + maxX) / 2 - desiredW / 2, (minY + maxY) / 2 - desiredH / 2, desiredW, desiredH];
+      applyVB();
+    }
+
+    // Wheel + Drag + Touch Pan & 2-Finger Pinch-to-Zoom
+    vp.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const r = vp.getBoundingClientRect();
+      zoomCanvas(e.deltaY < 0 ? 1.25 : 0.8, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+    }, { passive: false });
+
+    let dragging = false, dStart = [0, 0], dVB = [0, 0];
+    vp.addEventListener('mousedown', (e) => { dragging = true; dStart = [e.clientX, e.clientY]; dVB = [curVB[0], curVB[1]]; });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const r = vp.getBoundingClientRect();
+      curVB[0] = dVB[0] - (e.clientX - dStart[0]) * (curVB[2] / Math.max(1, r.width));
+      curVB[1] = dVB[1] - (e.clientY - dStart[1]) * (curVB[3] / Math.max(1, r.height));
+      applyVB();
+    });
+    window.addEventListener('mouseup', () => { dragging = false; });
+
+    let tMode = null, tStart = [0, 0], tVB = [0, 0], pDist = 0;
+    vp.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) { tMode = 'pan'; tStart = [e.touches[0].clientX, e.touches[0].clientY]; tVB = [curVB[0], curVB[1]]; }
+      else if (e.touches.length === 2) { tMode = 'pinch'; pDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY); }
+    }, { passive: true });
+    vp.addEventListener('touchmove', (e) => {
+      if (tMode === 'pan' && e.touches.length === 1) {
+        e.preventDefault();
+        const r = vp.getBoundingClientRect();
+        curVB[0] = tVB[0] - (e.touches[0].clientX - tStart[0]) * (curVB[2] / Math.max(1, r.width));
+        curVB[1] = tVB[1] - (e.touches[0].clientY - tStart[1]) * (curVB[3] / Math.max(1, r.height));
+        applyVB();
+      } else if (tMode === 'pinch' && e.touches.length === 2) {
+        e.preventDefault();
+        const d = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+        if (pDist > 10 && d > 10 && Math.abs(d / pDist - 1) > 0.04) { zoomCanvas(d / pDist); pDist = d; }
+      }
+    }, { passive: false });
+    vp.addEventListener('touchend', () => { tMode = null; });
+
+    // =========================================================================
+    // UI TOGGLES, SAFETY GUARDRAILS, BYOD LOCAL LOADER & FLOW OVERLAY
+    // =========================================================================
+    let activePdfUrl = '';
+    let activeLocalObjectUrl = '';
+
+    function updateModeHintText() {
+      const hintEl = document.getElementById('mode-hint-text');
+      if (!hintEl) return;
+      const modeDesc = expMode === 'junior'
+        ? '<b>Mode Junior:</b> Menampilkan penjelasan fungsi tiap komponen &amp; panduan cara pasang probe merah/hitam multimeter.'
+        : '<b>Mode Senior:</b> Menampilkan ringkasan pinout, warna kabel, dan nilai ukur standar secara padat.';
+      const xrayDesc = xrayOn
+        ? ' <b>X-Ray ON:</b> Meredupkan kabel lain agar hanya jalur sinyal aktif yang menyala terang.'
+        : ' <b>X-Ray OFF:</b> Menampilkan seluruh kabel pada skema secara penuh.';
+      hintEl.innerHTML = `💡 ${modeDesc}${xrayDesc}`;
+    }
+
+    function updateSafetyGuardrails(asTool, asKey, title, scope) {
+      const text = `${asTool || ''} ${asKey || ''} ${title || ''} ${scope || ''}`.toLowerCase();
+      const isOhm = /\b(ohm|kontinuitas|tahanan|ω|resistansi)\b/i.test(text);
+      const isHv = /\b(hybrid|hev|phev|\bev\b|\bhv\b|tegangan\s*tinggi|inverter|service\s*plug|350v|400v|1000v|baterai\s*hv|hvil)\b/i.test(text);
+      const ohmEl = document.getElementById('safety-ohm-banner');
+      const hvEl = document.getElementById('safety-hv-banner');
+      if (ohmEl) ohmEl.classList.toggle('hidden', !isOhm);
+      if (hvEl) hvEl.classList.toggle('hidden', !isHv);
+    }
+
+    function toggleColorLegendModal(show) {
+      const el = document.getElementById('modal-wire-colors');
+      if (el) el.classList.toggle('hidden', !show);
+    }
+
+    function toggleFullscreenViewer() {
+      const shell = document.getElementById('ewd-app-shell') || document.documentElement;
+      if (!document.fullscreenElement) {
+        if (shell.requestFullscreen) shell.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      }
+      setTimeout(applyVB, 250);
+    }
+
+    function setExpMode(m) {
+      expMode = m;
+      document.getElementById('exp-btn-junior').classList.toggle('active', m === 'junior');
+      document.getElementById('exp-btn-senior').classList.toggle('active', m === 'senior');
+      document.getElementById('junior-block').classList.toggle('hidden', m === 'senior');
+      document.getElementById('insp-handoff').classList.toggle('hidden', m === 'senior');
+      const mobBtn = document.getElementById('mob-exp-btn');
+      if (mobBtn) mobBtn.textContent = m === 'junior' ? '🎓 Junior' : '⚡ Senior';
+      updateModeHintText();
+    }
+
+    function toggleXray() {
+      xrayOn = !xrayOn;
+      const svg = document.querySelector('#ewd-svg-host svg');
+      if (svg) svg.classList.toggle('xray-mode', xrayOn);
+      const b = document.getElementById('btn-xray');
+      b.textContent = xrayOn ? 'X-Ray: ON' : 'X-Ray: OFF';
+      b.className = xrayOn ? 'btn btn-amber' : 'btn';
+      const mb = document.getElementById('mob-xray-btn');
+      if (mb) {
+        mb.textContent = xrayOn ? 'X-Ray: ON' : 'X-Ray: OFF';
+        mb.className = xrayOn ? 'btn btn-amber' : 'btn';
+      }
+      updateModeHintText();
+    }
+
+    function toggleInspector() {
+      const pane = document.getElementById('inspector-pane');
+      pane.classList.toggle('collapsed');
+      const mp = document.getElementById('mob-panel-btn');
+      if (mp) mp.textContent = pane.classList.contains('collapsed') ? '◧ Info' : '✕ Tutup Info';
+      setTimeout(applyVB, 220);
+    }
+
+    function setActivePdfTarget(url) {
+      activePdfUrl = url || '';
+      const btn = document.getElementById('pdf-open-newtab');
+      if (btn) btn.disabled = !activePdfUrl;
+    }
+
+    function openActivePdfInNewTab() {
+      if (!activePdfUrl) return;
+      window.open(activePdfUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function triggerLocalByodUpload(acceptStr) {
+      const inp = document.getElementById('byod-local-file-input');
+      if (!inp) return;
+      inp.accept = acceptStr || '.pdf,.svg,.svgz';
+      inp.value = '';
+      inp.click();
+    }
+
+    async function handleLocalByodFile(input) {
+      const file = input && input.files && input.files[0];
+      if (!file) return;
+      const nameLow = file.name.toLowerCase();
+      if (nameLow.endsWith('.pdf')) {
+        if (activeLocalObjectUrl) {
+          try { URL.revokeObjectURL(activeLocalObjectUrl); } catch (_) {}
+        }
+        activeLocalObjectUrl = URL.createObjectURL(file);
+        switchAppMode('pdf', true);
+        document.getElementById('pdf-byod-empty').classList.add('hidden');
+        document.getElementById('pdf-frame').src = activeLocalObjectUrl;
+        setActivePdfTarget(activeLocalObjectUrl);
+        document.getElementById('pdf-quick-pages').innerHTML =
+          `<span style="color:#38bdf8;font-weight:700;">📂 PDF Lokal BYOD: ${file.name} (${Math.round(file.size / 1024)} KB)</span>`;
+        document.getElementById('insp-stage-badge').textContent = 'BYOD PDF';
+        document.getElementById('insp-title').textContent = file.name;
+        document.getElementById('insp-direction').innerHTML = '<b>Sumber:</b> File PDF lokal perangkat Anda (100% offline, tidak diunggah ke server).';
+        document.getElementById('canvas-hud').textContent = `📂 Membuka PDF Lokal BYOD: ${file.name}`;
+        updateSafetyGuardrails('Multimeter', 'Sesuai PDF', file.name, '');
+        return;
+      }
+      if (nameLow.endsWith('.svg') || nameLow.endsWith('.svgz')) {
+        try {
+          let svgText = '';
+          if (nameLow.endsWith('.svgz') && typeof DecompressionStream !== 'undefined') {
+            const ds = new DecompressionStream('gzip');
+            const decompressedStream = file.stream().pipeThrough(ds);
+            svgText = await new Response(decompressedStream).text();
+          } else {
+            svgText = await file.text();
+          }
+          const startIdx = svgText.indexOf('<svg');
+          if (startIdx >= 0) svgText = svgText.slice(startIdx);
+          if (!svgText.includes('<svg')) throw new Error('Format berkas bukan SVG/SVGZ yang valid.');
+          switchAppMode('toyota', true);
+          document.getElementById('byod-svg-empty').classList.add('hidden');
+          document.getElementById('ewd-svg-host').innerHTML = svgText;
+          const svgEl = document.querySelector('#ewd-svg-host svg');
+          const vbAttr = svgEl ? (svgEl.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number) : [];
+          baseVB = (vbAttr.length === 4 && vbAttr.every(Number.isFinite)) ? vbAttr : [0, 0, 780, 460];
+          activeRenderKind = 'toyota_svgz';
+          resetCanvasView();
+          document.getElementById('stepper-host').innerHTML = `<span style="font-weight:700;color:#38bdf8;">📂 BYOD Lokal: ${file.name}</span>`;
+          document.getElementById('insp-stage-badge').textContent = 'BYOD SVG';
+          document.getElementById('insp-title').textContent = `Diagram Lokal: ${file.name}`;
+          document.getElementById('insp-direction').innerHTML = '<b>Sumber:</b> File vektor lokal perangkat Anda (100% offline — aman HKI).';
+          document.getElementById('canvas-hud').textContent = `📂 Membuka Diagram Lokal BYOD: ${file.name}`;
+          updateSafetyGuardrails('Multimeter Digital', 'IG OFF (Ohm) / IG ON (Volt)', file.name, '');
+        } catch (err) {
+          document.getElementById('canvas-hud').textContent = 'Gagal membaca file lokal: ' + err.message;
+        }
+      }
+    }
+
+    function clearOverlay() {
+      const old = document.getElementById('flow-anim-overlay');
+      if (old) old.remove();
+      document.querySelectorAll('#ewd-svg-host a').forEach((el) => {
+        el.classList.remove('xray-node', 'xray-node-from', 'xray-node-to', 'xray-wire', 'ewd-focus-wire', 'chain-prev-node', 'chain-prev-wire', 'sz-prev-node', 'sz-prev-wire', 'sz-node-from', 'sz-node-to', 'sz-wire-active', 'sz-wire-focus');
+      });
+    }
+
+    function drawFlowOverlay(wireEls, fromCenters, toCenters, forceForward = false) {
+      const svg = document.querySelector('#ewd-svg-host svg');
+      if (!svg) return;
+      const old = document.getElementById('flow-anim-overlay');
+      if (old) old.remove();
+      const ns = 'http://www.w3.org/2000/svg';
+      const g = document.createElementNS(ns, 'g');
+      g.setAttribute('id', 'flow-anim-overlay');
+      g.setAttribute('pointer-events', 'none');
+
+      const minD = (pt, arr) => arr.length ? Math.min(...arr.map((c) => Math.hypot(pt.x - c.x, pt.y - c.y))) : 99999;
+
+      wireEls.forEach((aEl) => {
+        const p = aEl.querySelector('path.w-base') || aEl.querySelector('path');
+        if (!p) return;
+        try {
+          const len = p.getTotalLength();
+          if (len < 8) return;
+          let fwd = true;
+          if (!forceForward && fromCenters.length && toCenters.length) {
+            const p0 = p.getPointAtLength(0), p1 = p.getPointAtLength(len);
+            fwd = (minD(p0, fromCenters) + minD(p1, toCenters)) <= (minD(p1, fromCenters) + minD(p0, toCenters));
+          }
+          const ap = document.createElementNS(ns, 'path');
+          ap.setAttribute('d', p.getAttribute('d'));
+          ap.setAttribute('class', fwd ? 'flow-pulse-fwd' : 'flow-pulse-rev');
+          g.appendChild(ap);
+        } catch (_) {}
+      });
+      svg.appendChild(g);
+    }
+
+    function spotlightWire(id, btnEl) {
+      document.querySelectorAll('#ewd-svg-host a.ewd-focus-wire, #ewd-svg-host a.sz-wire-focus').forEach((a) => {
+        a.classList.remove('ewd-focus-wire', 'sz-wire-focus');
+      });
+      document.querySelectorAll('#insp-wires-list button').forEach((b) => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      const w = document.querySelector(`#ewd-svg-host a[data-ewd-lineID="${id}"]`) || document.querySelector(`#ewd-svg-host a[data-wire-id="${id}"]`);
+      if (w) {
+        w.classList.add('ewd-focus-wire', 'xray-wire', 'sz-wire-focus', 'sz-wire-active');
+        if (activeRenderKind === 'toyota_svgz') fitElements([w]);
+        else drawFlowOverlay([w], [], [], true);
+      }
+    }
+
+    // =========================================================================
+    // MODE SWITCHER
+    // =========================================================================
+    function switchAppMode(mode, skipAutoLoad = false) {
+      appMode = mode;
+      ['chains', 'toyota', 'pdf'].forEach((m) => {
+        document.getElementById('mode-btn-' + m).classList.toggle('active', m === mode);
+        document.getElementById('subbar-' + m).classList.toggle('hidden', m !== mode);
+      });
+      const isPdf = mode === 'pdf';
+      document.getElementById('vector-toolbar').classList.toggle('hidden', isPdf);
+      document.getElementById('ewd-viewport').classList.toggle('hidden', isPdf);
+      document.getElementById('pdf-pane').style.display = isPdf ? 'flex' : 'none';
+      document.getElementById('btn-xray').classList.toggle('hidden', isPdf);
+      document.getElementById('byod-svg-empty').classList.add('hidden');
+      if (!isPdf) document.getElementById('pdf-byod-empty').classList.add('hidden');
+
+      if (skipAutoLoad) return;
+
+      if (mode === 'chains') {
+        loadChain(document.getElementById('chain-select').value || Object.keys(chainsMap)[0] || 'suzuki_ertiga_map');
+      } else if (mode === 'toyota') {
+        const sysVal = document.getElementById('ty-sys-select').value;
+        if (sysVal && catalogData.cache_ready) {
+          loadToyotaSystem(sysVal);
+        } else {
+          document.getElementById('loading-overlay').classList.add('hidden');
+          document.getElementById('byod-svg-empty').classList.remove('hidden');
+          document.getElementById('stepper-host').innerHTML = '<span style="color:#38bdf8;font-weight:700;">🛡️ Mode BYOD Lokal — Pilih berkas .svgz dari perangkat Anda</span>';
+          document.getElementById('canvas-hud').textContent = '🛡️ Mode BYOD: Unggah file .svgz lokal atau gunakan Tab 1 (Alur Sinyal Vektor Built-in).';
+        }
+      } else if (mode === 'pdf') {
+        if (currentPdfDocs.length > 0 && catalogData.cache_ready) {
+          openSelectedPdf();
+        } else if (!activeLocalObjectUrl) {
+          setActivePdfTarget('');
+          document.getElementById('pdf-byod-empty').classList.remove('hidden');
+          document.getElementById('pdf-quick-pages').innerHTML = '<span style="color:#38bdf8;font-weight:700;">🛡️ Mode BYOD Lokal — Pilih file PDF dari perangkat bengkel Anda</span>';
+          document.getElementById('canvas-hud').textContent = '🛡️ Mode BYOD: Klik "Buka File PDF Lokal" untuk membuka manual PDF perangkat Anda.';
+        }
+      }
+    }
+
+    // =========================================================================
+    // MODE 1: CURATED SIGNAL CHAINS (MULTI-MEREK BUILT-IN & LOCAL SVGZ)
+    // =========================================================================
+    async function loadChain(chainId) {
+      const chain = chainsMap[chainId];
+      if (!chain) return;
+      activeChainId = chainId;
+      activeStageIdx = 0;
+      document.getElementById('byod-svg-empty').classList.add('hidden');
+
+      const pdfBtn = document.getElementById('btn-chain-pdf');
+      pdfBtn.classList.toggle('hidden', !(chain.pdf_doc_id && catalogData.cache_ready));
+
+      if (chain.render_mode === 'toyota_svgz' && catalogData.cache_ready) {
+        const ok = await fetchAndMountToyotaSvg(chain.model_id, chain.sys_code, false);
+        if (ok) {
+          activeRenderKind = 'toyota_svgz';
+        } else {
+          activeRenderKind = 'suzuki_schematic';
+          document.getElementById('byod-svg-empty').classList.add('hidden');
+          document.getElementById('ewd-svg-host').innerHTML = buildDynamicChainSvg(chain);
+          baseVB = [0, 0, 780, 460];
+          activeEdges = [];
+          resetCanvasView();
+        }
+      } else if (chain.render_mode === 'toyota_svgz') {
+        activeRenderKind = 'suzuki_schematic';
+        document.getElementById('ewd-svg-host').innerHTML = buildDynamicChainSvg(chain);
+        baseVB = [0, 0, 780, 460];
+        activeEdges = [];
+        resetCanvasView();
+      } else {
+        activeRenderKind = 'suzuki_schematic';
+        document.getElementById('ewd-svg-host').innerHTML = SUZUKI_SVGS[chain.schematic_key] || buildDynamicChainSvg(chain);
+        baseVB = [0, 0, 780, 460];
+        activeEdges = [];
+        resetCanvasView();
+      }
+      renderChainStage(0);
+    }
+
+    function openChainPdf() {
+      const chain = chainsMap[activeChainId];
+      if (!chain || !chain.pdf_doc_id) return;
+      const url = `/api/v1/ewd/pdf/${chain.pdf_doc_id}#page=${chain.pdf_page || 1}`;
+      window.open(url, '_blank');
+    }
+
+    function renderChainStage(idx) {
+      const chain = chainsMap[activeChainId];
+      if (!chain) return;
+      activeStageIdx = Math.max(0, Math.min(chain.stages.length - 1, idx));
+      const st = chain.stages[activeStageIdx];
+
+      clearOverlay();
+      const svg = document.querySelector('#ewd-svg-host svg');
+      if (svg) svg.classList.toggle('xray-mode', xrayOn);
+
+      const prevN = new Set(), prevW = new Set();
+      for (let i = 0; i < activeStageIdx; i++) {
+        chain.stages[i].fromNodes.forEach((n) => prevN.add(n));
+        chain.stages[i].toNodes.forEach((n) => prevN.add(n));
+        (chain.stages[i].lineIds || chain.stages[i].wireIds || []).forEach((w) => prevW.add(w));
+      }
+
+      const fromSet = new Set(st.fromNodes);
+      const toSet = new Set(st.toNodes);
+      const wireSet = new Set(st.lineIds || st.wireIds || []);
+      const focusEls = [], activeWireEls = [], fromC = [], toC = [];
+
+      if (activeRenderKind === 'toyota_svgz') {
+        document.querySelectorAll('#ewd-svg-host a[data-ewd-code]').forEach((el) => {
+          const codes = normCodes(el.getAttribute('data-ewd-code'));
+          if (codes.some((c) => fromSet.has(c))) {
+            el.classList.add('xray-node', 'xray-node-from');
+            try { const b = el.getBBox(); fromC.push({ x: b.x + b.width / 2, y: b.y + b.height / 2 }); if (b.width < 900) focusEls.push(el); } catch (_) {}
+          } else if (codes.some((c) => toSet.has(c))) {
+            el.classList.add('xray-node', 'xray-node-to');
+            try { const b = el.getBBox(); toC.push({ x: b.x + b.width / 2, y: b.y + b.height / 2 }); if (b.width < 900) focusEls.push(el); } catch (_) {}
+          } else if (codes.some((c) => prevN.has(c))) {
+            el.classList.add('chain-prev-node');
+          }
+        });
+        document.querySelectorAll('#ewd-svg-host a[data-ewd-lineID]').forEach((el) => {
+          const lid = el.getAttribute('data-ewd-lineID');
+          if (wireSet.has(lid)) { el.classList.add('xray-wire'); focusEls.push(el); activeWireEls.push(el); }
+          else if (prevW.has(lid)) el.classList.add('chain-prev-wire');
+        });
+        drawFlowOverlay(activeWireEls, fromC, toC, false);
+        fitElements(focusEls);
+      } else {
+        document.querySelectorAll('#ewd-svg-host a.sz-node').forEach((el) => {
+          const id = el.getAttribute('data-node-id');
+          if (fromSet.has(id)) el.classList.add('sz-node-from');
+          else if (toSet.has(id)) el.classList.add('sz-node-to');
+          else if (prevN.has(id)) el.classList.add('sz-prev-node');
+        });
+        document.querySelectorAll('#ewd-svg-host a.sz-wire').forEach((el) => {
+          const id = el.getAttribute('data-wire-id');
+          if (wireSet.has(id)) { el.classList.add('sz-wire-active'); activeWireEls.push(el); }
+          else if (prevW.has(id)) el.classList.add('sz-prev-wire');
+        });
+        drawFlowOverlay(activeWireEls, [], [], true);
+        resetCanvasView();
+      }
+
+      // Render Stepper
+      document.getElementById('stepper-host').innerHTML = chain.stages.map((s, i) => {
+        const cls = i === activeStageIdx ? 'step-pill active' : i < activeStageIdx ? 'step-pill done' : 'step-pill';
+        return `<button type="button" class="${cls}" onclick="renderChainStage(${i})">${s.shortLabel}</button>`;
+      }).join('<span style="color:var(--muted);">→</span>');
+
+      // Populate Right Inspector
+      document.getElementById('insp-stage-badge').textContent = `TAHAP ${activeStageIdx + 1} / ${chain.stages.length}`;
+      const cb = document.getElementById('insp-cat-badge');
+      cb.textContent = st.badge;
+      cb.className = 'mono-badge cat-' + (st.cat || 'INPUT');
+
+      document.getElementById('insp-title').textContent = st.title;
+      document.getElementById('insp-direction').innerHTML = `<b>Arah:</b> ${st.direction}`;
+      document.getElementById('insp-func').textContent = st.func;
+      const nEl = document.getElementById('insp-note');
+      if (st.prereq) { nEl.innerHTML = `<b>Catatan Praktisi:</b> ${st.prereq}`; nEl.classList.remove('hidden'); }
+      else nEl.classList.add('hidden');
+
+      document.getElementById('as-key').textContent = st.asKey;
+      document.getElementById('as-tool').textContent = st.asTool;
+      document.getElementById('as-spec').textContent = st.asSpec;
+      updateSafetyGuardrails(st.asTool, st.asKey, st.title, chain.scope);
+      document.getElementById('insp-handoff').innerHTML = `<b>Langkah Lanjutan:</b> ${st.nextHandoff}`;
+      document.getElementById('insp-scope').textContent = chain.scope;
+      document.getElementById('insp-wire-count').textContent = `${st.wires.length} kabel`;
+      document.getElementById('canvas-hud').innerHTML = `✨ <b>Tahap ${activeStageIdx + 1}/${chain.stages.length}:</b> ${st.direction}`;
+
+      document.getElementById('insp-wires-list').innerHTML = st.wires.map((w) => {
+        const wid = w.lineId || w.id;
+        return `<button type="button" class="wire-card" onclick="spotlightWire('${wid}', this)">
+          <div class="wire-card-top">${w.from} ──▶ ${w.to}</div>
+          <div class="wire-card-bot">
+            <span class="color-pill">${decodeColor(w.color)}</span>
+            <span style="color:var(--muted);">${w.role}</span>
+          </div>
+        </button>`;
+      }).join('');
+
+      const bp = document.getElementById('btn-prev'), bn = document.getElementById('btn-next');
+      bp.disabled = activeStageIdx === 0;
+      bn.disabled = false;
+      bn.textContent = activeStageIdx === chain.stages.length - 1 ? 'Ulang Tahap 1 ↺' : 'Lanjut Tahap ▶';
+    }
+
+    function stepChain(delta) {
+      if (appMode !== 'chains') return;
+      const c = chainsMap[activeChainId];
+      if (!c) return;
+      renderChainStage(delta > 0 && activeStageIdx === c.stages.length - 1 ? 0 : activeStageIdx + delta);
+    }
+
+    function showFullChain() {
+      const c = chainsMap[activeChainId];
+      if (!c) return;
+      clearOverlay();
+      const svg = document.querySelector('#ewd-svg-host svg');
+      if (svg) svg.classList.toggle('xray-mode', xrayOn);
+      const allN = new Set(), allW = new Set();
+      c.stages.forEach((st) => {
+        st.fromNodes.forEach((n) => allN.add(n));
+        st.toNodes.forEach((n) => allN.add(n));
+        (st.lineIds || st.wireIds || []).forEach((w) => allW.add(w));
+      });
+      const focusEls = [], wireEls = [];
+      if (activeRenderKind === 'toyota_svgz') {
+        document.querySelectorAll('#ewd-svg-host a[data-ewd-code]').forEach((el) => {
+          if (normCodes(el.getAttribute('data-ewd-code')).some((cd) => allN.has(cd))) {
+            el.classList.add('xray-node', 'xray-node-from');
+            try { if (el.getBBox().width < 900) focusEls.push(el); } catch (_) {}
+          }
+        });
+        document.querySelectorAll('#ewd-svg-host a[data-ewd-lineID]').forEach((el) => {
+          if (allW.has(el.getAttribute('data-ewd-lineID'))) { el.classList.add('xray-wire'); focusEls.push(el); wireEls.push(el); }
+        });
+        fitElements(focusEls);
+      } else {
+        document.querySelectorAll('#ewd-svg-host a.sz-node').forEach((el) => { if (allN.has(el.getAttribute('data-node-id'))) el.classList.add('sz-node-from'); });
+        document.querySelectorAll('#ewd-svg-host a.sz-wire').forEach((el) => { if (allW.has(el.getAttribute('data-wire-id'))) { el.classList.add('sz-wire-active'); wireEls.push(el); } });
+        drawFlowOverlay(wireEls, [], [], true);
+        resetCanvasView();
+      }
+      document.getElementById('canvas-hud').innerHTML = `🔗 <b>Rantai Penuh (${c.stages.length} Tahap)</b> dinyalakan sekaligus!`;
+    }
+
+    // =========================================================================
+    // MODE 2: EXPLORE ALL 338+ TOYOTA SVGZ SYSTEMS + AUTO X-RAY CONNECT GRAPH
+    // =========================================================================
+    let currentToyotaSystems = [];
+
+    function onToyotaModelChange() {
+      const mid = document.getElementById('ty-model-select').value;
+      const m = catalogData.models.find((x) => x.model_id === mid);
+      currentToyotaSystems = m ? (m.systems || []) : [];
+      document.getElementById('ty-sys-filter').value = '';
+      filterToyotaSystems(true);
+    }
+
+    function filterToyotaSystems(autoLoad = false) {
+      const q = (document.getElementById('ty-sys-filter').value || '').toLowerCase().trim();
+      const filtered = currentToyotaSystems.filter((s) =>
+        !q || s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q) || s.category_label.toLowerCase().includes(q)
+      );
+      const sel = document.getElementById('ty-sys-select');
+      sel.innerHTML = filtered.map((s) =>
+        `<option value="${s.code}">[${s.sc}] ${s.name} (${s.code})</option>`
+      ).join('') || '<option value="">Tidak ada sistem cocok</option>';
+      if (autoLoad && filtered.length > 0 && appMode === 'toyota') {
+        loadToyotaSystem(filtered[0].code);
+      }
+    }
+
+    async function fetchAndMountToyotaSvg(modelId, sysCode, updateInspector = true) {
+      const loader = document.getElementById('loading-overlay');
+      const byodEmpty = document.getElementById('byod-svg-empty');
+      byodEmpty.classList.add('hidden');
+      loader.classList.remove('hidden');
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 2000);
+      try {
+        const res = await fetch(
+          `/api/v1/ewd/system/${encodeURIComponent(modelId)}/${encodeURIComponent(sysCode)}`,
+          { signal: ctrl.signal }
+        );
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        activeRenderKind = 'toyota_svgz';
+        activeEdges = data.edges || [];
+        activeSysCode = data.sys_code;
+        baseVB = data.base_vb || [0, 0, 502.1, 710.0];
+        document.getElementById('ewd-svg-host').innerHTML = data.svg;
+
+        // Bind component clicks & populate searchable component dropdown
+        domPartAnchors = [];
+        codeToTitle = {};
+        const opts = ['<option value="">🔍 Pilih Komponen...</option>'];
+        document.querySelectorAll('#ewd-svg-host a').forEach((el) => {
+          const code = el.getAttribute('data-ewd-code');
+          const lid = el.getAttribute('data-ewd-lineID');
+          if (code) {
+            const tEl = el.querySelector('title');
+            const title = tEl && tEl.textContent ? tEl.textContent.trim() : '';
+            if (title) {
+              normCodes(code).forEach((c) => { if (c !== '1') codeToTitle[c] = title; });
+              const idx = domPartAnchors.length;
+              domPartAnchors.push(el);
+              opts.push(`<option value="${idx}">${title} [${code.split(',')[0]}]</option>`);
+            }
+            el.addEventListener('click', (e) => {
+              e.preventDefault(); e.stopPropagation();
+              freeTraceElement(el);
+            });
+          } else if (lid) {
+            el.addEventListener('click', (e) => {
+              e.preventDefault(); e.stopPropagation();
+              spotlightWire(lid, null);
+              const hit = activeEdges.find((ed) => ed[0] === lid);
+              if (hit) {
+                document.getElementById('canvas-hud').innerHTML = `🔌 Kabel #${hit[0]} (${decodeColor(hit[1])}): <b>${hit[2]}${hit[4] ? '-' + hit[4] : ''}</b> ↔ <b>${hit[5]}${hit[7] ? '-' + hit[7] : ''}</b>`;
+              }
+            });
+          }
+        });
+        opts[0] = `<option value="">🔍 Cari ${domPartAnchors.length} Komponen...</option>`;
+        document.getElementById('ty-part-picker').innerHTML = opts.join('');
+        resetCanvasView();
+
+        if (updateInspector) {
+          document.getElementById('stepper-host').innerHTML = `<span style="font-weight:700;color:#fff;">[${data.sys_code}] ${data.sys_name}</span> <span style="color:var(--muted);margin-left:6px;">(${domPartAnchors.length} komponen • ${activeEdges.length} kabel graf)</span>`;
+          document.getElementById('insp-stage-badge').textContent = data.sys_code;
+          const cb = document.getElementById('insp-cat-badge');
+          cb.textContent = `EWD ASLI (${activeEdges.length} KABEL)`;
+          cb.className = 'mono-badge cat-INPUT';
+          document.getElementById('insp-title').textContent = `${data.sys_name} — ${data.model_label}`;
+          document.getElementById('insp-direction').innerHTML = `<b>Cara Pakai:</b> Klik kotak komponen biru mana saja di skema (atau pilih dari dropdown 🔍 di atas) untuk mengisolasi kabelnya secara otomatis.`;
+          document.getElementById('insp-func').textContent = `Diagram vektor 1:1 asli OEM dilengkapi graf koneksi connect/${data.sys_code}.xml.`;
+          document.getElementById('insp-note').classList.add('hidden');
+          document.getElementById('as-key').textContent = 'IG OFF (Ohm) / IG ON (Volt)';
+          document.getElementById('as-tool').textContent = 'Multimeter Mode Ohm (Ω) / DC Volt';
+          document.getElementById('as-spec').textContent = 'Kontinuitas < 1 Ω • Isolasi ≥ 10 kΩ';
+          updateSafetyGuardrails('Multimeter Mode Ohm (Ω)', 'IG OFF', data.sys_name, data.model_label);
+          document.getElementById('insp-wire-count').textContent = `${activeEdges.length} total`;
+          document.getElementById('insp-wires-list').innerHTML = '<div style="color:var(--muted);font-size:12px;">Klik salah satu komponen biru pada diagram untuk melihat daftar kabel, pin, warna, dan varian tahunnya.</div>';
+          document.getElementById('insp-handoff').innerHTML = `💡 Aktifkan <b>X-Ray: ON</b> agar saat Anda mengklik komponen, kabel lain yang tidak terkait otomatis meredup.`;
+          document.getElementById('insp-scope').textContent = data.model_label;
+          document.getElementById('btn-prev').disabled = true;
+          document.getElementById('btn-next').disabled = true;
+        }
+        return true;
+      } catch (err) {
+        clearTimeout(timer);
+        if (updateInspector || appMode === 'toyota') {
+          byodEmpty.classList.remove('hidden');
+          document.getElementById('canvas-hud').textContent = '🛡️ Mode BYOD: File .svgz lokal belum dimuat di perangkat ini — pilih file lokal atau gunakan Tab 1.';
+        }
+        return false;
+      } finally {
+        loader.classList.add('hidden');
+      }
+    }
+
+    async function loadToyotaSystem(sysCode) {
+      const modelId = document.getElementById('ty-model-select').value;
+      if (!modelId || !sysCode) return;
+      await fetchAndMountToyotaSvg(modelId, sysCode, true);
+    }
+
+    function freeTraceElement(primaryEl) {
+      if (!primaryEl) return;
+      const rawCode = primaryEl.getAttribute('data-ewd-code') || '';
+      const tEl = primaryEl.querySelector('title');
+      const domTitle = tEl && tEl.textContent ? tEl.textContent.trim() : rawCode;
+      const seedCodes = normCodes(rawCode);
+
+      const adj = {};
+      activeEdges.forEach((e) => {
+        if (!adj[e[2]]) adj[e[2]] = [];
+        if (!adj[e[5]]) adj[e[5]] = [];
+        adj[e[2]].push([e[5], e]);
+        adj[e[5]].push([e[2], e]);
+      });
+
+      const visN = new Set(seedCodes), visL = new Set(), traced = [];
+      const q = [...seedCodes], depth = {};
+      seedCodes.forEach((c) => { depth[c] = 0; });
+      while (q.length > 0) {
+        const cur = q.shift(), d = depth[cur] || 0;
+        for (const [nxt, e] of (adj[cur] || [])) {
+          if (!visL.has(e[0])) { visL.add(e[0]); traced.push(e); }
+          if (!visN.has(nxt)) {
+            visN.add(nxt);
+            const ot = e[2] === cur ? e[6] : e[3];
+            if ((ot === 'sp' || ot === 'w2w') && d < 2) { depth[nxt] = d + 1; q.push(nxt); }
+          }
+        }
+      }
+
+      clearOverlay();
+      const svg = document.querySelector('#ewd-svg-host svg');
+      if (svg) svg.classList.toggle('xray-mode', xrayOn);
+
+      const focusEls = [], wireEls = [], fromC = [], toC = [];
+      primaryEl.classList.add('xray-node', 'xray-node-from');
+      try { const b = primaryEl.getBBox(); fromC.push({ x: b.x + b.width / 2, y: b.y + b.height / 2 }); if (b.width < 900) focusEls.push(primaryEl); } catch (_) {}
+
+      document.querySelectorAll('#ewd-svg-host a[data-ewd-code]').forEach((el) => {
+        if (el === primaryEl) return;
+        if (normCodes(el.getAttribute('data-ewd-code')).some((c) => visN.has(c))) {
+          el.classList.add('xray-node', 'xray-node-to');
+          try { const b = el.getBBox(); toC.push({ x: b.x + b.width / 2, y: b.y + b.height / 2 }); } catch (_) {}
+        }
+      });
+      document.querySelectorAll('#ewd-svg-host a[data-ewd-lineID]').forEach((el) => {
+        if (visL.has(el.getAttribute('data-ewd-lineID'))) { el.classList.add('xray-wire'); focusEls.push(el); wireEls.push(el); }
+      });
+
+      drawFlowOverlay(wireEls, fromC, toC, false);
+      fitElements(focusEls.length ? focusEls : [primaryEl]);
+
+      document.getElementById('insp-stage-badge').textContent = rawCode.split(',')[0] || 'PART';
+      const cb = document.getElementById('insp-cat-badge');
+      cb.textContent = `X-RAY (${traced.length} KABEL)`;
+      cb.className = 'mono-badge cat-OUTPUT';
+      document.getElementById('insp-title').textContent = `${domTitle} [${rawCode}]`;
+      document.getElementById('insp-direction').innerHTML = `<b>Terisolasi:</b> ${traced.length} jalur koneksi pada connect/${activeSysCode}.xml`;
+      document.getElementById('insp-func').textContent = `Hanya kabel & konektor yang terhubung ke ${domTitle} yang dinyalakan. Klik salah satu kartu kabel di bawah untuk memperbesar jalur tersebut.`;
+      document.getElementById('insp-wire-count').textContent = `${traced.length} dari ${activeEdges.length}`;
+      document.getElementById('canvas-hud').innerHTML = `🎯 <b>X-Ray ${domTitle}:</b> ${visL.size} dari ${activeEdges.length} kabel dinyalakan`;
+
+      document.getElementById('insp-wires-list').innerHTML = traced.slice(0, 20).map((e) => {
+        const [lid, col, fc, ft, fp, tc, tt, tp, spec] = e;
+        return `<button type="button" class="wire-card" onclick="spotlightWire('${lid}', this)">
+          <div class="wire-card-top">${fc}${fp ? '-' + fp : ''} ↔ ${tc}${tp ? '-' + tp : ''}</div>
+          <div class="wire-card-bot">
+            <span class="color-pill">${decodeColor(col)}</span>
+            <span style="color:var(--muted);">#${lid} • ${codeToTitle[fc] || fc} ↔ ${codeToTitle[tc] || tc}${spec ? ' (' + spec + ')' : ''}</span>
+          </div>
+        </button>`;
+      }).join('') || '<div style="color:var(--muted);">Tidak ada koneksi tercatat di connect XML untuk kode ini.</div>';
+    }
+
+    function freeTraceByDomIndex(idxStr) {
+      if (idxStr === '') return;
+      const el = domPartAnchors[Number(idxStr)];
+      if (el) freeTraceElement(el);
+    }
+
+    // =========================================================================
+    // MODE 3: PDF VIEWER (AVANZA 275 PDFs & SUZUKI GRAND VITARA / ERTIGA)
+    // =========================================================================
+    let currentPdfDocs = [];
+
+    function onPdfModelChange() {
+      const mid = document.getElementById('pdf-model-select').value;
+      const m = catalogData.models.find((x) => x.model_id === mid);
+      currentPdfDocs = m ? (m.docs || []) : [];
+      document.getElementById('pdf-doc-filter').value = '';
+      filterPdfDocs(true);
+    }
+
+    function filterPdfDocs(autoOpen = false) {
+      const q = (document.getElementById('pdf-doc-filter').value || '').toLowerCase().trim();
+      const filtered = currentPdfDocs.filter((d) =>
+        !q || d.title.toLowerCase().includes(q) || (d.category || '').toLowerCase().includes(q)
+      );
+      const sel = document.getElementById('pdf-doc-select');
+      sel.innerHTML = filtered.map((d) =>
+        `<option value="${d.doc_id}">[${d.category}] ${d.title}</option>`
+      ).join('') || '<option value="">Tidak ada dokumen cocok</option>';
+      if (autoOpen && filtered.length > 0 && appMode === 'pdf') openSelectedPdf();
+    }
+
+    function openSelectedPdf(pageNo = null) {
+      const docId = document.getElementById('pdf-doc-select').value;
+      const doc = currentPdfDocs.find((d) => d.doc_id === docId);
+      if (!doc || !catalogData.cache_ready) {
+        setActivePdfTarget('');
+        document.getElementById('pdf-byod-empty').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('pdf-byod-empty').classList.add('hidden');
+      const targetPage = pageNo || (doc.quick_pages && doc.quick_pages[0] ? doc.quick_pages[0].page : 1);
+      const url = `/api/v1/ewd/pdf/${encodeURIComponent(docId)}#page=${targetPage}`;
+      document.getElementById('pdf-frame').src = url;
+      setActivePdfTarget(url);
+
+      const qpHost = document.getElementById('pdf-quick-pages');
+      if (doc.quick_pages && doc.quick_pages.length) {
+        qpHost.innerHTML = `<span style="color:var(--muted);font-weight:600;white-space:nowrap;">Lompat Cepat:</span>` +
+          doc.quick_pages.map((qp) => `<button type="button" class="step-pill" onclick="openSelectedPdf(${qp.page})">${qp.label}</button>`).join('');
+      } else {
+        qpHost.innerHTML = `<span style="color:#fff;font-weight:600;">📄 ${doc.title} (${doc.size_kb ? doc.size_kb + ' KB' : 'PDF Vektor'})</span>`;
+      }
+
+      document.getElementById('insp-stage-badge').textContent = 'PDF VEKTOR';
+      const cb = document.getElementById('insp-cat-badge');
+      cb.textContent = doc.category || 'MANUAL ASLI';
+      cb.className = 'mono-badge cat-INPUT';
+      document.getElementById('insp-title').textContent = doc.title;
+      document.getElementById('insp-direction').innerHTML = `<b>Halaman Aktif:</b> Hal. ${targetPage} — gunakan zoom bawaan PDF viewer (Ctrl + Scroll / tombol +/-) untuk ketajaman vektor 100%.`;
+      document.getElementById('insp-func').textContent = 'Dokumen PDF asli pabrikan dibuka langsung dari penyimpanan lokal perangkat tanpa upload cloud (Arsitektur BYOD).';
+      document.getElementById('insp-note').classList.add('hidden');
+      document.getElementById('as-key').textContent = 'Sesuai Prosedur Halaman PDF';
+      document.getElementById('as-tool').textContent = 'Multimeter / Scanner OBD-II';
+      document.getElementById('as-spec').textContent = 'Lihat Tabel Spesifikasi di PDF';
+      updateSafetyGuardrails('Multimeter', 'Sesuai PDF', doc.title, '');
+      document.getElementById('insp-wire-count').textContent = '';
+      document.getElementById('insp-wires-list').innerHTML = `<button type="button" class="btn btn-primary" onclick="switchAppMode('chains')">⚡ Buka Mode Alur Sinyal Berantai (Animasi &amp; X-Ray)</button>`;
+      document.getElementById('insp-handoff').innerHTML = `💡 Untuk melihat animasi arah sinyal &amp; panduan Junior/Senior, klik tab <b>1. Alur Sinyal Berantai</b> di atas.`;
+      document.getElementById('canvas-hud').textContent = `📄 Membuka PDF Lokal: ${doc.title} (Hal. ${targetPage})`;
+    }
+
+    // =========================================================================
+    // DEEP-LINKING CONTEXT RESOLVER (REQ-11: ?dtc=&engine=&case=&model=)
+    // =========================================================================
+    function resolveDeepLinkTarget() {
+      const qs = new URLSearchParams(window.location.search);
+      const qCase = (qs.get('case') || '').trim().toLowerCase();
+      const qDtc = (qs.get('dtc') || '').trim().toUpperCase();
+      const qEngine = (qs.get('engine') || '').trim().toUpperCase();
+      const qModel = (qs.get('model') || '').trim().toLowerCase();
+      if (!qCase && !qDtc && !qEngine && !qModel) return null;
+
+      let chainId = '';
+      let stageIdx = 0;
+
+      // 1. Cocokkan parameter `case` eksplisit
+      if (qCase) {
+        if (chainsMap[qCase]) chainId = qCase;
+        else if (qCase.includes('ertiga') && qCase.includes('map')) chainId = 'suzuki_ertiga_map';
+        else if (qCase.includes('ertiga')) chainId = 'suzuki_ertiga_k14b';
+        else if (qCase.includes('gv') || qCase.includes('vitara')) chainId = 'suzuki_gv_p0335';
+        else if (qCase.includes('hv') || qCase.includes('ev') || qCase.includes('hybrid')) chainId = 'hv_safety_interlock';
+        else if (qCase.includes('rail') || qCase.includes('scv')) chainId = 'toyota_rail_to_scv';
+        else if (qCase.includes('2tr') || qCase.includes('ign')) chainId = 'toyota_ign_2tr';
+        else if (qCase.includes('1kd') || qCase.includes('2kd')) chainId = 'toyota_ckp_to_inj';
+      }
+
+      // 2. Cocokkan kombinasi engine / model + DTC
+      if (!chainId) {
+        if (/P0A|U011|HV|EV/.test(qDtc) || /HYBRID|EV|HEV/.test(qEngine)) {
+          chainId = 'hv_safety_interlock';
+        } else if (/K14B/.test(qEngine) || qModel.includes('ertiga')) {
+          chainId = /^P010[5-9]$|^P011[0-4]$/.test(qDtc) ? 'suzuki_ertiga_map' : 'suzuki_ertiga_k14b';
+        } else if (/J20A/.test(qEngine) || qModel.includes('vitara')) {
+          chainId = 'suzuki_gv_p0335';
+        } else if (/1KD|2KD/.test(qEngine)) {
+          chainId = /^P008[78]$|^P0093$/.test(qDtc) ? 'toyota_rail_to_scv' : 'toyota_ckp_to_inj';
+        } else if (/2TR|1TR/.test(qEngine) || /^P030[0-4]$|^P035[1-4]$/.test(qDtc)) {
+          chainId = 'toyota_ign_2tr';
+        } else if (/^P010[5-9]$/.test(qDtc)) {
+          chainId = 'suzuki_ertiga_map';
+        } else if (/^P033[5-9]$/.test(qDtc)) {
+          chainId = 'suzuki_gv_p0335';
+        }
+      }
+
+      if (!chainId || !chainsMap[chainId]) {
+        chainId = chainsMap['suzuki_ertiga_map'] ? 'suzuki_ertiga_map' : Object.keys(chainsMap)[0];
+      }
+
+      // Pilih tahap (stage) paling sesuai dengan DTC (prioritaskan judul/shortLabel dulu sebelum prereq)
+      const ch = chainsMap[chainId];
+      if (ch && Array.isArray(ch.stages) && qDtc) {
+        let hitIdx = ch.stages.findIndex((st) => `${st.shortLabel || ''} ${st.title || ''}`.toUpperCase().includes(qDtc));
+        if (hitIdx < 0) {
+          hitIdx = ch.stages.findIndex((st) => {
+            const hay = `${st.shortLabel} ${st.title} ${st.func} ${(st.wires || []).map((w) => w.role).join(' ')}`.toUpperCase();
+            if (hay.includes(qDtc)) return true;
+            if (/^P030[0-4]$|^P035[1-4]$/.test(qDtc) && /KOIL|COIL|IGT/.test(hay)) return true;
+            if (/^P033[5-9]$/.test(qDtc) && /CKP|NE\+/.test(hay)) return true;
+            if (/^P034[0-9]$/.test(qDtc) && /CMP/.test(hay)) return true;
+            if (/^P010[5-9]$/.test(qDtc) && /SINYAL MAP|MAP SIG|P0107/.test(hay)) return true;
+            return false;
+          });
+        }
+        if (hitIdx >= 0) stageIdx = hitIdx;
+      }
+
+      const parts = [];
+      if (qDtc) parts.push(`DTC ${qDtc}`);
+      if (qEngine) parts.push(`Mesin ${qEngine}`);
+      if (qCase) parts.push(`Kasus ${qCase}`);
+      return { chainId, stageIdx, label: parts.join(' · ') };
+    }
+
+    // =========================================================================
+    // INITIALIZATION
+    // =========================================================================
+    async function initApp() {
+      // Pada layar HP (<= 640px), tutup panel samping secara default agar kanvas >= 70% layar (REQ-12)
+      if (window.innerWidth <= 640) {
+        document.getElementById('inspector-pane').classList.add('collapsed');
+      }
+      updateModeHintText();
+
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 3000);
+        const [catRes, chRes] = await Promise.all([
+          fetch('/api/v1/ewd/catalog', { signal: ctrl.signal }),
+          fetch('/api/v1/ewd/chains', { signal: ctrl.signal })
+        ]);
+        clearTimeout(t);
+        if (catRes.ok) catalogData = await catRes.json();
+        if (chRes.ok) {
+          const chJson = await chRes.json();
+          chainsMap = chJson.chains || {};
+        }
+      } catch (_) {
+        catalogData = { models: [], signal_chains: [], cache_ready: false };
+      }
+
+      if (!Object.keys(chainsMap).length) {
+        chainsMap = BUILTIN_CHAINS_FALLBACK;
+      }
+
+      // Populate Mode 1 Chains Dropdown
+      document.getElementById('chain-select').innerHTML = Object.values(chainsMap).map((c) =>
+        `<option value="${c.chain_id}">[${c.brand}] ${c.label}</option>`
+      ).join('');
+
+      // Populate Mode 2 OEM SVGZ Models
+      const tyModels = (catalogData.models || []).filter((m) => m.format === 'toyota_svgz');
+      document.getElementById('ty-model-select').innerHTML = tyModels.length
+        ? tyModels.map((m) => `<option value="${m.model_id}">${m.label} (${m.system_count} Sistem)</option>`).join('')
+        : '<option value="">Mode BYOD Lokal (Upload file .svgz Anda)</option>';
+      if (tyModels.length) onToyotaModelChange();
+
+      // Populate Mode 3 PDF Models
+      const pdfModels = (catalogData.models || []).filter((m) => m.format === 'pdf_collection');
+      document.getElementById('pdf-model-select').innerHTML = pdfModels.length
+        ? pdfModels.map((m) => `<option value="${m.model_id}">${m.label} (${m.doc_count} Dok.)</option>`).join('')
+        : '<option value="">Mode BYOD Lokal (Upload file PDF Anda)</option>';
+      if (pdfModels.length) onPdfModelChange();
+
+      // Terapkan Deep-Link bila dibuka dari Dashboard (?dtc=&engine=&case=), jika tidak buka alur default
+      const dl = resolveDeepLinkTarget();
+      const firstChain = (dl && dl.chainId)
+        ? dl.chainId
+        : (catalogData.cache_ready ? 'toyota_ckp_to_inj' : (chainsMap['suzuki_ertiga_map'] ? 'suzuki_ertiga_map' : Object.keys(chainsMap)[0]));
+
+      document.getElementById('chain-select').value = firstChain;
+      await loadChain(firstChain);
+      if (dl) {
+        renderChainStage(dl.stageIdx || 0);
+        const badge = document.getElementById('deeplink-context-badge');
+        if (badge) {
+          badge.textContent = `🔗 Konteks Diagnosa: ${dl.label}`;
+          badge.classList.remove('hidden');
+        }
+        const ch = chainsMap[firstChain];
+        const firstWire = ch && ch.stages && ch.stages[dl.stageIdx] && ch.stages[dl.stageIdx].wires && ch.stages[dl.stageIdx].wires[0];
+        if (firstWire) {
+          spotlightWire(firstWire.lineId || firstWire.id, null);
+        }
+      }
+    }
+
+    window.addEventListener('resize', () => { if (appMode !== 'pdf') applyVB(); });
+    initApp();
+  </script>
+</body>
+</html>

@@ -28,7 +28,7 @@ OFFLINE_SCRIPTS = """  <!-- AGOS Offline Local Engine Bundle (100% Tanpa Server)
       const _origFetch = window.fetch ? window.fetch.bind(window) : null;
       window.fetch = function (input, init) {
         const url = typeof input === 'string' ? input : (input && input.url) || '';
-        if (url.startsWith('/api/v1') || url === '/health' || url.endsWith('/health')) {
+        if (url.startsWith('/api/v1') || url.startsWith('/api/cases') || url === '/health' || url.endsWith('/health')) {
           return window.offlineFetch(url, init);
         }
         return _origFetch ? _origFetch(input, init) : Promise.reject(new Error('Offline mode'));
@@ -102,10 +102,13 @@ ORIENTATION_AND_BACK_JS = """
 def sync() -> None:
     html = WEB_HTML.read_text(encoding="utf-8")
 
-    # 1. Ganti title & icon path agar relatif (file:// / Capacitor WebView)
+    # 1. Ganti title & icon/asset paths agar relatif (file:// / Capacitor WebView)
     html = html.replace('href="/static/icon-192.png"', 'href="icon-192.png"')
     html = html.replace('src="/static/icon-192.png"', 'src="icon-192.png"')
-    html = html.replace('>App v2.0<', '>APK Offline v2.2<')
+    html = html.replace('src="/static/js/xlsx.full.min.js"', 'src="js/xlsx.full.min.js"')
+    html = html.replace('href="/wiring-viewer"', 'href="ewd_viewer.html"')
+    html = html.replace('>App v2.0<', '>APK Offline v2.2.0<')
+    html = html.replace('>v2.2.0<', '>APK Offline v2.2.0<')
     html = html.replace('href="/manifest.json"', '')
     html = html.replace(
         "<title>AGOS SMART DIAGNOSTIK by Agos Corporation — Aplikasi Bengkel AI</title>",
@@ -161,6 +164,15 @@ def sync() -> None:
 
     OFFLINE_HTML.write_text(html, encoding="utf-8")
     print(f"[SUKSES] android_offline/www/index.html disinkronkan ({len(html)/1024:.1f} KB)")
+
+    # 8. Sinkronkan juga ewd_viewer.html untuk mode 100% offline APK
+    web_ewd = ROOT_DIR / "backend" / "app" / "static" / "ewd_viewer.html"
+    off_ewd = ROOT_DIR / "android_offline" / "www" / "ewd_viewer.html"
+    if web_ewd.exists():
+        ewd_html = web_ewd.read_text(encoding="utf-8")
+        ewd_html = ewd_html.replace('href="/"', 'href="index.html"')
+        off_ewd.write_text(ewd_html, encoding="utf-8")
+        print(f"[SUKSES] android_offline/www/ewd_viewer.html disinkronkan ({len(ewd_html)/1024:.1f} KB)")
 
 
 if __name__ == "__main__":

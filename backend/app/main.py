@@ -19,10 +19,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.api.v1.endpoints.diagnostic_router import router as diagnostic_router
+from app.api.v1.endpoints.diagnostic_router import (
+    cases_alias_router,
+    router as diagnostic_router,
+)
 from app.core.config import settings
 from app.models import Base, DTCCode, HistoricalCase, User
 from app.services.admin_guard import router as admin_guard_router
@@ -48,6 +51,22 @@ async def lifespan(app: FastAPI):
     engine = create_async_engine(settings.DATABASE_URL, echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Migrasi kolom aman (idempotent) untuk kolom baru PRD v2.2.0 pada historical_cases
+        try:
+            pragma_rows = (await conn.execute(text("PRAGMA table_info(historical_cases)"))).fetchall()
+            existing_cols = {r[1] for r in pragma_rows}
+            new_cols_ddl = [
+                ("engine_code", "VARCHAR(64)"),
+                ("odometer_km", "INTEGER"),
+                ("license_plate", "VARCHAR(32)"),
+                ("mechanic_name", "VARCHAR(100)"),
+                ("verification_status", "VARCHAR(32) NOT NULL DEFAULT 'TERVERIFIKASI'"),
+            ]
+            for col_name, col_ddl in new_cols_ddl:
+                if col_name not in existing_cols:
+                    await conn.execute(text(f"ALTER TABLE historical_cases ADD COLUMN {col_name} {col_ddl}"))
+        except Exception as exc_mig:
+            logger.warning("Migrasi kolom opsional dilewati: %s", exc_mig)
 
     # Otomatis suntikkan referensi terstruktur JB420 & Kasus Historis Excel (K001 - K012)
     # Fast-path untuk Vercel/Serverless jika DB pre-seeded sudah terisi lengkap
@@ -138,6 +157,7 @@ app.add_middleware(
 # Registrasi Router Auth/Kendaraan, Diagnostik, Manual Multi-Merek & Admin Security/Backup
 app.include_router(auth_vehicle_router)
 app.include_router(diagnostic_router)
+app.include_router(cases_alias_router)
 app.include_router(manual_wiring_router)
 app.include_router(ewd_viewer_router)
 app.include_router(admin_guard_router)

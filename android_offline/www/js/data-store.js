@@ -11,6 +11,7 @@
 
   const STORAGE_KEY_ADDED = 'agos_offline_added_cases_v1';
   const STORAGE_KEY_DELETED = 'agos_offline_deleted_case_ids_v1';
+  const STORAGE_KEY_VERIFIED = 'agos_offline_verified_case_ids_v1';
 
   let _cache = null;
 
@@ -100,38 +101,76 @@
     } catch (_) {}
   }
 
+  function getVerifiedIds() {
+    try {
+      const raw = global.localStorage.getItem(STORAGE_KEY_VERIFIED);
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch (_) {
+      return new Set();
+    }
+  }
+
+  function saveVerifiedIds(setObj) {
+    try {
+      global.localStorage.setItem(STORAGE_KEY_VERIFIED, JSON.stringify(Array.from(setObj)));
+    } catch (_) {}
+  }
+
   async function getAllCases() {
     const data = await ensureLoaded();
     const deleted = getDeletedIds();
+    const verifiedOverrides = getVerifiedIds();
     const added = getAddedCases();
-    const merged = [...data.baseCases, ...added].filter(
-      (c) => !deleted.has(Number(c.id)) && !deleted.has(String(c.case_code))
-    );
+    const byCode = new Map();
+    data.baseCases.forEach((c) => {
+      if (!deleted.has(Number(c.id)) && !deleted.has(String(c.case_code))) {
+        const copy = { ...c };
+        if (verifiedOverrides.has(Number(copy.id)) || verifiedOverrides.has(String(copy.case_code))) {
+          copy.verification_status = 'TERVERIFIKASI';
+        } else if (!copy.verification_status) {
+          copy.verification_status = 'TERVERIFIKASI';
+        }
+        byCode.set(String(copy.case_code || copy.id), copy);
+      }
+    });
+    added.forEach((c) => {
+      if (!deleted.has(Number(c.id)) && !deleted.has(String(c.case_code))) {
+        const copy = { ...c };
+        if (verifiedOverrides.has(Number(copy.id)) || verifiedOverrides.has(String(copy.case_code))) {
+          copy.verification_status = 'TERVERIFIKASI';
+        }
+        byCode.set(String(copy.case_code || copy.id), copy);
+      }
+    });
+    const merged = Array.from(byCode.values());
     merged.sort((a, b) => String(a.case_code || '').localeCompare(String(b.case_code || '')));
     return merged;
   }
 
   async function addCase(payload) {
-    const all = await getAllCases();
     const data = await ensureLoaded();
     const added = getAddedCases();
 
-    // Hitung nomor K berikutnya
-    let maxNum = 18;
-    [...data.baseCases, ...added].forEach((c) => {
-      const m = String(c.case_code || '').match(/^K0*(\d+)$/i);
-      if (m) {
-        const n = parseInt(m[1], 10);
-        if (n > maxNum) maxNum = n;
-      }
-    });
-    const nextNum = maxNum + 1;
-    const caseCode = 'K' + String(nextNum).padStart(3, '0');
-    const nextId = Date.now();
+    let caseCode = String(payload.case_code || '').trim().toUpperCase();
+    if (!caseCode) {
+      let maxNum = 18;
+      [...data.baseCases, ...added].forEach((c) => {
+        const m = String(c.case_code || '').match(/^K0*(\d+)$/i);
+        if (m) {
+          const n = parseInt(m[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      });
+      caseCode = 'K' + String(maxNum + 1).padStart(3, '0');
+    }
+
+    const existingIdx = added.findIndex((c) => String(c.case_code || '').toUpperCase() === caseCode);
+    const nextId = existingIdx >= 0 ? added[existingIdx].id : (Date.now() + Math.floor(Math.random() * 1000));
 
     const sysCategory = payload.system_category || 'Udara';
     const pembakaranSet = new Set(['Udara', 'Bahan Bakar', 'Pengapian', 'Mekanis']);
     const groupCategory = pembakaranSet.has(sysCategory) ? 'Pembakaran' : 'Pendukung';
+    const verStatus = String(payload.verification_status || 'DRAFT').trim().toUpperCase();
 
     const newCase = {
       id: nextId,
@@ -140,6 +179,11 @@
       model: (payload.model || '-').trim(),
       year: payload.year || null,
       engine_capacity: payload.engine_capacity || '-',
+      engine_code: String(payload.engine_code || '').trim().toUpperCase(),
+      odometer_km: payload.odometer_km != null && payload.odometer_km !== '' ? Number(payload.odometer_km) : null,
+      license_plate: String(payload.license_plate || '').trim().toUpperCase(),
+      mechanic_name: String(payload.mechanic_name || '').trim(),
+      verification_status: verStatus === 'TERVERIFIKASI' ? 'TERVERIFIKASI' : 'DRAFT',
       complaint: (payload.complaint || '').trim(),
       symptom: (payload.symptom || '').trim(),
       dtc: (payload.dtc || 'Tidak ada').trim() || 'Tidak ada',
@@ -159,14 +203,42 @@
       manual_book_ref:
         'Buku Pedoman Perbaikan Workshop Manual - Prosedur Servis Standar. Tindakan: ' +
         (payload.repair_action || '-'),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString().slice(0, 10)
     };
 
-    added.push(newCase);
+    if (existingIdx >= 0) added[existingIdx] = newCase;
+    else added.push(newCase);
     saveAddedCases(added);
     return {
-      message: `Kasus baru ${caseCode} (${newCase.brand} ${newCase.model}) berhasil disimpan ke memori HP!`,
+      status: 'success',
+      id: newCase.id,
+      case_code: caseCode,
+      verification_status: newCase.verification_status,
+      message: `Kasus ${caseCode} (${newCase.brand} ${newCase.model} · Status: ${newCase.verification_status}) tersimpan di perangkat!`,
       case: newCase
+    };
+  }
+
+  async function verifyCaseById(id) {
+    const numId = Number(id);
+    const added = getAddedCases();
+    const idx = added.findIndex((c) => Number(c.id) === numId);
+    let code = String(id);
+    if (idx !== -1) {
+      added[idx].verification_status = 'TERVERIFIKASI';
+      code = added[idx].case_code || code;
+      saveAddedCases(added);
+    }
+    const verSet = getVerifiedIds();
+    verSet.add(numId);
+    if (code) verSet.add(String(code));
+    saveVerifiedIds(verSet);
+    return {
+      status: 'verified',
+      id: numId,
+      case_code: code,
+      verification_status: 'TERVERIFIKASI',
+      message: `Kasus ${code} resmi TERVERIFIKASI Standar Bengkel!`
     };
   }
 
@@ -189,6 +261,7 @@
     ensureLoaded,
     getAllCases,
     addCase,
+    verifyCaseById,
     deleteCaseById
   };
 })(typeof window !== 'undefined' ? window : globalThis);

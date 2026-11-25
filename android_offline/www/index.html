@@ -17,6 +17,8 @@
   <!-- Font Awesome Icons -->
   <!-- Local Offline Font Awesome -->
   <link rel="stylesheet" href="css/fontawesome.min.css">
+  <!-- Local SheetJS (100% Offline Excel .xlsx Export/Import — REQ-13) -->
+  <script src="js/xlsx.full.min.js" defer></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -110,7 +112,7 @@
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-sm sm:text-lg font-extrabold tracking-tight text-white truncate">AGOS DIAGNOSTIK</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-mono font-semibold shrink-0">APK Offline v2.2</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-mono font-semibold shrink-0">APK Offline v2.2.0</span>
             </div>
             <p class="text-[11px] text-slate-400 truncate hidden md:block">AGOS SMART DIAGNOSTIK by Agos Corporation • Android & Web AI Platform</p>
           </div>
@@ -150,7 +152,11 @@
           <i class="fa-solid fa-screwdriver-wrench text-amber-400 text-xs"></i>
           <span>Tool Diagnostik</span>
         </button>
-        <a href="/wiring-viewer" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg text-amber-300 bg-amber-500/15 border border-amber-500/40 hover:bg-amber-500 hover:text-slate-950 transition flex items-center gap-1.5 shadow-sm active:scale-95">
+        <button onclick="switchTab('pos')" id="tab-btn-pos" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
+          <i class="fa-solid fa-cash-register text-emerald-400 text-xs"></i>
+          <span>Web POS Bengkel (Demo)</span>
+        </button>
+        <a href="ewd_viewer.html" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg text-amber-300 bg-amber-500/15 border border-amber-500/40 hover:bg-amber-500 hover:text-slate-950 transition flex items-center gap-1.5 shadow-sm active:scale-95">
           <i class="fa-solid fa-diagram-project text-xs"></i>
           <span>Wiring Interaktif (Layar Penuh)</span>
         </a>
@@ -211,22 +217,49 @@
         </div>
       </details>
 
+      <!-- EXPRESS SEARCH: PENCARIAN KILAT 1 BARIS (REQ-04) -->
+      <div id="express-search-bar" class="bg-gradient-to-r from-slate-800/90 via-slate-800/90 to-brand-950/60 border border-cyan-500/40 rounded-2xl p-3.5 sm:p-4 shadow-lg space-y-2.5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div class="relative flex-1 min-w-0">
+            <i class="fa-solid fa-bolt text-amber-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+            <input type="text" id="input-express-search" oninput="runExpressSearchInstant(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();runExpressSearchInstant(this.value, true);}" placeholder="Cari cepat: Ketik Kode Mesin + DTC atau Gejala (Contoh: K14B P0107, 2KD susah hidup, 1NZ brebet)..." class="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-xl pl-8 pr-3 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition">
+          </div>
+          <button type="button" onclick="runExpressSearchInstant(document.getElementById('input-express-search').value, true)" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow flex items-center justify-center gap-1.5 shrink-0 transition active:scale-95">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+            <span>Cari Kilat</span>
+          </button>
+        </div>
+        <div id="express-search-results" class="hidden space-y-2 pt-1"></div>
+      </div>
+
       <!-- FORM DIAGNOSA INPUT (DUAL-PANEL) -->
       <form id="form-diagnostic" onsubmit="event.preventDefault(); executeSearch();" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         <!-- PANEL KIRI: DATA TEKS KENDARAAN & GEJALA (7 COLS) -->
         <div class="lg:col-span-7 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+          <div class="flex items-center justify-between gap-2 border-b border-slate-700 pb-3">
             <h2 class="text-sm font-semibold text-white flex items-center gap-2">
               <i class="fa-solid fa-file-waveform text-brand-500"></i>
-              Data Kendaraan & Keluhan Kerusakan
+              Data Kendaraan &amp; Keluhan Kerusakan
             </h2>
-            <span class="text-xs text-slate-400">Bobot Teks: 85%</span>
+            <button type="button" onclick="document.getElementById('cbr-algo-info-box').classList.toggle('hidden')" class="text-[11px] font-semibold text-cyan-300 hover:text-white bg-slate-900 border border-slate-700 hover:border-cyan-500/60 px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition shrink-0">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>Info Algoritma CBR</span>
+            </button>
+          </div>
+
+          <!-- POPOVER PENJELASAN BOBOT ALGORITMA CBR (REQ-05 & REQ-14) -->
+          <div id="cbr-algo-info-box" class="hidden bg-slate-950/90 border border-cyan-500/40 rounded-xl p-3 text-[11px] text-slate-300 space-y-1.5">
+            <div class="font-bold text-cyan-300 flex items-center justify-between">
+              <span><i class="fa-solid fa-brain mr-1"></i>Formula Weighted CBR + Kedekatan KM &amp; Tahun (v2.2.0)</span>
+              <button type="button" onclick="document.getElementById('cbr-algo-info-box').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <p class="leading-relaxed">Sistem mencocokkan keluhan dengan Basis Pengetahuan Bengkel (17+ Kasus Terverifikasi &amp; Impor Excel): <strong>Merek (10%)</strong>, <strong>Model (15%)</strong>, <strong>Kedekatan Tahun (10%)</strong>, <strong>Kedekatan Kilometer (15%)</strong>, <strong>Keluhan &amp; Gejala (25%)</strong>, dan <strong>Kode DTC (25%)</strong> — dengan redistribusi bobot otomatis bila DTC/KM kosong + bonus +2% untuk kasus terverifikasi Kepala Bengkel.</p>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div class="sm:col-span-4">
-              <label class="block text-xs font-medium text-slate-300 mb-1">Merk Kendaraan (0.10)</label>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Merk Mobil</label>
               <input type="text" id="input-brand" list="dl-brands" oninput="updateContextualDatalists(); scheduleVehicleResolution();" placeholder="Suzuki, Toyota, BMW, Wuling..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition">
               <datalist id="dl-brands">
                 <option value="Suzuki">
@@ -259,7 +292,7 @@
               </datalist>
             </div>
             <div class="sm:col-span-4">
-              <label class="block text-xs font-medium text-slate-300 mb-1">Model / Varian (0.15)</label>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Model &amp; Varian</label>
               <input type="text" id="input-model" list="dl-models" oninput="updateContextualDatalists(); scheduleVehicleResolution();" placeholder="Innova, Reborn, Ertiga, Almaz, 320i..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition">
               <datalist id="dl-models">
                 <option value="Grand Vitara">
@@ -360,44 +393,50 @@
             <div id="live-res-hv-alert" class="rounded-lg bg-rose-950/70 border border-rose-500/60 px-2.5 py-1.5 text-[11px] text-rose-200 font-semibold hidden"></div>
           </div>
 
-          <!-- DATA KILOMETER TEMPUH (STEPPER ±100 KM) -->
-          <div class="bg-slate-900/70 border border-slate-700/80 rounded-xl p-3">
-            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2">
+          <!-- DATA KILOMETER TEMPUH FLEKSIBEL + 4 QUICK PILLS (REQ-05) -->
+          <div class="bg-slate-900/70 border border-slate-700/80 rounded-xl p-3 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-1.5">
               <label for="input-km" class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
                 <i class="fa-solid fa-gauge-simple-high text-cyan-400"></i>
-                Data Kilometer Tempuh <span class="text-slate-400 font-normal">(Per 100 km)</span>
+                Kilometer Tempuh Kendaraan <span class="text-slate-400 font-normal">(Presisi atau 1-Klik)</span>
               </label>
               <span id="km-formatted-badge" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-cyan-950/70 text-cyan-300 border border-cyan-800/60 truncate max-w-full">
-                50.000 km · Servis Menengah (40rb–80rb km)
+                75.000 km · Servis Menengah (40rb–80rb km)
               </span>
             </div>
             <div class="flex items-stretch gap-2">
-              <button type="button" id="btn-km-down" onclick="adjustDiagnosticKm(-100)" title="Turunkan 100 km" class="px-3.5 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-600 text-xs font-bold text-rose-300 hover:text-white transition flex items-center gap-1.5 select-none touch-manipulation">
-                <i class="fa-solid fa-minus text-[10px]"></i> 100
+              <button type="button" id="btn-km-down" onclick="adjustDiagnosticKm(-1000)" title="Turunkan 1.000 km" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-600 text-xs font-bold text-rose-300 hover:text-white transition flex items-center gap-1 select-none touch-manipulation">
+                <i class="fa-solid fa-minus text-[10px]"></i> 1rb
               </button>
               <div class="relative flex-1 min-w-0">
-                <input type="number" id="input-km" min="0" max="999900" step="100" value="50000" oninput="updateDiagnosticKmBadge()" onchange="snapDiagnosticKm()" placeholder="50000" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-10 py-2.5 text-sm font-mono font-semibold text-cyan-300 text-center focus:outline-none focus:border-cyan-500 transition">
+                <input type="number" id="input-km" min="0" max="999999" step="1" value="75000" oninput="updateDiagnosticKmBadge()" placeholder="Contoh: 75000" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-sm font-mono font-semibold text-cyan-300 text-center focus:outline-none focus:border-cyan-500 transition">
                 <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 pointer-events-none">KM</span>
               </div>
-              <button type="button" id="btn-km-up" onclick="adjustDiagnosticKm(100)" title="Naikkan 100 km" class="px-3.5 py-2.5 rounded-lg bg-slate-800 hover:bg-brand-600 active:scale-95 border border-slate-600 hover:border-brand-500 text-xs font-bold text-emerald-300 hover:text-white transition flex items-center gap-1.5 select-none touch-manipulation">
-                <i class="fa-solid fa-plus text-[10px]"></i> 100
+              <button type="button" id="btn-km-up" onclick="adjustDiagnosticKm(1000)" title="Naikkan 1.000 km" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-brand-600 active:scale-95 border border-slate-600 hover:border-brand-500 text-xs font-bold text-emerald-300 hover:text-white transition flex items-center gap-1 select-none touch-manipulation">
+                <i class="fa-solid fa-plus text-[10px]"></i> 1rb
               </button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
+              <button type="button" onclick="setQuickKm(15000)" class="px-2 py-1.5 rounded-lg bg-slate-950 hover:bg-brand-600 border border-slate-700 hover:border-brand-500 text-[11px] font-semibold text-slate-300 hover:text-white transition active:scale-95">&lt; 20.000 km</button>
+              <button type="button" onclick="setQuickKm(40000)" class="px-2 py-1.5 rounded-lg bg-slate-950 hover:bg-brand-600 border border-slate-700 hover:border-brand-500 text-[11px] font-semibold text-slate-300 hover:text-white transition active:scale-95">40.000 km</button>
+              <button type="button" onclick="setQuickKm(75000)" class="px-2 py-1.5 rounded-lg bg-slate-950 hover:bg-brand-600 border border-slate-700 hover:border-brand-500 text-[11px] font-semibold text-slate-300 hover:text-white transition active:scale-95">75.000 km</button>
+              <button type="button" onclick="setQuickKm(110000)" class="px-2 py-1.5 rounded-lg bg-slate-950 hover:bg-brand-600 border border-slate-700 hover:border-brand-500 text-[11px] font-semibold text-slate-300 hover:text-white transition active:scale-95">&gt; 100.000 km</button>
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Keluhan Pelanggan (0.20)</label>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Keluhan Utama Pelanggan</label>
             <input type="text" id="input-complaint" required placeholder="Contoh: Mesin brebet saat idle, akselerasi ngempos..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition">
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Gejala Kerusakan Fisik (0.20)</label>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Gejala Fisik yang Ditemukan Mekanik</label>
             <textarea id="input-symptom" rows="2" placeholder="Contoh: Idle tidak stabil, RPM naik turun 700-900 rpm, mesin bergetar..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition"></textarea>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1">Kode DTC OBD-II (Bisa Multi-Kode, pisahkan koma)</label>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Kode Error Scanner (DTC)</label>
               <input type="text" id="input-dtc" oninput="document.getElementById('input-system-filter').value='';" placeholder="Contoh: P0480, P0037, P0136 atau P0171" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm uppercase text-amber-400 font-mono font-semibold focus:outline-none focus:border-brand-500 transition">
             </div>
             <div>
@@ -431,34 +470,61 @@
             </div>
           </div>
 
+          <!-- KOTAK TOOLTIP EDUKASI MEKANIK JUNIOR (REQ-06) -->
+          <div id="live-tooltip-banner" class="hidden rounded-lg bg-cyan-950/70 border border-cyan-500/50 px-2.5 py-1.5 text-[11px] text-cyan-100 leading-snug flex items-start justify-between gap-2">
+            <span id="live-tooltip-text"></span>
+            <button type="button" onclick="document.getElementById('live-tooltip-banner').classList.add('hidden')" class="text-cyan-300 hover:text-white shrink-0">✕</button>
+          </div>
+
           <!-- MODE 1: BENSIN / EFI -->
           <div id="live-panel-bensin" class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs text-slate-300 mb-1">STFT (%) <span class="text-slate-400">(±5%)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>STFT (%) <span class="text-slate-400">(±5%)</span></span>
+                <button type="button" onclick="showLiveParamTip('STFT')" title="Koreksi semprotan bensin cepat (detik ini): positif (+) berarti campuran kurus/bocor vakum, negatif (-) berarti terlalu boros." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-cyan-600 text-[10px] font-bold text-cyan-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.1" id="input-stft" placeholder="e.g. 18.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">LTFT (%) <span class="text-slate-400">(±5%)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>LTFT (%) <span class="text-slate-400">(±5%)</span></span>
+                <button type="button" onclick="showLiveParamTip('LTFT')" title="Koreksi bensin jangka panjang yang diingat ECU; jika di atas +10% menandakan kebocoran udara atau tekanan BBM lemah." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-cyan-600 text-[10px] font-bold text-cyan-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.1" id="input-ltft" placeholder="e.g. 12.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">RPM Idle <span class="text-slate-400">(±300)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>RPM Idle <span class="text-slate-400">(±300)</span></span>
+                <button type="button" onclick="showLiveParamTip('RPM')" title="Putaran langsam mesin hangat tanpa AC (normal 650–800 RPM); tinggi tidak wajar biasanya karena bocor vakum/throttle kotor." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-cyan-600 text-[10px] font-bold text-cyan-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" id="input-rpm" placeholder="e.g. 750" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">O2 Sensor (V) <span class="text-slate-400">(±0.15)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>O2 Sensor (V) <span class="text-slate-400">(±0.15)</span></span>
+                <button type="button" onclick="showLiveParamTip('O2')" title="Sensor pembaca oksigen knalpot (normal naik-turun cepat 0.1–0.9V); jika diam di bawah 0.2V berarti campuran kurus/sensor mati." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-cyan-600 text-[10px] font-bold text-cyan-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.01" id="input-o2" placeholder="e.g. 0.45" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">MAP (kPa) <span class="text-slate-400">(±10)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>MAP (kPa) <span class="text-slate-400">(±10)</span></span>
+                <button type="button" onclick="showLiveParamTip('MAP')" title="Sensor tekanan/kevakuman intake manifold (normal idle 28–38 kPa); angka tinggi > 45 kPa menandakan kebocoran vakum atau timing meleset." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-cyan-600 text-[10px] font-bold text-cyan-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.1" id="input-map" placeholder="e.g. 38.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">MAF (g/s) <span class="text-slate-400">(±2.0)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>MAF (g/s) <span class="text-slate-400">(±2.0)</span></span>
+                <button type="button" onclick="showLiveParamTip('MAF')" title="Sensor pengukur aliran udara masuk setelah filter udara (normal idle ~2.0–3.2 g/s); kawat MAF kotor membuat tarikan ngempos & boros." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-cyan-600 text-[10px] font-bold text-cyan-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.1" id="input-maf" placeholder="e.g. 2.8" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
             </div>
             <div class="col-span-2">
-              <label class="block text-xs text-slate-300 mb-1">ECT Suhu Pendingin (°C) <span class="text-slate-400">(±10°C)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>ECT Suhu Pendingin (°C) <span class="text-slate-400">(±10°C)</span></span>
+                <button type="button" onclick="showLiveParamTip('ECT')" title="Sensor suhu air radiator (suhu kerja normal 85–95°C); jika terbaca -40°C saat mesin panas berarti kabel sensor putus." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-cyan-600 text-[10px] font-bold text-cyan-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.5" id="input-ect" placeholder="e.g. 88.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-cyan-300 font-mono focus:border-cyan-500 focus:outline-none">
             </div>
           </div>
@@ -469,19 +535,31 @@
               <i class="fa-solid fa-oil-can mr-1"></i> Parameter Khusus <strong>Diesel Common-Rail</strong> (2GD / 2KD / 4N15 / D4HB)
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">Fuel Rail (MPa) <span class="text-slate-400">(30–45)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>Fuel Rail (MPa) <span class="text-slate-400">(30–45)</span></span>
+                <button type="button" onclick="showLiveParamTip('RAIL')" title="Tekanan solar bertekanan tinggi di pipa common-rail (idle 30–45 MPa); di bawah 22 MPa cek filter solar, masuk angin, atau katup SCV." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-amber-600 text-[10px] font-bold text-amber-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.5" id="input-rail-pressure" placeholder="e.g. 32.0" class="w-full bg-slate-900 border border-amber-600/50 rounded-lg px-2.5 py-1.5 text-sm text-amber-300 font-mono focus:border-amber-400 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">Boost Turbo (kPa) <span class="text-slate-400">(100–240)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>Boost Turbo (kPa) <span class="text-slate-400">(100–240)</span></span>
+                <button type="button" onclick="showLiveParamTip('BOOST')" title="Tekanan dorongan udara turbo di intake (idle ~100 kPa, gas penuh 180–240 kPa); kurang dorongan cek selang intercooler bocor atau VNT macet." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-amber-600 text-[10px] font-bold text-amber-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="1" id="input-boost-kpa" placeholder="e.g. 185" class="w-full bg-slate-900 border border-amber-600/50 rounded-lg px-2.5 py-1.5 text-sm text-amber-300 font-mono focus:border-amber-400 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">Koreksi Injektor <span class="text-slate-400">(±3 mm³)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>Koreksi Injektor <span class="text-slate-400">(±3 mm³)</span></span>
+                <button type="button" onclick="showLiveParamTip('INJ_FB')" title="Nilai kompensasi debit solar per silinder; jika melenceng melewati ±3.0 mm³/st menandakan nosel injektor aus/mampet atau kompresi drop." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-amber-600 text-[10px] font-bold text-amber-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.1" id="input-inj-feedback" placeholder="e.g. +3.8" class="w-full bg-slate-900 border border-amber-600/50 rounded-lg px-2.5 py-1.5 text-sm text-amber-300 font-mono focus:border-amber-400 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">Bukaan EGR (%) <span class="text-slate-400">(0–45%)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>Bukaan EGR (%) <span class="text-slate-400">(0–45%)</span></span>
+                <button type="button" onclick="showLiveParamTip('EGR')" title="Persentase bukaan katup sirkulasi gas buang (EGR); katup macet terbuka akibat jelaga bikin asap hitam tebal dan tenaga ngempos." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-amber-600 text-[10px] font-bold text-amber-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="1" id="input-egr-pct" placeholder="e.g. 25" class="w-full bg-slate-900 border border-amber-600/50 rounded-lg px-2.5 py-1.5 text-sm text-amber-300 font-mono focus:border-amber-400 focus:outline-none">
             </div>
             <div class="col-span-2 text-[10px] text-slate-400">
@@ -495,19 +573,31 @@
               <i class="fa-solid fa-bolt mr-1 text-rose-400"></i> WAJIB APD HV 1000V — Parameter BMS Baterai &amp; Isolasi Tegangan Tinggi
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">SoC Baterai HV (%) <span class="text-slate-400">(20–95%)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>SoC Baterai HV (%) <span class="text-slate-400">(20–95%)</span></span>
+                <button type="button" onclick="showLiveParamTip('HV_SOC')" title="State of Charge: sisa kapasitas isi baterai tegangan tinggi (HV); jangan biarkan turun di bawah 15% saat servis lama." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-violet-600 text-[10px] font-bold text-violet-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="1" id="input-hv-soc" placeholder="e.g. 62" class="w-full bg-slate-900 border border-violet-500/50 rounded-lg px-2.5 py-1.5 text-sm text-violet-300 font-mono focus:border-violet-400 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">Delta Sel HV (mV) <span class="text-slate-400">(&lt; 50 mV)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>Delta Sel HV (mV) <span class="text-slate-400">(&lt; 50 mV)</span></span>
+                <button type="button" onclick="showLiveParamTip('HV_DELTA')" title="Selisih tegangan antara sel tertinggi dan terendah baterai HV; jika > 100 mV berarti ada blok sel lemah (imbalance)." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-violet-600 text-[10px] font-bold text-violet-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="1" id="input-hv-delta" placeholder="e.g. 210" class="w-full bg-slate-900 border border-violet-500/50 rounded-lg px-2.5 py-1.5 text-sm text-violet-300 font-mono focus:border-violet-400 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">Isolasi HV (MΩ) <span class="text-slate-400">(&gt; 10 MΩ)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>Isolasi HV (MΩ) <span class="text-slate-400">(&gt; 10 MΩ)</span></span>
+                <button type="button" onclick="showLiveParamTip('HV_ISO')" title="Tahanan isolasi kabel tegangan tinggi terhadap bodi mobil; WAJIB > 10 MΩ (jika < 1 MΩ ada kebocoran arus HV — berbahaya!)." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-rose-600 text-[10px] font-bold text-rose-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="0.1" id="input-hv-insulation" placeholder="e.g. 0.4" class="w-full bg-slate-900 border border-rose-500/50 rounded-lg px-2.5 py-1.5 text-sm text-rose-300 font-mono focus:border-rose-400 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs text-slate-300 mb-1">Suhu HV/Inverter (°C) <span class="text-slate-400">(&lt; 50°C)</span></label>
+              <label class="flex items-center justify-between text-xs text-slate-300 mb-1">
+                <span>Suhu HV/Inverter (°C) <span class="text-slate-400">(&lt; 50°C)</span></span>
+                <button type="button" onclick="showLiveParamTip('HV_TEMP')" title="Temperatur paket baterai HV & inverter; suhu > 55°C memicu pembatasan tenaga (Turtle Mode) — cek pompa coolant inverter & blower." class="w-4 h-4 rounded-full bg-slate-700 hover:bg-violet-600 text-[10px] font-bold text-violet-300 hover:text-white flex items-center justify-center shrink-0">?</button>
+              </label>
               <input type="number" step="1" id="input-hv-temp" placeholder="e.g. 38" class="w-full bg-slate-900 border border-violet-500/50 rounded-lg px-2.5 py-1.5 text-sm text-violet-300 font-mono focus:border-violet-400 focus:outline-none">
             </div>
           </div>
@@ -583,8 +673,11 @@
               </div>
             </div>
             <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+              <button onclick="openInteractiveWiringViewer();" class="text-xs px-2.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold flex items-center justify-center gap-1.5 transition text-center active:scale-95">
+                <i class="fa-solid fa-diagram-project"></i> <span>Wiring Interaktif</span>
+              </button>
               <button onclick="openWiringFromDiagnosis();" class="text-xs px-2.5 py-2 rounded-lg bg-cyan-700 hover:bg-cyan-600 text-white font-semibold flex items-center justify-center gap-1.5 transition text-center active:scale-95">
-                <i class="fa-solid fa-diagram-project"></i> <span>Skema Wiring</span>
+                <i class="fa-solid fa-book-open"></i> <span>Manual &amp; Pin</span>
               </button>
               <button onclick="scrollToPinout();" class="text-xs px-2.5 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold flex items-center justify-center gap-1.5 transition text-center active:scale-95">
                 <i class="fa-solid fa-bolt text-amber-400"></i> <span>Multimeter</span>
@@ -644,6 +737,20 @@
               <button type="button" onclick="selectDiagResultTab('kasus')" data-diagtab="kasus" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white transition active:scale-95">📊 Kasus Mirip <span id="diag-badge-kasus" class="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-[10px]">0</span></button>
               <button type="button" onclick="selectDiagResultTab('all')" data-diagtab="all" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white transition active:scale-95">📑 Semua</button>
             </div>
+          </div>
+
+          <!-- KOTAK PENJELASAN BAHASA AWAM UNTUK PEMILIK MOBIL (REQ-07) -->
+          <div id="diag-sec-customer-summary" class="bg-gradient-to-r from-sky-950/50 via-slate-900/90 to-emerald-950/40 border border-sky-500/40 rounded-xl p-3.5 sm:p-4 space-y-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-user-check text-emerald-400"></i>
+                Penjelasan untuk Pemilik Mobil (Bahasa Awam / Non-Teknis)
+              </h4>
+              <button type="button" onclick="copyCustomerSummary()" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-sky-700 border border-slate-700 text-sky-200 font-semibold transition">
+                <i class="fa-solid fa-copy mr-1"></i><span id="copy-cust-summary-lbl">Salin untuk Pelanggan</span>
+              </button>
+            </div>
+            <p id="res-customer-summary-text" class="text-xs sm:text-sm text-slate-100 leading-relaxed">-</p>
           </div>
 
           <!-- SUMMARY & ACTION (STRUCTURED ROOT CAUSES & INTERACTIVE MULTI-OPTION REPAIR) -->
@@ -886,8 +993,21 @@
           </div>
         </div>
 
-        <!-- DUAL TABLE: TOP MATCHES & SYSTEM SUMMARY -->
-        <div id="diag-sec-kasus" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- DUAL TABLE: TOP 3 KASUS PENGALAMAN MEKANIK TERMIRIP + TABEL RANKING & RINGKASAN SISTEM (REQ-14) -->
+        <div id="diag-sec-kasus" class="space-y-4">
+          <!-- TOP 3 KASUS PENGALAMAN MEKANIK TERMIRIP (BERBASIS KM & TAHUN TERDEKAT) -->
+          <div class="bg-slate-800/85 border border-cyan-500/35 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 pb-2.5">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-award text-amber-400"></i>
+                Top 3 Kasus Pengalaman Mekanik Termirip (Kedekatan KM &amp; Tahun)
+              </h3>
+              <span class="text-[11px] text-cyan-300 font-mono">Weighted CBR + Prioritas Verifikasi</span>
+            </div>
+            <div id="diag-top3-similar-cards" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
           <!-- TABEL RANKING TOP 10 KASUS (8 COLS) -->
           <div class="lg:col-span-8 bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-3">
@@ -943,6 +1063,7 @@
               </table>
             </div>
           </div>
+          </div>
         </div>
 
       </div>
@@ -950,20 +1071,29 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- TAB 2: DATABASE KASUS HISTORIS (K001 - K012 + FORM INPUT BARU)  -->
+    <!-- TAB 2: DATABASE KASUS HISTORIS (17 KASUS + AUTO-SYNC EXCEL)    -->
     <!-- ============================================================== -->
     <section id="tab-content-database" class="tab-pane space-y-6 hidden">
       <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700 pb-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-700 pb-4">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-folder-tree text-brand-400"></i>
               Database Kasus Kerusakan Mobil (DATA_KASUS)
             </h2>
-            <p class="text-xs text-slate-400">Dataset historis 11 kasus Excel &amp; input kasus baru pasca perbaikan mekanik.</p>
+            <p id="db-cases-subtitle" class="text-xs text-slate-400">17 Kasus Bengkel Terverifikasi (Basis Pengetahuan CBR) &amp; Auto-Sync Excel (DATA_KASUS_AGOS.xlsx).</p>
           </div>
-          <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <input type="text" id="filter-case-search" oninput="renderCasesTable();" placeholder="Cari keluhan/gejala/DTC..." class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+          <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <input type="text" id="filter-case-search" oninput="renderCasesTable();" placeholder="Cari nopol/mobil/keluhan/DTC..." class="w-full sm:w-52 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            <button type="button" onclick="exportCasesToExcel();" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5 shadow shrink-0 active:scale-95" title="Unduh seluruh data kasus sebagai DATA_KASUS_AGOS.xlsx">
+              <i class="fa-solid fa-file-excel"></i>
+              <span>Ekspor ke Excel (.xlsx)</span>
+            </button>
+            <label class="bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5 shadow shrink-0 cursor-pointer active:scale-95" title="Impor kasus dari file .xlsx ke Basis Pengetahuan CBR">
+              <i class="fa-solid fa-file-import"></i>
+              <span>Impor dari Excel (.xlsx)</span>
+              <input type="file" id="input-import-excel-cases" accept=".xlsx,.xls" onchange="importCasesFromExcelFile(this)" class="hidden">
+            </label>
             <button onclick="toggleModalNewCase(true);" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5 shadow shrink-0 active:scale-95">
               <i class="fa-solid fa-plus"></i>
               <span>Simpan Kasus Selesai</span>
@@ -976,10 +1106,9 @@
           <table class="w-full text-left text-xs">
             <thead class="text-slate-400 bg-slate-900/60 border-b border-slate-700">
               <tr>
-                <th class="py-2 px-2.5">ID</th>
-                <th class="py-2 px-2.5">Mobil</th>
+                <th class="py-2 px-2.5">ID &amp; Status</th>
+                <th class="py-2 px-2.5">Mobil / Nopol / KM</th>
                 <th class="py-2 px-2.5">Keluhan</th>
-                <th class="py-2 px-2.5">Gejala</th>
                 <th class="py-2 px-2.5">DTC</th>
                 <th class="py-2 px-2.5">Diagnosis Akhir</th>
                 <th class="py-2 px-2.5">Tindakan Perbaikan</th>
@@ -1009,7 +1138,7 @@
             <p id="manuals-header-subtitle" class="text-xs text-slate-400">Katalog terstruktur berbasis Model, Generasi Tahun &amp; Kode Mesin (Multi-Buku Manual Resmi Terpasang).</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <a href="/wiring-viewer" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+            <a href="ewd_viewer.html" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
               <i class="fa-solid fa-diagram-project"></i>
               <span>Buka Wiring Interaktif (Layar Penuh)</span>
             </a>
@@ -1017,8 +1146,17 @@
               <i class="fa-solid fa-file-circle-plus"></i>
               <span>Tambah Manual Model Baru</span>
             </button>
-            <span id="manual-packs-count-badge" class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">1 Manual Aktif</span>
+            <span id="manual-packs-count-badge" class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">8 Manual Aktif</span>
           </div>
+        </div>
+
+        <!-- RINGKASAN TOTAL 8 PAKET MANUAL OEM & KEPATUHAN BYOD (REQ-02) -->
+        <div id="manuals-byod-summary-banner" class="rounded-xl bg-emerald-950/30 border border-emerald-500/40 px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div class="font-bold text-emerald-300 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span id="manuals-total-stats-text">8 Paket Struktur Aktif · 2.511 DTC · 6.315 Pinout · 2.477 Spek Sensor</span>
+          </div>
+          <span class="text-[11px] text-slate-300">Arsitektur <strong>BYOD (Local-Only)</strong> — File PDF/SVGZ asli tetap di perangkat bengkel (Aman HKI)</span>
         </div>
 
         <!-- MATRIKS KESIAPAN BUKU MANUAL MULTI-MEREK & PEMISAH TAHUN GENERASI -->
@@ -1607,7 +1745,130 @@
       </div>
     </section>
 
+    <!-- ============================================================== -->
+    <!-- TAB 5: PRATINJAU PILAR 3 — WEB POS BENGKEL (DEMO INTERAKTIF)   -->
+    <!-- ============================================================== -->
+    <section id="tab-content-pos" class="tab-pane space-y-5 hidden">
+      <div class="bg-slate-800/85 border border-emerald-500/40 rounded-2xl p-4 sm:p-6 shadow-xl space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700 pb-4">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/50">Pilar 3 · Pratinjau Publik</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-slate-900 text-cyan-300 border border-slate-700">v2.2.0 Dual-Platform</span>
+            </div>
+            <h2 class="text-base sm:text-lg font-extrabold text-white mt-1.5 flex items-center gap-2">
+              <i class="fa-solid fa-cash-register text-emerald-400"></i>
+              Web POS Bengkel: PKB → Gudang Sparepart → Invoice Kasir PPN 11%
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Simulasi interaktif alur operasional bengkel modern yang terhubung langsung ke hasil diagnosa AGOS.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="posDemoReset()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 transition">
+              <i class="fa-solid fa-rotate-left mr-1"></i> Reset Simulasi
+            </button>
+          </div>
+        </div>
+
+        <!-- ALUR 3 TAHAP INTERAKTIF: PKB -> GUDANG -> KASIR PPN 11% -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- LANGKAH 1: PERINTAH KERJA BENGKEL (PKB) -->
+          <div class="lg:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-xs font-bold text-cyan-300 uppercase tracking-wider">1. Perintah Kerja Bengkel (PKB)</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">PKB-2026-089</span>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between"><span class="text-slate-400">Pelanggan:</span><span class="text-white font-semibold">Bpk. Hendra Wijaya</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Kendaraan:</span><span class="text-white font-semibold">Toyota Avanza 1.3 (2017)</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">No. Polisi / KM:</span><span class="text-amber-300 font-mono font-semibold">L 1234 AB · 75.000 km</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Hasil Diagnosa AI:</span><span class="text-emerald-300 font-semibold">P0171 (Selang PCV &amp; Koil #2)</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Status PKB:</span><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold">IN PROGRESS → SIAP BAYAR</span></div>
+            </div>
+            <div class="pt-2 border-t border-slate-800">
+              <div class="text-[11px] font-semibold text-slate-300 mb-1.5">Tambah Jasa / Part dari Hasil Diagnosa:</div>
+              <div class="grid grid-cols-1 gap-1.5">
+                <button type="button" onclick="posDemoAddItem('Koil Pengapian OEM (1NR-VE)', 385000, 'SPAREPART', 'SP-COIL-1NR')" class="text-left px-2.5 py-2 rounded-lg bg-slate-950 hover:bg-brand-600/30 border border-slate-700 hover:border-cyan-500 text-xs flex justify-between items-center transition">
+                  <span class="text-white font-medium">+ Koil Pengapian OEM</span>
+                  <span class="font-mono text-cyan-300">Rp 385.000</span>
+                </button>
+                <button type="button" onclick="posDemoAddItem('Selang Vakum PCV SAE J30R7', 95000, 'SPAREPART', 'SP-PCV-01')" class="text-left px-2.5 py-2 rounded-lg bg-slate-950 hover:bg-brand-600/30 border border-slate-700 hover:border-cyan-500 text-xs flex justify-between items-center transition">
+                  <span class="text-white font-medium">+ Selang Vakum PCV</span>
+                  <span class="font-mono text-cyan-300">Rp 95.000</span>
+                </button>
+                <button type="button" onclick="posDemoAddItem('Jasa Scan OBD-II + Reset ECU', 125000, 'JASA', 'SVC-SCAN')" class="text-left px-2.5 py-2 rounded-lg bg-slate-950 hover:bg-brand-600/30 border border-slate-700 hover:border-cyan-500 text-xs flex justify-between items-center transition">
+                  <span class="text-white font-medium">+ Jasa Scan &amp; Reset ECU</span>
+                  <span class="font-mono text-amber-300">Rp 125.000</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- LANGKAH 2: CEK STOK GUDANG AUTO-DEDUCT -->
+          <div class="lg:col-span-4 bg-slate-900/90 border border-slate-700 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">2. Stok Gudang (Auto-Deduct)</span>
+              <span class="text-[10px] font-mono text-emerald-300">Sinkron PKB</span>
+            </div>
+            <div id="pos-demo-stock-list" class="space-y-2 text-xs"></div>
+            <div class="rounded-lg bg-slate-950/90 border border-slate-800 p-2.5 text-[11px] text-slate-300 leading-relaxed">
+              <i class="fa-solid fa-boxes-stacked text-amber-400 mr-1"></i>
+              Begitu faktur dibayar pada Kasir, stok sparepart di gudang otomatis berkurang (<em>Auto Stock Deduction</em>) dan tercatat pada buku mutasi barang.
+            </div>
+          </div>
+
+          <!-- LANGKAH 3: INVOICE KASIR PPN 11% -->
+          <div class="lg:col-span-4 bg-slate-900/90 border border-emerald-500/40 rounded-xl p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">3. Invoice Kasir (PPN 11%)</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">INV-2026-089</span>
+              </div>
+              <div id="pos-demo-cart-list" class="space-y-1.5 text-xs max-h-44 overflow-y-auto"></div>
+            </div>
+            <div class="border-t border-slate-800 pt-2.5 space-y-1.5 text-xs">
+              <div class="flex justify-between text-slate-300"><span>Subtotal Jasa &amp; Part:</span><span id="pos-demo-subtotal" class="font-mono">Rp 0</span></div>
+              <div class="flex justify-between text-slate-300"><span>PPN Resmi (11%):</span><span id="pos-demo-ppn" class="font-mono text-amber-300">Rp 0</span></div>
+              <div class="flex justify-between text-sm font-extrabold text-white border-t border-slate-800 pt-1.5"><span>Grand Total Bayar:</span><span id="pos-demo-grand" class="font-mono text-emerald-400">Rp 0</span></div>
+              <button type="button" onclick="posDemoCheckout()" class="w-full mt-2 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-bold shadow flex items-center justify-center gap-1.5 transition active:scale-95">
+                <i class="fa-solid fa-receipt"></i> Simulasikan Bayar (QRIS / Tunai) &amp; Potong Stok
+              </button>
+              <div id="pos-demo-status" class="hidden rounded-lg bg-emerald-950/60 border border-emerald-500/50 p-2 text-[11px] text-emerald-200 font-semibold text-center"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KETERANGAN ARSITEKTUR DUAL-PLATFORM -->
+        <div class="bg-slate-950/90 border border-cyan-500/35 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="space-y-1">
+            <div class="font-bold text-cyan-300 flex items-center gap-1.5"><i class="fa-solid fa-server"></i> Mode Server Bengkel Lokal (FastAPI + SQLite/PostgreSQL)</div>
+            <p class="text-slate-300 leading-relaxed">Dirancang untuk PC Kasir &amp; Admin Bengkel: mengelola 16 tabel ORM penuh (Pelanggan, PKB, Mutasi Stok Gudang, Kasir PPN 11%, Multi-Role Login) serta Auto-Sync Excel (<code>DATA_KASUS_AGOS.xlsx</code>) secara real-time di jaringan LAN/Wi-Fi bengkel.</p>
+          </div>
+          <div class="space-y-1">
+            <div class="font-bold text-emerald-300 flex items-center gap-1.5"><i class="fa-brands fa-android"></i> Mode APK Android 100% Offline (Mekanik Lapangan)</div>
+            <p class="text-slate-300 leading-relaxed">Berjalan tanpa internet (Mode Pesawat): membawa seluruh 8 Paket Struktur Manual OEM, 17+ Kasus CBR, Simulator Wiring Multi-Sumber, Tool Diagnostik, dan Ekspor/Impor Excel lokal (<code>SheetJS</code>) langsung di saku mekanik.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- FOOTER RESMI SERAGAM v2.2.0 (REQ-03) -->
+  <footer class="border-t border-slate-800/90 bg-slate-950/80 text-slate-400 text-[11px] py-3 px-4 mb-16 sm:mb-0">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+      <div>
+        <strong class="text-slate-200">AGOS SMART DIAGNOSTIK v2.2.0</strong> — Agos Corporation • 8 Paket Manual OEM (BYOD) • 17+ Kasus Terverifikasi CBR
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="ewd_viewer.html" class="text-amber-300 hover:text-amber-200 font-semibold">Wiring Viewer v2.2.0</a>
+        <span>•</span>
+        <button type="button" onclick="switchTab('pos')" class="text-emerald-300 hover:text-emerald-200 font-semibold">Web POS Bengkel</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING TOAST NOTIFICATION (REQ-01 / REQ-13) -->
+  <div id="agos-toast" class="fixed bottom-20 sm:bottom-6 right-4 z-[70] px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-2xl border border-emerald-400/60 hidden transition"></div>
 
   <!-- MODAL: SIMPAN KASUS BARU SELESAI (SHEET SIMPAN_KASUS) -->
   <div id="modal-new-case" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
@@ -1655,7 +1916,19 @@
           </div>
           <div class="sm:col-span-2">
             <label class="block text-slate-300 font-medium mb-1">Kode Mesin / CC</label>
-            <input type="text" id="save-engine" list="dl-engines" placeholder="2GD-FTV / 1TR-FE" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono focus:border-brand-500 focus:outline-none">
+            <input type="text" id="save-engine" list="dl-engines" placeholder="2GD-FTV / 1NR-VE" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono focus:border-brand-500 focus:outline-none">
+          </div>
+          <div class="sm:col-span-4">
+            <label class="block text-slate-300 font-medium mb-1">Nomor Polisi <span class="text-slate-500">(Opsional)</span></label>
+            <input type="text" id="save-nopol" placeholder="Contoh: L 1234 AB" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 uppercase text-amber-300 font-mono font-semibold focus:border-brand-500 focus:outline-none">
+          </div>
+          <div class="sm:col-span-4">
+            <label class="block text-slate-300 font-medium mb-1">Nama Mekanik <span class="text-slate-500">(Opsional)</span></label>
+            <input type="text" id="save-mechanic" placeholder="Contoh: Budi Santoso" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-brand-500 focus:outline-none">
+          </div>
+          <div class="sm:col-span-4">
+            <label class="block text-slate-300 font-medium mb-1">Kilometer (KM)</label>
+            <input type="number" id="save-km" min="0" placeholder="Contoh: 75000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-cyan-300 font-mono font-semibold focus:border-brand-500 focus:outline-none">
           </div>
         </div>
 
@@ -1736,23 +2009,27 @@
   <!-- ====================================================================== -->
   <!-- FIXED ANDROID BOTTOM NAVIGATION BAR (KHUSUS TAMPILAN APLIKASI HP)       -->
   <!-- ====================================================================== -->
-  <nav id="mobile-bottom-nav" class="sm:hidden fixed bottom-0 inset-x-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 z-40 px-2 py-1.5 shadow-2xl">
-    <div class="grid grid-cols-4 gap-1 max-w-md mx-auto">
+  <nav id="mobile-bottom-nav" class="sm:hidden fixed bottom-0 inset-x-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 z-40 px-1.5 py-1.5 shadow-2xl">
+    <div class="grid grid-cols-5 gap-1 max-w-md mx-auto">
       <button type="button" onclick="switchTab('diagnostic')" id="mob-tab-btn-diagnostic" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-cyan-400 bg-brand-600/20 font-bold transition active:scale-95">
         <i class="fa-solid fa-microchip text-sm mb-0.5"></i>
-        <span class="text-[10px] tracking-tight">Diagnosa</span>
+        <span class="text-[9.5px] tracking-tight">Diagnosa</span>
       </button>
       <button type="button" onclick="switchTab('database')" id="mob-tab-btn-database" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
         <i class="fa-solid fa-database text-sm mb-0.5"></i>
-        <span class="text-[10px] tracking-tight">Data Kasus</span>
+        <span class="text-[9.5px] tracking-tight">Kasus</span>
       </button>
       <button type="button" onclick="switchTab('manuals')" id="mob-tab-btn-manuals" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
         <i class="fa-solid fa-book-open text-sm mb-0.5"></i>
-        <span class="text-[10px] tracking-tight">Manual Book</span>
+        <span class="text-[9.5px] tracking-tight">Manual</span>
       </button>
       <button type="button" onclick="switchTab('tools')" id="mob-tab-btn-tools" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
         <i class="fa-solid fa-screwdriver-wrench text-sm mb-0.5"></i>
-        <span class="text-[10px] tracking-tight">Tool Teknis</span>
+        <span class="text-[9.5px] tracking-tight">Tool</span>
+      </button>
+      <button type="button" onclick="switchTab('pos')" id="mob-tab-btn-pos" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
+        <i class="fa-solid fa-cash-register text-sm mb-0.5"></i>
+        <span class="text-[9.5px] tracking-tight">POS Demo</span>
       </button>
     </div>
   </nav>
@@ -1769,7 +2046,7 @@
           </div>
           <div>
             <h3 class="text-sm sm:text-base font-extrabold text-white">Pasang Aplikasi Android &amp; Bagikan ke Mekanik</h3>
-            <p class="text-[11px] text-slate-400">AGOS SMART DIAGNOSTIK v1.2 • Fullscreen Android App</p>
+            <p class="text-[11px] text-slate-400">AGOS SMART DIAGNOSTIK v2.2.0 • Fullscreen Android App</p>
           </div>
         </div>
         <button type="button" onclick="toggleModalAppInstall(false)" class="text-slate-400 hover:text-white p-1.5">
@@ -1812,15 +2089,15 @@
           Mekanik Anda dapat langsung menginstal aplikasi ini dengan men-scan QR Code di bawah menggunakan kamera HP mereka, atau kirimkan lewat WhatsApp:
         </p>
 
-        <!-- QR CODE & LINK -->
+        <!-- QR CODE & LINK DINAMIS (REQ-01: window.location.origin) -->
         <div class="flex flex-col sm:flex-row items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3">
           <div class="bg-white p-2 rounded-xl shrink-0 shadow">
-            <img id="app-share-qr-img" src="icon-192.png" alt="QR Aplikasi AGOS Diagnostik" class="w-28 h-28 object-contain">
+            <img id="app-share-qr-img" src="" alt="QR Aplikasi AGOS Diagnostik" class="w-32 h-32 object-contain">
           </div>
           <div class="flex-1 space-y-2 w-full text-center sm:text-left">
             <div class="text-[11px] text-slate-400">Alamat Aplikasi Aktif:</div>
             <div id="app-share-url-display" class="bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-lg font-mono text-xs text-cyan-300 truncate">
-              http://bore.pub:36500/
+              Memuat URL aktif...
             </div>
             <div class="grid grid-cols-2 gap-2 pt-1">
               <button type="button" onclick="shareAppToMechanicWhatsApp()" class="py-2 px-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95">
@@ -2059,6 +2336,15 @@
               <input type="file" id="admin-restore-file" accept=".json" onchange="handleRestoreBackupFile(this)" class="hidden">
             </label>
           </div>
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80">
+            <button type="button" onclick="exportCasesToExcel()" class="py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-file-excel"></i> Ekspor Excel (.xlsx)
+            </button>
+            <label class="py-2 px-3 rounded-lg bg-slate-800 hover:bg-emerald-700 border border-emerald-600/50 text-emerald-200 hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition">
+              <i class="fa-solid fa-file-import"></i> Impor Excel (.xlsx)
+              <input type="file" id="admin-import-excel-file" accept=".xlsx,.xls" onchange="importCasesFromExcelFile(this)" class="hidden">
+            </label>
+          </div>
         </div>
 
         <!-- Ubah PIN -->
@@ -2089,7 +2375,7 @@
       const _origFetch = window.fetch ? window.fetch.bind(window) : null;
       window.fetch = function (input, init) {
         const url = typeof input === 'string' ? input : (input && input.url) || '';
-        if (url.startsWith('/api/v1') || url === '/health' || url.endsWith('/health')) {
+        if (url.startsWith('/api/v1') || url.startsWith('/api/cases') || url === '/health' || url.endsWith('/health')) {
           return window.offlineFetch(url, init);
         }
         return _origFetch ? _origFetch(input, init) : Promise.reject(new Error('Offline mode'));
@@ -2152,6 +2438,41 @@
       toggleModalNewCase(true, 'diag');
     }
 
+    function showAgosToast(msg, isError = false) {
+      const el = document.getElementById('agos-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `fixed bottom-20 sm:bottom-6 right-4 z-[70] px-4 py-2.5 rounded-xl text-white text-xs font-bold shadow-2xl border transition ${isError ? 'bg-rose-600 border-rose-400/60' : 'bg-emerald-600 border-emerald-400/60'}`;
+      el.classList.remove('hidden');
+      clearTimeout(window._agosToastTimer);
+      window._agosToastTimer = setTimeout(() => el.classList.add('hidden'), 2800);
+    }
+
+    function openInteractiveWiringViewer(dtcOverride = '', engOverride = '', caseOverride = '') {
+      const dtcRaw = (dtcOverride || document.getElementById('input-dtc')?.value || '').trim();
+      const firstDtc = dtcRaw ? formatMultiDtcClient(dtcRaw).split(/[,\s]+/)[0] : '';
+      const engVal = (engOverride || document.getElementById('input-engine')?.value || (lastDiagnosticData && lastDiagnosticData.vehicle_applicability && lastDiagnosticData.vehicle_applicability.engine_code) || '').trim();
+      const modelVal = (document.getElementById('input-model')?.value || '').trim();
+      const params = new URLSearchParams();
+      if (firstDtc) params.set('dtc', firstDtc);
+      if (engVal && engVal !== '-') params.set('engine', engVal.split(' ')[0]);
+      if (caseOverride) params.set('case', caseOverride);
+      else if (modelVal) params.set('model', modelVal);
+      const baseHref = (window.location.protocol === 'file:' || typeof window.offlineFetch === 'function') ? 'ewd_viewer.html' : '/wiring-viewer';
+      const targetUrl = params.toString() ? `${baseHref}?${params.toString()}` : baseHref;
+      window.location.href = targetUrl;
+    }
+
+    function copyCustomerSummary() {
+      const txt = (document.getElementById('res-customer-summary-text')?.textContent || '').trim();
+      if (!txt || txt === '-') return;
+      navigator.clipboard?.writeText(txt).then(() => {
+        showAgosToast('Ringkasan untuk pemilik mobil berhasil disalin!');
+        const lbl = document.getElementById('copy-cust-summary-lbl');
+        if (lbl) { lbl.textContent = 'Tersalin!'; setTimeout(() => { lbl.textContent = 'Salin untuk Pelanggan'; }, 2000); }
+      }).catch(() => {});
+    }
+
     async function openWiringFromDiagnosis() {
       const dtcVal = document.getElementById('input-dtc').value.trim();
       const brandVal = document.getElementById('input-brand').value.trim();
@@ -2187,6 +2508,7 @@
       const dtc = document.getElementById('input-dtc').value.trim() || 'Tidak ada DTC tersimpan';
 
       const cause = document.getElementById('manual-cause-summary')?.textContent.trim() || '-';
+      const custSummary = document.getElementById('res-customer-summary-text')?.textContent.trim() || cause;
       const action = document.getElementById('manual-proven-action')?.textContent.trim() || '-';
       const sectionLabel = document.getElementById('manual-book-section-label')?.textContent.trim() || 'Buku Pedoman Resmi Servis';
       const adv = lastDiagnosticData && lastDiagnosticData.direct_manual_advice;
@@ -2280,6 +2602,14 @@
     <tr>
       <th>Gejala Kerusakan Fisik</th>
       <td colspan="3" style="border:1px solid #cbd5e1;padding:4px 7px">${esc(symptom)}</td>
+    </tr>
+  </table>
+
+  <div class="section-title">1B. PENJELASAN RINGKAS UNTUK PEMILIK MOBIL (BAHASA AWAM)</div>
+  <div class="box" style="background:#f0f9ff;border-color:#7dd3fc;color:#0c4a6e;">
+    ${esc(custSummary)}
+  </div>
+  <table style="display:none"><tr><td></td></tr>
     </tr>
   </table>
 
@@ -2406,21 +2736,25 @@
       };
     }
 
+    // 8 Paket Struktur Manual OEM Lengkap (REQ-02: selalu aktif penuh di Frontend & BYOD)
+    const BUILTIN_MANUAL_PACKS = [
+      { pack_id: 'suzuki_jb420_builtin', brand: 'Suzuki', model: 'Grand Vitara JB420', year_start: 2006, year_end: 2015, engine_codes: ['J20A'], title: 'Suzuki Grand Vitara JB420 (2006–2015)', dtc_count: 207, pinout_count: 251, sensor_spec_count: 9, is_builtin: true },
+      { pack_id: 'suzuki_ertiga_gen1_2012_2017', brand: 'Suzuki', model: 'Ertiga Gen 1', year_start: 2012, year_end: 2017, engine_codes: ['K14B', 'D13A'], title: 'Suzuki Ertiga Gen 1 (2012–2017)', dtc_count: 232, pinout_count: 59, sensor_spec_count: 7, is_builtin: false },
+      { pack_id: 'toyota_avanza_xenia_2004_2015', brand: 'Toyota', model: 'Avanza / Rush / Xenia', year_start: 2004, year_end: 2015, engine_codes: ['K3-VE', '3SZ-VE', 'EJ-VE'], title: 'Toyota Avanza / Rush / Xenia (2004–2015)', dtc_count: 73, pinout_count: 273, sensor_spec_count: 211, is_builtin: false },
+      { pack_id: 'toyota_fortuner_gen1_2005_2015', brand: 'Toyota', model: 'Fortuner Gen 1', year_start: 2005, year_end: 2015, engine_codes: ['2KD-FTV', '1KD-FTV', '2TR-FE', '1GR-FE'], title: 'Toyota Fortuner Gen 1 (2005–2015)', dtc_count: 317, pinout_count: 1052, sensor_spec_count: 429, is_builtin: false },
+      { pack_id: 'toyota_innova_gen1_2004_2015', brand: 'Toyota', model: 'Innova Gen 1 IMV', year_start: 2004, year_end: 2015, engine_codes: ['1TR-FE', '2KD-FTV', '2TR-FE'], title: 'Toyota Innova Gen 1 IMV (2004–2015)', dtc_count: 257, pinout_count: 865, sensor_spec_count: 353, is_builtin: false },
+      { pack_id: 'toyota_hilux_hiace_2005_2015', brand: 'Toyota', model: 'Hilux & HiAce IMV', year_start: 2005, year_end: 2015, engine_codes: ['1KD-FTV', '2KD-FTV', '1TR-FE'], title: 'Toyota Hilux & HiAce IMV (2005–2015)', dtc_count: 230, pinout_count: 400, sensor_spec_count: 255, is_builtin: false },
+      { pack_id: 'toyota_yaris_vios_1nzfe_2003_2016', brand: 'Toyota', model: 'Yaris / Vios / Limo', year_start: 2003, year_end: 2016, engine_codes: ['1NZ-FE'], title: 'Toyota Yaris / Vios / Limo (2003–2016)', dtc_count: 208, pinout_count: 885, sensor_spec_count: 431, is_builtin: false },
+      { pack_id: 'toyota_corolla_camry_alphard_2004_2015', brand: 'Toyota', model: 'Corolla / Camry / Alphard', year_start: 2004, year_end: 2015, engine_codes: ['1ZZ-FE', '3ZR-FE', '2AZ-FE', '2GR-FE', '2AR-FXE'], title: 'Toyota Corolla / Camry / Alphard (2004–2015)', dtc_count: 987, pinout_count: 2530, sensor_spec_count: 782, is_builtin: false }
+    ];
+
     function populateActiveManualBookSelectors() {
-      const packs = (globalInstalledPacksCache && globalInstalledPacksCache.length)
+      const packs = (globalInstalledPacksCache && globalInstalledPacksCache.length >= BUILTIN_MANUAL_PACKS.length)
         ? globalInstalledPacksCache
-        : [{
-            pack_id: 'suzuki_jb420_builtin',
-            brand: 'Suzuki',
-            model: 'Grand Vitara',
-            year_start: 2006,
-            year_end: 2015,
-            engine_codes: ['J20A'],
-            title: 'Buku Pedoman Resmi Suzuki Grand Vitara JB420 (Vol 1 & Vol 2)',
-            dtc_count: 207,
-            pinout_count: 251,
-            is_builtin: true
-          }];
+        : BUILTIN_MANUAL_PACKS;
+      if (!globalInstalledPacksCache || globalInstalledPacksCache.length < BUILTIN_MANUAL_PACKS.length) {
+        globalInstalledPacksCache = packs;
+      }
 
       const validIds = new Set(packs.map(p => p.pack_id));
       validIds.add('universal');
@@ -2430,9 +2764,9 @@
 
       const optionsHtml = packs.map(p => {
         const icon = p.is_builtin ? '📘' : '📗';
-        const tag = p.is_builtin ? 'Bawaan' : 'Terpasang';
-        const engs = (p.engine_codes || []).join(' / ') || '-';
-        return `<option value="${esc(p.pack_id)}">${icon} ${esc(p.brand)} ${esc(p.model)} (${p.year_start}–${p.year_end} · ${esc(engs)}) — ${tag}</option>`;
+        const tag = p.is_builtin ? 'Bawaan' : 'OEM Aktif';
+        const engs = (p.engine_codes || []).join(', ') || '-';
+        return `<option value="${esc(p.pack_id)}">${icon} ${esc(p.brand)} ${esc(p.model)} (${p.year_start}–${p.year_end} · ${esc(engs)}) — ${p.dtc_count} DTC · ${p.pinout_count} Pin</option>`;
       }).join('') + `<option value="universal">🌐 Standar Universal OBD-II (Ilustrasi Umum · Ref. JB420)</option>`;
 
       ['active-manual-book-select', 'tools-manual-book-select'].forEach(selId => {
@@ -2441,6 +2775,16 @@
         el.innerHTML = optionsHtml;
         el.value = activeManualPackId;
       });
+
+      const totDtc = packs.reduce((s, p) => s + Number(p.dtc_count || 0), 0);
+      const totPin = packs.reduce((s, p) => s + Number(p.pinout_count || 0), 0);
+      const totSpec = packs.reduce((s, p) => s + Number(p.sensor_spec_count || 0), 0);
+      const statsEl = document.getElementById('manuals-total-stats-text');
+      if (statsEl) {
+        statsEl.textContent = `${packs.length} Paket Struktur Aktif · ${totDtc.toLocaleString('id-ID')} DTC · ${totPin.toLocaleString('id-ID')} Pinout · ${totSpec.toLocaleString('id-ID')} Spek Sensor`;
+      }
+      const badgeCount = document.getElementById('manual-packs-count-badge');
+      if (badgeCount) badgeCount.textContent = `${packs.length} Manual Aktif`;
 
       refreshActiveManualBookUI();
     }
@@ -3481,7 +3825,7 @@
       if (Number.isNaN(num) || num < 0) {
         el.value = '0';
       } else {
-        el.value = String(Math.min(999900, Math.round(num / 100) * 100));
+        el.value = String(Math.min(999999, Math.round(num)));
       }
       updateDiagnosticKmBadge();
     }
@@ -3490,10 +3834,179 @@
       const el = document.getElementById('input-km');
       if (!el) return;
       const current = parseInt(el.value, 10);
-      const base = Number.isNaN(current) ? 0 : Math.round(current / 100) * 100;
-      const next = Math.min(999900, Math.max(0, base + delta));
+      const base = Number.isNaN(current) ? 0 : current;
+      const next = Math.min(999999, Math.max(0, base + delta));
       el.value = String(next);
       updateDiagnosticKmBadge();
+    }
+
+    function setQuickKm(kmVal) {
+      const el = document.getElementById('input-km');
+      if (!el) return;
+      el.value = String(kmVal);
+      updateDiagnosticKmBadge();
+    }
+
+    const LIVE_PARAM_TIPS = {
+      STFT: 'STFT (Short Term Fuel Trim): Koreksi semprotan bensin cepat saat ini (normal -10% s/d +10%). Positif tinggi (+) = campuran kurus / kebocoran vakum; negatif (-) = terlalu kaya / injektor bocor.',
+      LTFT: 'LTFT (Long Term Fuel Trim): Memori koreksi bensin jangka panjang ECU (normal -10% s/d +10%). Bila terus di atas +12%, cek selang vakum, MAF kotor, atau tekanan pompa bensin lemah.',
+      RPM: 'RPM Idle: Putaran mesin stasioner hangat tanpa AC (normal 650–800 RPM). Idle terlalu tinggi (> 1000 RPM) sering disebabkan kebocoran vakum intake atau katup throttle mengganjal kerak.',
+      O2: 'O2 Sensor (V): Pembaca kadar oksigen knalpot (normal osilasi cepat 0.10–0.90 V). Jika diam di < 0.2 V berarti campuran kurus/sensor lemah; diam di > 0.8 V berarti terlalu kaya.',
+      MAP: 'MAP (kPa): Sensor kevakuman intake manifold (normal idle 28–38 kPa). Nilai terlalu tinggi (> 45 kPa) menandakan kebocoran selang vakum, klep bocor, atau timing loncat.',
+      MAF: 'MAF (g/s): Sensor debit aliran udara setelah filter (normal idle ~2.0–3.2 g/s). Kawat sensor kotor debu/oli membuat ECU salah takar bensin sehingga mesin ngempos & boros.',
+      ECT: 'ECT (°C): Sensor suhu air pendingin mesin (suhu kerja normal 85–95°C). Bila terbaca -40°C saat mesin panas berarti kabel sensor putus; jika > 105°C cek kipas radiator & thermostat.',
+      RAIL: 'Fuel Rail Pressure (MPa): Tekanan solar pada pipa common-rail (idle normal 30–45 MPa). Jika drop < 22 MPa, mesin susah hidup/limp mode — cek filter solar, masuk angin, atau katup SCV.',
+      BOOST: 'Boost Turbo (kPa): Tekanan udara masuk dari turbo (idle ~100 kPa, gas penuh 180–240 kPa). Jika kurang dorongan (underboost), cek selang intercooler sobek atau aktuator VNT macet.',
+      INJ_FB: 'Koreksi Injektor (mm³/st): Kompensasi debit solar per silinder agar putaran halus (normal -3.0 s/d +3.0). Nilai di luar batas menunjukkan nosel injektor aus/mampet atau kompresi silinder lemah.',
+      EGR: 'Bukaan EGR (%): Bukaan katup resirkulasi gas buang (idle 0–45%). Katup EGR macet terbuka karena jelaga tebal membuat asap hitam dan tarikan berat.',
+      HV_SOC: 'SoC Baterai HV (%): Sisa muatan baterai tegangan tinggi (normal 20–95%). Hindari pembiaran < 15% saat perbaikan agar baterai HV tidak drop permanen.',
+      HV_DELTA: 'Delta Sel HV (mV): Selisih tegangan antar-blok sel baterai HV (normal < 50 mV). Bila > 100–200 mV berarti ada modul sel melemah (imbalance).',
+      HV_ISO: 'Tahanan Isolasi HV (MΩ): Pengaman kebocoran listrik tegangan tinggi ke sasis (WAJIB > 10 MΩ). Nilai < 1 MΩ memicu DTC P0AA6 — WAJIB pakai APD sarung tangan 1000V!',
+      HV_TEMP: 'Suhu HV/Inverter (°C): Suhu paket baterai HV & inverter (normal < 50°C). Di atas 55°C sistem membatasi tenaga — cek kipas pendingin baterai HV & pompa coolant inverter.'
+    };
+
+    function showLiveParamTip(key) {
+      const box = document.getElementById('live-tooltip-banner');
+      const txt = document.getElementById('live-tooltip-text');
+      if (!box || !txt) return;
+      txt.innerHTML = `<i class="fa-solid fa-circle-question text-cyan-400 mr-1"></i>${esc(LIVE_PARAM_TIPS[key] || '')}`;
+      box.classList.remove('hidden');
+    }
+
+    const EXPRESS_ENGINE_HINTS = {
+      'K14B': { brand: 'Suzuki', model: 'Ertiga', year: 2014, pack: 'suzuki_ertiga_gen1_2012_2017', caseKey: 'suzuki_ertiga_map' },
+      'J20A': { brand: 'Suzuki', model: 'Grand Vitara', year: 2008, pack: 'suzuki_jb420_builtin', caseKey: 'suzuki_gv_p0335' },
+      '1NZ': { brand: 'Toyota', model: 'Yaris', year: 2010, pack: 'toyota_yaris_vios_1nzfe_2003_2016', caseKey: '' },
+      '1NZ-FE': { brand: 'Toyota', model: 'Yaris', year: 2010, pack: 'toyota_yaris_vios_1nzfe_2003_2016', caseKey: '' },
+      '2KD': { brand: 'Toyota', model: 'Fortuner', year: 2012, pack: 'toyota_fortuner_gen1_2005_2015', caseKey: 'toyota_ckp_to_inj' },
+      '2KD-FTV': { brand: 'Toyota', model: 'Fortuner', year: 2012, pack: 'toyota_fortuner_gen1_2005_2015', caseKey: 'toyota_ckp_to_inj' },
+      '1KD': { brand: 'Toyota', model: 'Fortuner', year: 2012, pack: 'toyota_fortuner_gen1_2005_2015', caseKey: 'toyota_ckp_to_inj' },
+      '2TR': { brand: 'Toyota', model: 'Fortuner', year: 2012, pack: 'toyota_fortuner_gen1_2005_2015', caseKey: 'toyota_ign_2tr' },
+      '1TR': { brand: 'Toyota', model: 'Innova', year: 2012, pack: 'toyota_innova_gen1_2004_2015', caseKey: 'toyota_ign_2tr' },
+      'K3-VE': { brand: 'Toyota', model: 'Avanza', year: 2010, pack: 'toyota_avanza_xenia_2004_2015', caseKey: '' },
+      '3SZ-VE': { brand: 'Toyota', model: 'Avanza', year: 2010, pack: 'toyota_avanza_xenia_2004_2015', caseKey: '' },
+      '2AZ': { brand: 'Toyota', model: 'Camry', year: 2010, pack: 'toyota_corolla_camry_alphard_2004_2015', caseKey: '' },
+      '3ZR': { brand: 'Toyota', model: 'Corolla Altis', year: 2012, pack: 'toyota_corolla_camry_alphard_2004_2015', caseKey: '' }
+    };
+
+    function parseExpressQuery(raw) {
+      const q = String(raw || '').trim();
+      const dtcMatch = q.match(/\b([PBCU][0-9A-F]{4})\b/i);
+      const dtc = dtcMatch ? dtcMatch[1].toUpperCase() : '';
+      let engKey = '';
+      let meta = null;
+      const upper = q.toUpperCase();
+      for (const k of Object.keys(EXPRESS_ENGINE_HINTS).sort((a, b) => b.length - a.length)) {
+        if (upper.includes(k)) { engKey = k; meta = EXPRESS_ENGINE_HINTS[k]; break; }
+      }
+      if (!meta) {
+        const low = q.toLowerCase();
+        if (low.includes('ertiga')) { engKey = 'K14B'; meta = EXPRESS_ENGINE_HINTS['K14B']; }
+        else if (low.includes('vitara')) { engKey = 'J20A'; meta = EXPRESS_ENGINE_HINTS['J20A']; }
+        else if (low.includes('avanza') || low.includes('xenia')) { engKey = 'K3-VE'; meta = EXPRESS_ENGINE_HINTS['K3-VE']; }
+        else if (low.includes('yaris') || low.includes('vios')) { engKey = '1NZ-FE'; meta = EXPRESS_ENGINE_HINTS['1NZ-FE']; }
+        else if (low.includes('fortuner')) { engKey = '2KD-FTV'; meta = EXPRESS_ENGINE_HINTS['2KD-FTV']; }
+        else if (low.includes('innova')) { engKey = '1TR-FE'; meta = EXPRESS_ENGINE_HINTS['1TR']; }
+        else if (low.includes('camry')) { engKey = '2AZ-FE'; meta = EXPRESS_ENGINE_HINTS['2AZ']; }
+      }
+      return { q, dtc, engKey, meta };
+    }
+
+    function runExpressSearchInstant(raw, autoRunDiag = false) {
+      const host = document.getElementById('express-search-results');
+      if (!host) return;
+      const parsed = parseExpressQuery(raw);
+      if (!parsed.q || parsed.q.length < 2) {
+        host.classList.add('hidden');
+        host.innerHTML = '';
+        return;
+      }
+
+      const packs = (globalInstalledPacksCache && globalInstalledPacksCache.length) ? globalInstalledPacksCache : BUILTIN_MANUAL_PACKS;
+      const matchedPack = parsed.meta ? packs.find(p => p.pack_id === parsed.meta.pack) : null;
+      const qLow = parsed.q.toLowerCase();
+      const matchedCases = (allCasesCache || []).filter(c => {
+        const hay = `${c.brand} ${c.model} ${c.engine_code || ''} ${c.dtc || ''} ${c.complaint} ${c.symptom} ${c.final_diagnosis}`.toLowerCase();
+        if (parsed.dtc && hay.includes(parsed.dtc.toLowerCase())) return true;
+        return qLow.split(/\s+/).filter(w => w.length >= 2).some(w => hay.includes(w));
+      }).slice(0, 2);
+
+      const titleLabel = parsed.dtc
+        ? `Deteksi Instan Kode ${parsed.dtc}${parsed.meta ? ` · ${parsed.meta.brand} ${parsed.meta.model} (${parsed.engKey})` : ''}`
+        : `Pencarian Kilat: "${parsed.q}"${parsed.meta ? ` · ${parsed.meta.brand} ${parsed.meta.model} (${parsed.engKey})` : ''}`;
+
+      const subInfo = matchedPack
+        ? `Paket Manual OEM Aktif: ${matchedPack.title} (${matchedPack.dtc_count} DTC · ${matchedPack.pinout_count} Pinout)`
+        : (matchedCases.length ? `Ditemukan ${matchedCases.length} kasus bengkel cocok di Basis Pengetahuan CBR` : 'Siap analisa langsung via Mesin Weighted CBR & 8 Paket Manual OEM');
+
+      const topCaseHtml = matchedCases.map(c => `
+        <div class="text-[11px] bg-slate-900/90 border border-slate-800 rounded-lg px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-2">
+          <span><strong class="text-cyan-300 font-mono">${esc(c.case_code)}</strong> · ${esc(c.brand)} ${esc(c.model)} (${esc(c.year || '-')}) — <strong class="text-white">${esc(c.final_diagnosis)}</strong></span>
+          <span class="text-amber-300 font-mono text-[10px]">${esc(c.dtc || '-')}</span>
+        </div>
+      `).join('');
+
+      const caseParam = (parsed.meta && parsed.meta.caseKey)
+        ? (parsed.dtc === 'P0107' && parsed.engKey === 'K14B' ? 'ertiga_map' : parsed.meta.caseKey)
+        : '';
+
+      host.innerHTML = `
+        <div class="bg-slate-950/95 border border-cyan-500/45 rounded-xl p-3 space-y-2.5">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt text-amber-400"></i> ${esc(titleLabel)}
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">${esc(subInfo)}</div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">Instan &lt; 100ms</span>
+          </div>
+          ${topCaseHtml}
+          <div class="flex flex-wrap gap-2 pt-0.5">
+            <button type="button" onclick="applyExpressSearchToForm(true, 'standar')" class="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95">
+              <i class="fa-solid fa-plug"></i> Lihat Pinout &amp; Nilai Ukur
+            </button>
+            <button type="button" onclick="openInteractiveWiringViewer('${esc(parsed.dtc)}','${esc(parsed.engKey)}','${esc(caseParam)}')" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95">
+              <i class="fa-solid fa-diagram-project"></i> Buka Wiring Interaktif
+            </button>
+            <button type="button" onclick="applyExpressSearchToForm(false)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95">
+              <i class="fa-solid fa-pen-to-square"></i> Isi ke Form Lengkap
+            </button>
+          </div>
+        </div>
+      `;
+      host.classList.remove('hidden');
+
+      if (autoRunDiag) {
+        applyExpressSearchToForm(true, 'inti');
+      }
+    }
+
+    async function applyExpressSearchToForm(runSearch = false, targetSubTab = '') {
+      const raw = document.getElementById('input-express-search')?.value || '';
+      const parsed = parseExpressQuery(raw);
+      if (!parsed.q) return;
+      if (parsed.meta) {
+        document.getElementById('input-brand').value = parsed.meta.brand;
+        document.getElementById('input-model').value = parsed.meta.model;
+        document.getElementById('input-year').value = String(parsed.meta.year);
+        document.getElementById('input-engine').value = parsed.engKey;
+      } else if (!document.getElementById('input-year').value) {
+        document.getElementById('input-year').value = '2016';
+      }
+      if (parsed.dtc) document.getElementById('input-dtc').value = parsed.dtc;
+      document.getElementById('input-complaint').value = parsed.q;
+      document.getElementById('input-symptom').value = parsed.dtc ? `Kode error ${parsed.dtc} terdeteksi — ${parsed.q}` : parsed.q;
+      updateContextualDatalists();
+      scheduleVehicleResolution();
+      if (runSearch) {
+        await executeSearch();
+        if (targetSubTab && typeof selectDiagResultTab === 'function') {
+          selectDiagResultTab(targetSubTab);
+        }
+      } else {
+        document.getElementById('form-diagnostic')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function switchTab(tabName) {
@@ -3534,6 +4047,9 @@
         calculateFuelTrim();
         calculateMap('kpa');
         calculateVoltageDrop();
+      }
+      if (tabName === 'pos') {
+        renderPosDemo();
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -4366,6 +4882,7 @@
         adminIsDefaultPin = Boolean(data.is_default_pin);
         if (errEl) errEl.classList.add('hidden');
         updateAdminLockUI();
+        renderCasesTable();
         const cb = pendingAdminCallback;
         pendingAdminCallback = null;
         if (cb) {
@@ -4381,6 +4898,7 @@
       workshopAdminPin = '';
       sessionStorage.removeItem('agos_workshop_admin_pin');
       updateAdminLockUI();
+      renderCasesTable();
     }
 
     async function changeAdminPinSubmit() {
@@ -4552,21 +5070,25 @@
 
     function getPublicShareUrl() {
       const origin = window.location.origin;
-      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-        return 'http://bore.pub:36500/';
+      if (!origin || origin === 'null' || window.location.protocol === 'file:') {
+        return 'https://ags-diagnostik.vercel.app';
       }
-      return origin + '/';
+      return origin;
+    }
+
+    function syncShareQrAndUrl() {
+      const currentOrigin = getPublicShareUrl();
+      const urlEl = document.getElementById('app-share-url-display');
+      const qrEl = document.getElementById('app-share-qr-img');
+      if (urlEl) urlEl.textContent = currentOrigin;
+      if (qrEl) qrEl.src = `icon-192.png`;
     }
 
     function toggleModalAppInstall(show) {
       const modal = document.getElementById('modal-app-install');
       if (!modal) return;
       if (show) {
-        const shareUrl = getPublicShareUrl();
-        const urlEl = document.getElementById('app-share-url-display');
-        const qrEl = document.getElementById('app-share-qr-img');
-        if (urlEl) urlEl.textContent = shareUrl;
-        if (qrEl) qrEl.src = `icon-192.png`;
+        syncShareQrAndUrl();
         modal.classList.remove('hidden');
       } else {
         modal.classList.add('hidden');
@@ -4610,13 +5132,38 @@
 
     function copyAppLinkToClipboard() {
       const shareUrl = getPublicShareUrl();
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        const btnTxt = document.getElementById('copy-link-btn-text');
-        if (btnTxt) {
-          btnTxt.textContent = 'Tersalin!';
-          setTimeout(() => { btnTxt.textContent = 'Salin Link'; }, 2000);
-        }
-      }).catch(() => {});
+      // Tampilkan umpan balik toast segera secara sinkron (REQ-01)
+      showAgosToast('Tautan berhasil disalin!');
+      const btnTxt = document.getElementById('copy-link-btn-text');
+      if (btnTxt) {
+        btnTxt.textContent = 'Tersalin!';
+        setTimeout(() => { btnTxt.textContent = 'Salin Link'; }, 2000);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).catch(() => {
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = shareUrl;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          } catch (_) {}
+        });
+      } else {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = shareUrl;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch (_) {}
+      }
     }
 
     function loadSample(code) {
@@ -5027,6 +5574,13 @@
         document.getElementById('manual-book-section-label').textContent = advice.manual_book_section;
         renderStructuredCausesAndOptions(advice, topItem);
 
+        // Ringkasan Bahasa Awam untuk Pemilik Mobil (REQ-07)
+        const custEl = document.getElementById('res-customer-summary-text');
+        if (custEl) {
+          const fallbackCust = `Komputer mesin mendeteksi gangguan pada ${advice.system_category || 'sistem mesin'} (${advice.diagnosis_title || data.top_diagnosis}). Mekanik menyarankan pemeriksaan komponen terkait terlebih dahulu sebelum penggantian suku cadang.`;
+          custEl.textContent = advice.customer_summary || fallbackCust;
+        }
+
         // Steps (Kartu Checklist Interaktif Mekanik — ramah HP & tetap terbaca oleh Print Worksheet)
         const stepsContainer = document.getElementById('manual-repair-steps');
         stepsContainer.innerHTML = advice.step_by_step_repair.map((s, idx) => {
@@ -5095,18 +5649,53 @@
       const kasusBadge = document.getElementById('diag-badge-kasus');
       if (kasusBadge) kasusBadge.textContent = String((data.ranked_matches || []).length);
 
-      // 3. Ranked Matches Table (Top 10/20)
+      // 3. Top 3 Kasus Pengalaman Mekanik Termirip (REQ-14: KM & Tahun Terdekat + Verifikasi)
+      const top3Host = document.getElementById('diag-top3-similar-cards');
+      if (top3Host) {
+        const top3 = (data.ranked_matches || []).filter(m => !String(m.case_code || '').startsWith('MANUAL-')).slice(0, 3);
+        if (!top3.length) {
+          top3Host.innerHTML = '<div class="col-span-full text-xs text-slate-400">Belum ada kasus historis serupa — simpan kasus setelah selesai perbaikan untuk memperkaya basis pengetahuan bengkel.</div>';
+        } else {
+          top3Host.innerHTML = top3.map((m, i) => {
+            const kmStr = m.odometer_km != null ? `${Number(m.odometer_km).toLocaleString('id-ID')} km` : '-';
+            const kmDiffTxt = m.km_diff != null ? ` · Selisih ${Number(m.km_diff).toLocaleString('id-ID')} km` : '';
+            const yrDiffTxt = m.year_diff != null ? ` (±${m.year_diff} thn)` : '';
+            const isVer = String(m.verification_status || 'TERVERIFIKASI').toUpperCase() === 'TERVERIFIKASI';
+            const verBadge = isVer
+              ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9.5px] font-bold">✓ TERVERIFIKASI</span>'
+              : '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9.5px] font-bold">DRAFT</span>';
+            return `
+              <div class="rounded-xl p-3 bg-slate-950/90 border ${i === 0 ? 'border-emerald-500/50' : 'border-slate-800'} space-y-1.5 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-1">
+                  <span class="font-extrabold ${m.total_score >= 70 ? 'text-emerald-400' : 'text-cyan-300'}">Mirip ${m.total_score}% · Kasus ${esc(m.case_code)}</span>
+                  ${verBadge}
+                </div>
+                <div class="text-[11px] font-semibold text-white">
+                  ${esc(m.brand)} ${esc(m.model)} ${esc(m.year || '')}${yrDiffTxt} · <span class="font-mono text-cyan-300">${kmStr}${kmDiffTxt}</span>
+                </div>
+                <div class="text-[11px] text-slate-300">
+                  <span class="font-mono text-amber-300 font-bold">DTC: ${esc(m.dtc || '-')}</span> | <span class="text-slate-200">${esc(m.repair_action)}</span>
+                </div>
+              </div>`;
+          }).join('');
+        }
+      }
+
+      // 3B. Ranked Matches Table (Top 10/20)
       const rankedTbody = document.getElementById('table-ranked-cases');
-      rankedTbody.innerHTML = data.ranked_matches.map(m => `
+      rankedTbody.innerHTML = data.ranked_matches.map(m => {
+        const kmSub = m.odometer_km != null ? `<div class="text-[10px] font-mono text-cyan-300">${Number(m.odometer_km).toLocaleString('id-ID')} km${m.km_diff != null ? ` (Δ ${Number(m.km_diff).toLocaleString('id-ID')} km)` : ''}</div>` : '';
+        const isVer = String(m.verification_status || 'TERVERIFIKASI').toUpperCase() === 'TERVERIFIKASI';
+        return `
         <tr class="hover:bg-slate-700/40 transition">
           <td class="py-2 px-2.5 font-bold ${m.rank === 1 ? 'text-amber-400' : 'text-slate-400'}">#${m.rank}</td>
-          <td class="py-2 px-2.5 font-mono text-cyan-400 font-semibold">${esc(m.case_code)}</td>
-          <td class="py-2 px-2.5 font-medium text-white">${esc(m.brand)} ${esc(m.model)}</td>
+          <td class="py-2 px-2.5 font-mono text-cyan-400 font-semibold">${esc(m.case_code)}<div class="text-[9px] ${isVer ? 'text-emerald-400' : 'text-amber-400'}">${isVer ? '✓ VERIF' : 'DRAFT'}</div></td>
+          <td class="py-2 px-2.5 font-medium text-white">${esc(m.brand)} ${esc(m.model)} (${esc(m.year || '-')})${kmSub}</td>
           <td class="py-2 px-2.5 text-slate-200">${esc(m.final_diagnosis)}</td>
           <td class="py-2 px-2.5 text-right font-mono font-bold ${m.total_score >= 60 ? 'text-emerald-400' : 'text-slate-400'}">${m.total_score}%</td>
           <td class="py-2 px-2.5 text-slate-400 text-[11px]">${esc(m.repair_action)}</td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
 
       // 4. System Summaries Table
       const sysTbody = document.getElementById('table-system-summaries');
@@ -5134,6 +5723,7 @@
       currentDiagResultTab = tabKey || 'all';
       const showAll = currentDiagResultTab === 'all';
       const map = {
+        'diag-sec-customer-summary': showAll || currentDiagResultTab === 'inti',
         'diag-sec-inti-causes': showAll || currentDiagResultTab === 'inti',
         'diag-sec-wiring-sim': showAll || currentDiagResultTab === 'inti',
         'diag-sec-sop': showAll || currentDiagResultTab === 'sop',
@@ -7180,30 +7770,284 @@
         if (!search) return true;
         return (c.brand || '').toLowerCase().includes(search) ||
                (c.model || '').toLowerCase().includes(search) ||
+               (c.license_plate || '').toLowerCase().includes(search) ||
+               (c.engine_code || '').toLowerCase().includes(search) ||
                (c.complaint || '').toLowerCase().includes(search) ||
                (c.final_diagnosis || '').toLowerCase().includes(search) ||
                (c.dtc || '').toLowerCase().includes(search);
       });
 
+      const subEl = document.getElementById('db-cases-subtitle');
+      if (subEl) {
+        const verCnt = allCasesCache.filter(c => String(c.verification_status || 'TERVERIFIKASI').toUpperCase() === 'TERVERIFIKASI').length;
+        subEl.textContent = `${allCasesCache.length} Kasus Bengkel (${verCnt} Terverifikasi Standar · Basis Pengetahuan CBR) & Auto-Sync Excel (DATA_KASUS_AGOS.xlsx).`;
+      }
+
       const tbody = document.getElementById('table-all-cases');
       if (!tbody) return;
 
-      tbody.innerHTML = filtered.map(c => `
+      tbody.innerHTML = filtered.map(c => {
+        const st = String(c.verification_status || 'TERVERIFIKASI').toUpperCase();
+        const isVer = st === 'TERVERIFIKASI';
+        const statusBadge = isVer
+          ? '<span class="inline-block mt-1 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9.5px] font-bold">✓ TERVERIFIKASI</span>'
+          : '<span class="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[9.5px] font-bold">DRAFT / Menunggu Verifikasi</span>';
+        const kmStr = c.odometer_km != null ? `${Number(c.odometer_km).toLocaleString('id-ID')} km` : '-';
+        const nopolBadge = c.license_plate ? `<span class="px-1.5 py-0.5 rounded bg-slate-900 border border-amber-500/40 text-amber-300 font-mono text-[10px]">${esc(c.license_plate)}</span>` : '';
+        const engBadge = c.engine_code ? `<span class="font-mono text-cyan-300 text-[10px]">${esc(c.engine_code)}</span>` : '';
+        const mekTxt = c.mechanic_name ? `<div class="text-[10px] text-slate-400">Mek: ${esc(c.mechanic_name)}</div>` : '';
+        const verifyBtn = (!isVer && workshopAdminPin)
+          ? `<button onclick="verifyCaseStandard(${c.id}, '${esc(c.case_code)}')" title="Verifikasi Standar Bengkel oleh Kepala Bengkel" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold">✓ Verifikasi Standar Bengkel</button>`
+          : (!isVer ? `<button onclick="verifyCaseStandard(${c.id}, '${esc(c.case_code)}')" title="Buka Mode Kepala Bengkel (PIN) untuk Verifikasi" class="px-2 py-1 rounded bg-amber-600/80 hover:bg-amber-500 text-white text-[10px] font-semibold">🔒 Verifikasi</button>` : '');
+
+        return `
         <tr class="hover:bg-slate-700/40 transition">
-          <td class="py-2 px-2.5 font-mono text-cyan-400 font-semibold">${esc(c.case_code)}</td>
-          <td class="py-2 px-2.5 text-white font-medium">${esc(c.brand)} ${esc(c.model)} (${esc(c.year || '-')})</td>
-          <td class="py-2 px-2.5 text-slate-300">${esc(c.complaint)}</td>
-          <td class="py-2 px-2.5 text-slate-400">${esc(c.symptom)}</td>
-          <td class="py-2 px-2.5 font-mono text-amber-400">${esc(c.dtc || '-')}</td>
-          <td class="py-2 px-2.5 text-white font-semibold">${esc(c.final_diagnosis)}</td>
-          <td class="py-2 px-2.5 text-slate-300 text-[11px]">${esc(c.repair_action)}</td>
-          <td class="py-2 px-2.5"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[10px]">${esc(c.system_category)}</span></td>
-          <td class="py-2 px-2.5 text-right whitespace-nowrap space-x-1">
+          <td class="py-2 px-2.5 align-top">
+            <div class="font-mono text-cyan-400 font-semibold">${esc(c.case_code)}</div>
+            ${statusBadge}
+          </td>
+          <td class="py-2 px-2.5 align-top">
+            <div class="text-white font-medium">${esc(c.brand)} ${esc(c.model)} (${esc(c.year || '-')})</div>
+            <div class="flex flex-wrap items-center gap-1.5 mt-0.5">${nopolBadge} ${engBadge} <span class="text-[10px] font-mono text-slate-400">${kmStr}</span></div>
+            ${mekTxt}
+          </td>
+          <td class="py-2 px-2.5 text-slate-300 align-top">
+            <div>${esc(c.complaint)}</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">${esc(c.symptom)}</div>
+          </td>
+          <td class="py-2 px-2.5 font-mono text-amber-400 align-top">${esc(c.dtc || '-')}</td>
+          <td class="py-2 px-2.5 text-white font-semibold align-top">${esc(c.final_diagnosis)}</td>
+          <td class="py-2 px-2.5 text-slate-300 text-[11px] align-top">${esc(c.repair_action)}</td>
+          <td class="py-2 px-2.5 align-top"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[10px]">${esc(c.system_category)}</span></td>
+          <td class="py-2 px-2.5 text-right whitespace-nowrap align-top space-x-1 space-y-1">
+            ${verifyBtn}
             <button onclick="testCaseFromTable(${c.id})" title="Uji kasus ini di halaman Diagnosa" class="px-2 py-1 rounded bg-brand-600/80 hover:bg-brand-500 text-white text-[10px]"><i class="fa-solid fa-magnifying-glass"></i> Uji</button>
             <button onclick="deleteCase(${c.id}, '${esc(c.case_code)}')" title="Hapus kasus" class="px-2 py-1 rounded bg-red-900/60 hover:bg-red-700 text-red-200 text-[10px]"><i class="fa-solid fa-trash"></i></button>
           </td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
+    }
+
+    async function verifyCaseStandard(id, code) {
+      ensureWorkshopAdminPin(async () => {
+        const res = await fetch(`${API_BASE}/diagnostics/cases/${id}/verify`, {
+          method: 'PUT',
+          headers: getAdminHeaders()
+        });
+        if (res.status === 401) {
+          lockAdminSession();
+          openAdminSecurityModal('PIN Kepala Bengkel diperlukan untuk memverifikasi kasus.');
+          return;
+        }
+        if (!res.ok) { alert('Gagal verifikasi: ' + await apiError(res, 'Terjadi kesalahan.')); return; }
+        const data = await res.json();
+        showAgosToast(data.message || `Kasus ${code} TERVERIFIKASI!`);
+        loadAllCases();
+      }, `verifikasi standar bengkel kasus ${code}`);
+    }
+
+    async function exportCasesToExcel() {
+      const isOfflineMode = Boolean(window.offlineFetch && window.location.protocol === 'file:');
+      if (!isOfflineMode) {
+        try {
+          const res = await fetch(`${API_BASE}/diagnostics/cases/export-excel`);
+          if (res.ok) {
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'DATA_KASUS_AGOS.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showAgosToast('File DATA_KASUS_AGOS.xlsx berhasil diekspor!');
+            return;
+          }
+        } catch (_) {}
+      }
+      // Fallback / Mode 100% Offline menggunakan local SheetJS (xlsx.full.min.js)
+      if (typeof XLSX === 'undefined') {
+        alert('Library Excel offline (SheetJS) belum termuat.');
+        return;
+      }
+      const rows = (allCasesCache || []).map(c => ({
+        id_kasus: c.case_code || '',
+        tanggal_selesai: c.created_at || new Date().toISOString().slice(0, 10),
+        nomor_polisi: c.license_plate || '',
+        merek: c.brand || '',
+        model: c.model || '',
+        kode_mesin: c.engine_code || '',
+        tahun: c.year != null ? Number(c.year) : '',
+        kilometer: c.odometer_km != null ? Number(c.odometer_km) : '',
+        keluhan: c.complaint || '',
+        kode_dtc: c.dtc || 'Tidak ada',
+        diagnosis_akhir: c.final_diagnosis || '',
+        tindakan_perbaikan: c.repair_action || '',
+        status_verifikasi: String(c.verification_status || 'TERVERIFIKASI').toUpperCase(),
+        gejala: c.symptom || '',
+        nama_mekanik: c.mechanic_name || '',
+        sistem: c.system_category || 'Umum'
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'DATA_KASUS_AGOS');
+      XLSX.writeFile(wb, 'DATA_KASUS_AGOS.xlsx');
+      showAgosToast('File DATA_KASUS_AGOS.xlsx berhasil diekspor (Mode Offline SheetJS)!');
+    }
+
+    async function importCasesFromExcelFile(input) {
+      const file = input && input.files && input.files[0];
+      if (!file) return;
+      const isOfflineMode = Boolean(window.offlineFetch && window.location.protocol === 'file:');
+      try {
+        if (!isOfflineMode) {
+          const fd = new FormData();
+          fd.append('file', file);
+          const res = await fetch(`${API_BASE}/diagnostics/cases/import-excel`, { method: 'POST', body: fd });
+          if (res.ok) {
+            const out = await res.json();
+            showAgosToast(`Impor Excel sukses: +${out.imported} baru, ${out.updated} diperbarui (Total ${out.total_cases} kasus)`);
+            await loadAllCases();
+            input.value = '';
+            return;
+          }
+        }
+        // Mode 100% Offline memakai SheetJS lokal
+        if (typeof XLSX === 'undefined') throw new Error('Library SheetJS tidak tersedia.');
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const jsonRows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        let added = 0;
+        for (const r of jsonRows) {
+          const norm = {};
+          Object.keys(r).forEach(k => { norm[k.trim().toLowerCase().replace(/\s+/g, '_')] = r[k]; });
+          const brand = String(norm.merek || norm.brand || '').trim();
+          const model = String(norm.model || '').trim();
+          const complaint = String(norm.keluhan || norm.complaint || '').trim();
+          const diagnosis = String(norm.diagnosis_akhir || norm.final_diagnosis || '').trim();
+          if (!brand || !model || !(complaint || diagnosis)) continue;
+          const payload = {
+            case_code: String(norm.id_kasus || norm.case_code || '').trim().toUpperCase() || undefined,
+            brand,
+            model,
+            year: parseInt(norm.tahun || norm.year, 10) || null,
+            engine_code: String(norm.kode_mesin || norm.engine_code || '').trim().toUpperCase(),
+            odometer_km: parseInt(String(norm.kilometer || norm.odometer_km || '').replace(/[^\d]/g, ''), 10) || null,
+            license_plate: String(norm.nomor_polisi || norm.license_plate || '').trim().toUpperCase(),
+            mechanic_name: String(norm.nama_mekanik || norm.mechanic_name || '').trim(),
+            verification_status: String(norm.status_verifikasi || norm.verification_status || 'DRAFT').trim().toUpperCase(),
+            complaint: complaint || diagnosis,
+            symptom: String(norm.gejala || norm.symptom || complaint || diagnosis).trim(),
+            dtc: String(norm.kode_dtc || norm.dtc || 'Tidak ada').trim(),
+            inspection_findings: `Impor Excel (${file.name})`,
+            final_diagnosis: diagnosis || complaint,
+            repair_action: String(norm.tindakan_perbaikan || norm.repair_action || 'Lihat catatan Excel').trim(),
+            system_category: String(norm.sistem || norm.system_category || 'Umum').trim()
+          };
+          const resp = await fetch(`${API_BASE}/diagnostics/cases`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (resp.ok) added++;
+        }
+        showAgosToast(`Impor Excel Offline sukses: ${added} kasus ditambahkan!`);
+        await loadAllCases();
+      } catch (err) {
+        showAgosToast('Gagal impor Excel: ' + err.message, true);
+      } finally {
+        input.value = '';
+      }
+    }
+
+    // ---------- PILAR 3: WEB POS BENGKEL (DEMO INTERAKTIF — REQ-09) ----------
+    let posDemoStock = {
+      'SP-COIL-1NR': { name: 'Koil Pengapian OEM (1NR-VE)', qty: 6, price: 385000 },
+      'SP-PCV-01': { name: 'Selang Vakum PCV SAE J30R7', qty: 12, price: 95000 },
+      'SP-FILTER-OIL': { name: 'Filter Oli Mesin OEM', qty: 18, price: 48000 }
+    };
+    let posDemoCart = [
+      { sku: 'SP-PCV-01', name: 'Selang Vakum PCV SAE J30R7', price: 95000, type: 'SPAREPART', qty: 1 },
+      { sku: 'SVC-SCAN', name: 'Jasa Scan OBD-II + Reset ECU', price: 125000, type: 'JASA', qty: 1 }
+    ];
+
+    function posDemoAddItem(name, price, type, sku) {
+      const existing = posDemoCart.find(i => i.sku === sku);
+      if (existing) existing.qty += 1;
+      else posDemoCart.push({ sku, name, price, type, qty: 1 });
+      const stEl = document.getElementById('pos-demo-status');
+      if (stEl) stEl.classList.add('hidden');
+      renderPosDemo();
+    }
+
+    function posDemoReset() {
+      posDemoStock = {
+        'SP-COIL-1NR': { name: 'Koil Pengapian OEM (1NR-VE)', qty: 6, price: 385000 },
+        'SP-PCV-01': { name: 'Selang Vakum PCV SAE J30R7', qty: 12, price: 95000 },
+        'SP-FILTER-OIL': { name: 'Filter Oli Mesin OEM', qty: 18, price: 48000 }
+      };
+      posDemoCart = [
+        { sku: 'SP-PCV-01', name: 'Selang Vakum PCV SAE J30R7', price: 95000, type: 'SPAREPART', qty: 1 },
+        { sku: 'SVC-SCAN', name: 'Jasa Scan OBD-II + Reset ECU', price: 125000, type: 'JASA', qty: 1 }
+      ];
+      const stEl = document.getElementById('pos-demo-status');
+      if (stEl) stEl.classList.add('hidden');
+      renderPosDemo();
+    }
+
+    function posDemoCheckout() {
+      posDemoCart.forEach(item => {
+        if (item.type === 'SPAREPART' && posDemoStock[item.sku]) {
+          posDemoStock[item.sku].qty = Math.max(0, posDemoStock[item.sku].qty - item.qty);
+        }
+      });
+      renderPosDemo();
+      const stEl = document.getElementById('pos-demo-status');
+      if (stEl) {
+        stEl.textContent = '✓ Pembayaran Simulasi LUNAS (PPN 11%) · Stok Gudang Otomatis Berkurang!';
+        stEl.classList.remove('hidden');
+      }
+      showAgosToast('Simulasi Invoice POS PPN 11% LUNAS & Stok Gudang terpotong!');
+    }
+
+    function renderPosDemo() {
+      const stockHost = document.getElementById('pos-demo-stock-list');
+      const cartHost = document.getElementById('pos-demo-cart-list');
+      if (stockHost) {
+        stockHost.innerHTML = Object.entries(posDemoStock).map(([sku, s]) => `
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/90 border border-slate-800">
+            <div>
+              <div class="font-semibold text-white">${esc(s.name)}</div>
+              <div class="text-[10px] font-mono text-slate-400">${esc(sku)} · ${rupiah(s.price)}</div>
+            </div>
+            <span class="px-2 py-0.5 rounded font-mono font-bold text-[11px] ${s.qty <= 3 ? 'bg-rose-950 text-rose-300 border border-rose-700' : 'bg-emerald-950 text-emerald-300 border border-emerald-700'}">Stok: ${s.qty}</span>
+          </div>`).join('');
+      }
+      let subtotal = 0;
+      if (cartHost) {
+        cartHost.innerHTML = posDemoCart.map(item => {
+          const line = item.price * item.qty;
+          subtotal += line;
+          return `
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/80 border border-slate-800">
+              <div class="min-w-0 pr-2">
+                <div class="font-medium text-white truncate">${esc(item.name)}</div>
+                <div class="text-[10px] text-slate-400">${item.qty} × ${rupiah(item.price)} (${item.type})</div>
+              </div>
+              <span class="font-mono font-bold text-cyan-300 shrink-0">${rupiah(line)}</span>
+            </div>`;
+        }).join('');
+      }
+      const ppn = Math.round(subtotal * 0.11);
+      const grand = subtotal + ppn;
+      const subEl = document.getElementById('pos-demo-subtotal');
+      const ppnEl = document.getElementById('pos-demo-ppn');
+      const grEl = document.getElementById('pos-demo-grand');
+      if (subEl) subEl.textContent = rupiah(subtotal);
+      if (ppnEl) ppnEl.textContent = rupiah(ppn);
+      if (grEl) grEl.textContent = rupiah(grand);
     }
 
     function testCaseFromTable(id) {
@@ -7311,6 +8155,8 @@
         document.getElementById('save-maf').value = document.getElementById('input-maf').value;
         document.getElementById('save-ect').value = document.getElementById('input-ect').value;
         const diagKm = numOrNull(document.getElementById('input-km').value);
+        const saveKmEl = document.getElementById('save-km');
+        if (saveKmEl && diagKm !== null && diagKm >= 0) saveKmEl.value = String(Math.round(diagKm));
         const kmPrefix = (diagKm !== null && diagKm >= 0) ? `[Odometer: ${Math.round(diagKm).toLocaleString('id-ID')} km] ` : '';
         if (advice && advice.cause_summary) {
           document.getElementById('save-findings').value = kmPrefix + advice.cause_summary;
@@ -7329,11 +8175,17 @@
 
     async function submitNewCase() {
       const dtcFormatted = formatMultiDtcClient(document.getElementById('save-dtc').value.trim());
+      const engRaw = document.getElementById('save-engine').value.trim();
+      const saveKmVal = numOrNull(document.getElementById('save-km')?.value);
       const payload = {
         brand: document.getElementById('save-brand').value.trim(),
         model: document.getElementById('save-model').value.trim(),
         year: parseInt(document.getElementById('save-year').value) || null,
-        engine_capacity: document.getElementById('save-engine').value.trim() || extractEngineCap(document.getElementById('save-model').value, '') || '-',
+        engine_capacity: engRaw || extractEngineCap(document.getElementById('save-model').value, '') || '-',
+        engine_code: engRaw && !/^\d\.\d$/.test(engRaw) ? engRaw.toUpperCase() : '',
+        odometer_km: saveKmVal !== null && saveKmVal >= 0 ? Math.round(saveKmVal) : null,
+        license_plate: (document.getElementById('save-nopol')?.value || '').trim().toUpperCase() || null,
+        mechanic_name: (document.getElementById('save-mechanic')?.value || '').trim() || null,
         complaint: document.getElementById('save-complaint').value.trim(),
         symptom: document.getElementById('save-symptom').value.trim(),
         dtc: dtcFormatted || 'Tidak ada',
@@ -7359,7 +8211,7 @@
         });
         if (!res.ok) throw new Error(await apiError(res, 'Gagal menyimpan kasus baru.'));
         const result = await res.json();
-        alert(result.message);
+        showAgosToast(result.message || 'Kasus disimpan & tersinkron ke Excel!');
         toggleModalNewCase(false);
         document.getElementById('form-save-case').reset();
         loadAllCases();
@@ -9522,15 +10374,19 @@
       }
     }
 
+    syncShareQrAndUrl();
+    populateActiveManualBookSelectors();
     renderWiringSimulator();
     renderManualComponentSimulator();
+    renderPosDemo();
+    loadAllCases();
     initGlobalEngineCatalog();
     refreshAdminSecurityStatus();
 
-    // Dukung Android PWA home-screen shortcuts (/?tab=diagnostic, /?tab=tools, /?tab=manuals, /?tab=database)
+    // Dukung Android PWA home-screen shortcuts (/?tab=diagnostic, /?tab=tools, /?tab=manuals, /?tab=database, /?tab=pos)
     try {
       const urlTab = new URLSearchParams(window.location.search).get('tab');
-      if (urlTab && ['diagnostic', 'database', 'manuals', 'tools'].includes(urlTab)) {
+      if (urlTab && ['diagnostic', 'database', 'manuals', 'tools', 'pos'].includes(urlTab)) {
         switchTab(urlTab);
       }
     } catch (_) {}

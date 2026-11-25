@@ -24,9 +24,10 @@ jobs:
       - name: Install Python Build Helper (pydantic & pillow)
         run: python3 -m pip install --quiet pydantic pillow
 
-      - name: Export Offline JSON Data & Bundle Local FontAwesome
+      - name: Export Offline JSON Data, Sync Web & Bundle Local FontAwesome
         run: |
           python3 android_offline/tools/export_data.py
+          python3 android_offline/tools/sync_web_to_offline.py
           mkdir -p android_offline/www/css android_offline/www/webfonts
           FA="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1"
           curl -sSL "$FA/css/all.min.css" -o android_offline/www/css/fontawesome.min.css
@@ -70,16 +71,16 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: agos-diagnostik-offline-apk-v2
+          name: agos-diagnostik-offline-apk-v2.2.0
           path: android_offline/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
       - name: Publish APK to GitHub Release (Direct Download)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.0-offline
-          name: "AGOS Smart Diagnostik v2.0.0 — APK Android Offline (174 Kode Mesin Asia/Eropa/China + Diesel/EV + PIN Admin + Logo Baru)"
-          body: "APK Android Full Offline v2.0.0 (pra-Poin 4) menggunakan logo ikon baru: mencakup 66 generasi & 174 kode mesin (Asia, Eropa, China termasuk Innova 1TR-FE/1TR-VE & Reborn 2GD-FTV), +85 DTC Diesel Common-Rail/Turbo/VVT/Hybrid/EV, Live Data Adaptif, Peringatan HV 1000V, Guardrail Wiring, Paket Manual Kustom, dan PIN Kepala Bengkel (awal: 1234) + Backup/Restore 1-Klik."
+          tag_name: v2.2.0-offline
+          name: "AGOS Smart Diagnostik v2.2.0 — APK Android Offline (PRD v2.2.0 · 8 Manual OEM · Wiring v3 · Weighted CBR · SheetJS Excel)"
+          body: "APK Android Full Offline v2.2.0 (REQ-01 s/d REQ-14): 8 Paket Buku Manual OEM Resmi (2.511 DTC, 6.315 Pinout, 2.477 Spek Sensor), Simulator Wiring Multi-Sumber v3, Express Search (<100ms), Weighted CBR Berbobot (Keluhan, DTC, Model, KM, Merek/Platform Kembar, Tahun + Live Data), 17 Kasus Terverifikasi + Workflow Verifikasi PIN Kepala Bengkel, Ringkasan Bahasa Awam untuk Pemilik Mobil, Web POS Bengkel Demo (PPN 11% + Auto-Deduct Stok), Ekspor/Impor Excel 100% Offline via SheetJS lokal, serta Interactive Wiring Viewer BYOD (Deep-Link + Kode Warna Kabel + Guardrail Ohm & HV 1000V)."
           files: android_offline/AGOS-Smart-Diagnostik-Offline.apk
           prerelease: false
         env:

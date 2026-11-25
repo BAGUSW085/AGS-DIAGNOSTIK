@@ -505,6 +505,126 @@ CURATED_SIGNAL_CHAINS: dict[str, dict[str, Any]] = {
             },
         ],
     },
+    "suzuki_ertiga_map": {
+        "chain_id": "suzuki_ertiga_map",
+        "brand": "Suzuki",
+        "label": "Suzuki Ertiga K14B — Sensor MAP (DTC P0107 / P0108) & IAT → ECM C01 (Hal. 9A-53)",
+        "render_mode": "suzuki_schematic",
+        "schematic_key": "ERTIGA_MAP",
+        "scope": "Suzuki Ertiga Gen 1 K14B (Speed-Density MAP + IAT, Tanpa MAF)",
+        "pdf_doc_id": "suzuki_ertiga_k14b",
+        "pdf_page": 1200,
+        "stages": [
+            {
+                "shortLabel": "1. +5V & Massa MAP",
+                "cat": "POWER",
+                "badge": "🔴 REFERENSI +5V & MASSA",
+                "title": "Suplai Referensi +5V (C01-2 GRY/RED) & Massa Sensor (C01-20 GRY/BLU)",
+                "direction": "ECM C01-2 (GRY/RED +5V) ──▶ Sensor MAP Pin 3 | Sensor Pin 1 ──▶ ECM C01-20 (GRY/BLU)",
+                "fromNodes": ["MAP_ECM"],
+                "toNodes": ["MAP_SENS"],
+                "wireIds": ["MAP_W1", "MAP_W3"],
+                "func": "Ertiga K14B tidak memakai MAF melainkan sistem Speed-Density (Sensor MAP + IAT). ECM memasok referensi stabil +5.0V ke pin VCC MAP dan menarik referensi massa sensor lewat C01-20.",
+                "prereq": "Jika C01-2 putus atau konslet ke ground, sinyal MAP jatuh ke 0V sehingga memicu DTC P0107 (Low Input).",
+                "asKey": "IG ON, Soket MAP Dilepas",
+                "asTool": "Multimeter DC Volt (V)",
+                "asSpec": "4.5 – 5.5 V (C01-2 ke C01-20)",
+                "wires": [
+                    {"id": "MAP_W1", "from": "ECM C01-2 (Vref)", "to": "Sensor MAP Pin 3 (VCC)", "color": "GRY/RED (Abu-Merah)", "role": "Suplai Referensi +5V Sensor MAP (P0107)"},
+                    {"id": "MAP_W3", "from": "Sensor MAP Pin 1 (E2)", "to": "ECM C01-20 (SGND)", "color": "GRY/BLU (Abu-Biru)", "role": "Massa Referensi Sensor MAP & IAT (< 0.3V)"},
+                ],
+                "nextHandoff": "Lanjut Tahap 2: Ukur sinyal vakum MAP (C01-29 RED/BLK) saat IG ON dan mesin idle.",
+            },
+            {
+                "shortLabel": "2. Sinyal MAP (P0107)",
+                "cat": "INPUT",
+                "badge": "🔵 INPUT SINYAL VAKUM",
+                "title": "Sinyal Tekanan Vakum Intake MAP → ECM C01-29 (RED/BLK)",
+                "direction": "Sensor MAP Pin 2 (SIG) ──▶ ECM C01-29 (RED/BLK)",
+                "fromNodes": ["MAP_SENS"],
+                "toNodes": ["MAP_ECM"],
+                "wireIds": ["MAP_W2"],
+                "func": "Saat mesin mati (KOEO) tekanan atmosfer tinggi (3.8–4.3V). Saat mesin hidup idle, kevakuman intake menarik tegangan turun ke 1.0–1.6V agar ECM menghitung debit bensin yang tepat.",
+                "prereq": "Bila tegangan < 0.3V saat IG ON (DTC P0107), cek kabel RED/BLK apakah konslet ke massa bodi (ukur tahanan Ohm saat IG OFF).",
+                "asKey": "IG ON (KOEO) & Idle Hangat (Back-Probe)",
+                "asTool": "Multimeter DC Volt (V)",
+                "asSpec": "KOEO: 3.8–4.3V • Idle: 1.0–1.6V",
+                "wires": [
+                    {"id": "MAP_W2", "from": "Sensor MAP Pin 2 (SIG)", "to": "ECM C01-29", "color": "RED/BLK (Merah-Hitam)", "role": "Sinyal Vakum Intake Manifold (DTC P0107/P0108)"},
+                ],
+                "nextHandoff": "Lanjut Tahap 3: Cek kontinuitas kabel & sensor suhu udara masuk IAT (C01-34 BLK/YEL).",
+            },
+            {
+                "shortLabel": "3. Sinyal IAT & Tahanan",
+                "cat": "GROUND",
+                "badge": "⚫ CEK HARNESS OHM & IAT",
+                "title": "Uji Kontinuitas Harness MAP/IAT (Ohm) & Sinyal IAT C01-34 (BLK/YEL)",
+                "direction": "Sensor IAT (BLK/YEL) ──▶ ECM C01-34 | Uji Tahanan Kabel IG OFF",
+                "fromNodes": ["MAP_IAT"],
+                "toNodes": ["MAP_ECM"],
+                "wireIds": ["MAP_W4", "MAP_W3"],
+                "func": "Sensor IAT berbagi jalur massa C01-20 bersama MAP. Saat mengecek kabel putus atau short to ground, selalu lakukan dalam kondisi IG OFF dan soket ECM & sensor terlepas.",
+                "prereq": "Pastikan tahanan ujung-ke-ujung kabel < 1 Ohm dan isolasi terhadap massa bodi ≥ 10 kOhm.",
+                "asKey": "IG OFF, Soket ECM & Sensor Lepas",
+                "asTool": "Multimeter Mode Ohm (Ω) / Kontinuitas",
+                "asSpec": "Kontinuitas < 1 Ω • Isolasi ≥ 10 kΩ",
+                "wires": [
+                    {"id": "MAP_W4", "from": "Sensor IAT Pin 1", "to": "ECM C01-34", "color": "BLK/YEL (Hitam-Kuning)", "role": "Sinyal Suhu Udara Masuk (IAT)"},
+                    {"id": "MAP_W3", "from": "Sensor MAP/IAT Ground", "to": "ECM C01-20", "color": "GRY/BLU (Abu-Biru)", "role": "Massa Bersama Sensor Udara"},
+                ],
+                "nextHandoff": "Rantai Sensor MAP & IAT Ertiga K14B Selesai.",
+            },
+        ],
+    },
+    "hv_safety_interlock": {
+        "chain_id": "hv_safety_interlock",
+        "brand": "Hybrid / EV",
+        "label": "Sistem Hybrid / EV — Interlock Tegangan Tinggi (HV 350V) & Service Plug [APD 1000V]",
+        "render_mode": "suzuki_schematic",
+        "schematic_key": "HV_INTERLOCK",
+        "scope": "Kendaraan Hybrid / EV Umum (Innova Zenix HEV, Camry HV, Wuling EV, BYD)",
+        "stages": [
+            {
+                "shortLabel": "1. Service Plug & APD",
+                "cat": "POWER",
+                "badge": "🔴 KESELAMATAN HV (350V)",
+                "title": "Isolasi Baterai Tegangan Tinggi via Service Plug & Tunggu 10 Menit",
+                "direction": "Baterai HV (300–400V DC) ──▶ Service Plug Grip ──▶ SMR Relay ──▶ Inverter",
+                "fromNodes": ["HV_BATT"],
+                "toNodes": ["HV_PLUG", "HV_INV"],
+                "wireIds": ["HV_W1", "HV_W2"],
+                "func": "Service Plug memutus rangkaian seri sel baterai HV secara mekanis sekaligus membuka saklar interlock (ILK) agar BMS mematikan System Main Relay (SMR) dan membuang muatan kapasitor inverter.",
+                "prereq": "WAJIB pakai sarung tangan isolasi 1000V (Class 0), lepas aki 12V Aux, cabut Service Plug, dan tunggu minimal 10 menit sebelum menyentuh kabel oranye.",
+                "asKey": "IG OFF • Aki 12V & Service Plug DICABUT (Tunggu 10 Menit)",
+                "asTool": "Insulation Tester 500V & Multimeter CAT III 1000V",
+                "asSpec": "Tegangan Residual < 10V DC • Isolasi > 10 MΩ",
+                "wires": [
+                    {"id": "HV_W1", "from": "Baterai HV (+)", "to": "Service Plug / SMR", "color": "O (Oranye — Kabel Tegangan Tinggi!)", "role": "Bus DC 300–400V (JANGAN DITUSUK PROBE!)"},
+                    {"id": "HV_W2", "from": "SMR Relay", "to": "Inverter / Converter", "color": "O (Oranye — Kabel Tegangan Tinggi!)", "role": "Suplai HV ke Inverter & Kompresor AC EV"},
+                ],
+                "nextHandoff": "Lanjut Tahap 2: Cek sirkuit interlock (HVIL) tegangan rendah 12V melalui BMS.",
+            },
+            {
+                "shortLabel": "2. Sirkuit Interlock (HVIL)",
+                "cat": "FEEDBACK",
+                "badge": "🟣 FEEDBACK INTERLOCK BMS",
+                "title": "Loop Interlock (HVIL) Memastikan Tutup Inverter & Service Plug Terkunci",
+                "direction": "BMS / HV ECU ──▶ Switch Interlock Inverter & Service Plug ──▶ Kembali ke BMS",
+                "fromNodes": ["HV_BMS"],
+                "toNodes": ["HV_PLUG", "HV_INV"],
+                "wireIds": ["HV_W3"],
+                "func": "Bila tutup inverter atau Service Plug kendor, loop interlock terputus sehingga BMS memicu DTC P0A0D / P0AA6 dan memutus daya HV demi keselamatan.",
+                "prereq": "Ukur kontinuitas jalur HVIL (12V/5V low-voltage) HANYA setelah memastikan bus HV bertegangan 0V.",
+                "asKey": "IG OFF, Bus HV 0V Terkonfirmasi",
+                "asTool": "Multimeter Mode Ohm (Ω) / Kontinuitas",
+                "asSpec": "Loop Interlock Tertutup < 2 Ω",
+                "wires": [
+                    {"id": "HV_W3", "from": "BMS HVIL Out", "to": "Switch Service Plug & Inverter", "color": "Y-B (Kuning-Hitam)", "role": "Sinyal Pengaman Interlock (DTC P0A0D)"},
+                ],
+                "nextHandoff": "Prosedur Keselamatan Hybrid / EV Selesai.",
+            },
+        ],
+    },
 }
 
 
@@ -600,7 +720,7 @@ async def serve_wiring_viewer():
     viewer_file = STATIC_DIR / "ewd_viewer.html"
     if not viewer_file.exists():
         raise HTTPException(status_code=404, detail="ewd_viewer.html belum tersedia.")
-    return FileResponse(viewer_file)
+    return FileResponse(viewer_file, headers={"Cache-Control": "no-cache, must-revalidate"})
 
 
 @router.get("/api/v1/ewd/catalog")

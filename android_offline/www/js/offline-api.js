@@ -60,16 +60,26 @@
         return makeJsonResponse(result, 200);
       }
 
-      // 3. GET /api/v1/diagnostics/cases
-      if (path.endsWith('/diagnostics/cases') && method === 'GET') {
+      // 3. GET /api/v1/diagnostics/cases (atau /api/cases)
+      if ((path.endsWith('/diagnostics/cases') || path === '/api/cases') && method === 'GET') {
         const cases = await global.AgosDataStore.getAllCases();
         return makeJsonResponse(cases, 200);
       }
 
-      // 4. POST /api/v1/diagnostics/cases
-      if (path.endsWith('/diagnostics/cases') && method === 'POST') {
+      // 4. POST /api/v1/diagnostics/cases (atau /api/cases)
+      if ((path.endsWith('/diagnostics/cases') || path === '/api/cases') && method === 'POST') {
         const res = await global.AgosDataStore.addCase(bodyObj);
         return makeJsonResponse(res, 201);
+      }
+
+      // 4B. PUT /api/v1/diagnostics/cases/{id}/verify (PIN Protected — REQ-08)
+      const verMatch = path.match(/\/cases\/(\d+)\/verify$/);
+      if (verMatch && method === 'PUT') {
+        if (mm && !mm.verifyPin(readHeaderPin(options))) {
+          return makeJsonResponse({ detail: 'PIN Kepala Bengkel diperlukan atau salah.' }, 401);
+        }
+        const res = await global.AgosDataStore.verifyCaseById(verMatch[1]);
+        return makeJsonResponse(res, 200);
       }
 
       // 5. DELETE /api/v1/diagnostics/cases/{id} (PIN Protected)

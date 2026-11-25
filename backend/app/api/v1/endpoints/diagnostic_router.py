@@ -7,7 +7,7 @@ aplikasi Flutter (Android APK) dan Web Dashboard.
 
 import re
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +15,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_active_user, get_db
 from app.models import HistoricalCase, User
 from app.services.admin_guard import require_workshop_pin
+from app.services.excel_sync_service import (
+    export_cases_excel_bytes,
+    import_cases_from_excel_bytes,
+    sync_cases_to_excel,
+)
 from app.services.diagnostic_service import (
     DiagnosticRequest,
     DiagnosticResponse,
@@ -28,6 +33,7 @@ from app.services.diagnostic_service import (
 )
 
 router = APIRouter(prefix="/api/v1/diagnostics", tags=["Smart Fault Diagnostic"])
+cases_alias_router = APIRouter(prefix="/api", tags=["Cases Excel Sync & Verification"])
 
 
 class SaveCaseRequest(BaseModel):
@@ -35,6 +41,10 @@ class SaveCaseRequest(BaseModel):
     model: str = Field(..., examples=["Avanza"])
     year: int | None = Field(default=2016)
     engine_capacity: str | None = Field(default="1.3")
+    engine_code: str | None = Field(default=None, examples=["1NR-VE"])
+    odometer_km: int | None = Field(default=None, ge=0, examples=[75000])
+    license_plate: str | None = Field(default=None, examples=["L 1234 AB"])
+    mechanic_name: str | None = Field(default=None, examples=["Budi Santoso"])
     complaint: str = Field(..., examples=["Mesin brebet"])
     symptom: str = Field(..., examples=["Idle tidak stabil"])
     dtc: str | None = Field(default="P0171")
@@ -101,6 +111,12 @@ async def list_historical_cases(
             "model": c.model,
             "year": c.year,
             "engine_capacity": c.engine_capacity,
+            "engine_code": c.engine_code or "",
+            "odometer_km": c.odometer_km,
+            "license_plate": c.license_plate or "",
+            "mechanic_name": c.mechanic_name or "",
+            "verification_status": (c.verification_status or "TERVERIFIKASI").upper(),
+            "created_at": c.created_at.strftime("%Y-%m-%d") if getattr(c, "created_at", None) else "",
             "complaint": c.complaint,
             "symptom": c.symptom,
             "dtc": c.dtc or "Tidak ada",
@@ -123,17 +139,75 @@ async def list_historical_cases(
     ]
 
 
+@router.get(
+    "/cases/export-excel",
+    summary="Unduh Seluruh Basis Pengetahuan Kasus dalam Format Excel (DATA_KASUS_AGOS.xlsx)",
+)
+@cases_alias_router.get(
+    "/cases/export-excel",
+    summary="Unduh DATA_KASUS_AGOS.xlsx (PRD Alias)",
+)
+async def export_cases_excel(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> Response:
+    raw = await export_cases_excel_bytes(db)
+    return Response(
+        content=raw,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="DATA_KASUS_AGOS.xlsx"'},
+    )
+
+
+@router.post(
+    "/cases/import-excel",
+    summary="Impor / Tambah Kasus dari File Excel (.xlsx) ke Database & Auto-Sync",
+)
+@cases_alias_router.post(
+    "/cases/import-excel",
+    summary="Impor File DATA_KASUS_AGOS.xlsx (PRD Alias)",
+)
+async def import_cases_excel(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> dict:
+    raw = await file.read()
+    if not raw:
+        raise HTTPException(status_code=400, detail="File Excel kosong.")
+    try:
+        res = await import_cases_from_excel_bytes(db, raw)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Gagal membaca file Excel (.xlsx): {exc}") from exc
+    return res
+
+
+@cases_alias_router.get("/cases", summary="Daftar Seluruh Kasus Historis (PRD Alias)")
+async def list_cases_alias(
+    system_filter: str | None = Query(None),
+    search: str | None = Query(None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> list[dict]:
+    return await list_historical_cases(system_filter=system_filter, search=search, db=db, current_user=current_user)
+
+
 @router.post(
     "/cases",
     status_code=status.HTTP_201_CREATED,
-    summary="Simpan Kasus Selesai Baru ke Database (SIMPAN_KASUS)",
+    summary="Simpan Kasus Selesai Baru ke Database + Auto-Sync Excel (SIMPAN_KASUS)",
+)
+@cases_alias_router.post(
+    "/cases",
+    status_code=status.HTTP_201_CREATED,
+    summary="Simpan Kasus Selesai Baru + Auto-Sync Excel (PRD Alias)",
 )
 async def create_historical_case(
     payload: SaveCaseRequest,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> dict:
-    """Menyimpan kasus perbaikan baru dengan auto-generate case_code K0xx bebas bentrok."""
+    """Menyimpan kasus perbaikan baru (status DRAFT) + auto-sync ke DATA_KASUS_AGOS.xlsx."""
     existing_codes = set(
         (await db.execute(select(HistoricalCase.case_code))).scalars().all()
     )
@@ -155,11 +229,9 @@ async def create_historical_case(
     model_clean = payload.model.strip()
     if model_clean.islower():
         model_clean = model_clean.title()
-    # Simpan SEMUA kode DTC (dipisah koma/spasi/titik koma), tanpa duplikat, urutan terjaga
     dtc_list = split_dtc_codes(payload.dtc)
     dtc_stored = ", ".join(dtc_list) if dtc_list else "Tidak ada"
 
-    # Generate manual book guidance (memakai seluruh kode DTC)
     advice = WeightedDiagnosticEngine.get_repair_manual_guidance(
         payload.final_diagnosis, ", ".join(dtc_list) if dtc_list else None
     )
@@ -171,6 +243,11 @@ async def create_historical_case(
         model=model_clean,
         year=payload.year,
         engine_capacity=payload.engine_capacity or "-",
+        engine_code=(payload.engine_code or "").strip().upper() or None,
+        odometer_km=payload.odometer_km,
+        license_plate=(payload.license_plate or "").strip().upper() or None,
+        mechanic_name=(payload.mechanic_name or "").strip() or None,
+        verification_status="DRAFT",
         complaint=payload.complaint.strip(),
         symptom=payload.symptom.strip(),
         dtc=dtc_stored,
@@ -192,12 +269,47 @@ async def create_historical_case(
     db.add(new_case)
     await db.commit()
     await db.refresh(new_case)
+    excel_path = await sync_cases_to_excel(db)
 
     return {
         "status": "success",
-        "message": f"Kasus berhasil disimpan dengan kode {new_case.case_code}",
+        "message": f"Kasus berhasil disimpan ({new_case.case_code} · Status: DRAFT) & disinkronkan ke Excel.",
         "case_code": new_case.case_code,
         "id": new_case.id,
+        "verification_status": new_case.verification_status,
+        "excel_synced": bool(excel_path),
+    }
+
+
+@router.put(
+    "/cases/{case_id}/verify",
+    summary="Verifikasi Standar Bengkel oleh Kepala Bengkel (PIN) + Auto-Sync Excel (REQ-08)",
+)
+@cases_alias_router.put(
+    "/cases/{case_id}/verify",
+    summary="Verifikasi Kasus Standar Bengkel (PRD Alias)",
+)
+async def verify_historical_case(
+    case_id: int,
+    _pin_ok: str = Depends(require_workshop_pin),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> dict:
+    case_obj = (
+        await db.execute(select(HistoricalCase).where(HistoricalCase.id == case_id))
+    ).scalar_one_or_none()
+    if not case_obj:
+        raise HTTPException(status_code=404, detail="Data kasus tidak ditemukan.")
+    case_obj.verification_status = "TERVERIFIKASI"
+    await db.commit()
+    excel_path = await sync_cases_to_excel(db)
+    return {
+        "status": "verified",
+        "id": case_obj.id,
+        "case_code": case_obj.case_code,
+        "verification_status": "TERVERIFIKASI",
+        "excel_synced": bool(excel_path),
+        "message": f"Kasus {case_obj.case_code} resmi TERVERIFIKASI Standar Bengkel & tersinkron ke Excel.",
     }
 
 
@@ -219,7 +331,8 @@ async def delete_historical_case(
     code = case_obj.case_code
     await db.delete(case_obj)
     await db.commit()
-    return {"status": "deleted", "case_code": code, "message": f"Kasus {code} dihapus."}
+    await sync_cases_to_excel(db)
+    return {"status": "deleted", "case_code": code, "message": f"Kasus {code} dihapus & Excel disinkronkan."}
 
 
 @router.get(

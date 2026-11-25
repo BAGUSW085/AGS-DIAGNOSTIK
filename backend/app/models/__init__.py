@@ -179,6 +179,13 @@ class HistoricalCase(Base):
     model: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     year: Mapped[int | None] = mapped_column(Integer, nullable=True)
     engine_capacity: Mapped[str | None] = mapped_column(String(32), nullable=True)  # 1.2, 1.3, 1.5, 2.0
+    engine_code: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)  # 1NR-VE, K14B, J20A, 2KD-FTV
+    odometer_km: Mapped[int | None] = mapped_column(Integer, nullable=True)  # Jarak tempuh (km murni)
+    license_plate: Mapped[str | None] = mapped_column(String(32), index=True, nullable=True)  # Nomor Polisi (opsional)
+    mechanic_name: Mapped[str | None] = mapped_column(String(100), nullable=True)  # Nama Mekanik (opsional)
+    verification_status: Mapped[str] = mapped_column(
+        String(32), default="TERVERIFIKASI", nullable=False, doc="TERVERIFIKASI | DRAFT"
+    )
     complaint: Mapped[str] = mapped_column(Text, nullable=False)  # Keluhan
     symptom: Mapped[str] = mapped_column(Text, nullable=False)  # Gejala
     dtc: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)  # P0171, P0131, dll.

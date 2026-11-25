@@ -204,82 +204,137 @@
   }
 
   function calculateTextSimilarity(req, c) {
-    let simBrand = 0.0;
+    let weightedSum = 0.0;
+    let activeWeight = 0.0;
+
+    const normEng = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const reqEng = normEng(req.engine_code);
+    const caseEng = normEng(c.engine_code);
+    const sharedPlatforms = [
+      { brands: new Set(['toyota', 'daihatsu']), models: ['avanza', 'xenia', 'rush', 'terios', 'agya', 'ayla', 'calya', 'sigra', 'raize', 'rocky'] },
+      { brands: new Set(['suzuki', 'mazda']), models: ['ertiga', 'vx-1', 'vx1'] },
+      { brands: new Set(['mitsubishi', 'nissan']), models: ['xpander', 'livina'] }
+    ];
+
+    // 1. Merek (0.10): exact=1.0 | same platform/engine cross-brand=0.8 | diff=0.0
     const bReq = String(req.brand || '').trim().toLowerCase();
     if (bReq) {
       const bCase = String(c.brand || '').trim().toLowerCase();
-      if (bReq === bCase || (bCase && bCase.includes(bReq)) || (bCase && bReq.includes(bCase))) {
+      const mReqL = String(req.model || '').trim().toLowerCase();
+      const mCaseL = String(c.model || '').trim().toLowerCase();
+      let simBrand = 0.0;
+      if (bReq === bCase || (bCase && (bCase.includes(bReq) || bReq.includes(bCase)))) {
         simBrand = 1.0;
-      }
-    }
-
-    let simModel = 0.0;
-    const mReqStr = String(req.model || '').trim().toLowerCase();
-    if (mReqStr) {
-      const mReq = new Set(mReqStr.split(/\s+/).filter(Boolean));
-      const mCase = new Set(String(c.model || '').trim().toLowerCase().split(/\s+/).filter(Boolean));
-      if (mReq.size > 0 && mCase.size > 0) {
-        const overlap = setIntersectionCount(mReq, mCase);
-        simModel = overlap / Math.max(mReq.size, mCase.size);
-      }
-    }
-
-    let simComplaint = 0.0;
-    if (String(req.complaint || '').trim()) {
-      const cReq = new Set(preprocessSymptomTokens(req.complaint));
-      const cCase = new Set(preprocessSymptomTokens(c.complaint || ''));
-      if (cReq.size > 0 && cCase.size > 0) {
-        simComplaint = setIntersectionCount(cReq, cCase) / Math.max(cReq.size, cCase.size);
-      }
-    }
-
-    let simSymptom = 0.0;
-    if (String(req.symptom || '').trim()) {
-      const sReq = new Set(preprocessSymptomTokens(req.symptom));
-      const sCase = new Set(preprocessSymptomTokens(c.symptom || ''));
-      if (sReq.size > 0 && sCase.size > 0) {
-        simSymptom = setIntersectionCount(sReq, sCase) / Math.max(sReq.size, sCase.size);
-      }
-    }
-
-    const reqCodes = new Set(extractAllRequestDtcs(req));
-    const caseCodes = new Set(splitDtcCodes(c.dtc));
-    let simDtc = 0.0;
-    if (reqCodes.size === 0 && caseCodes.size === 0) {
-      simDtc = 1.0;
-    } else if (reqCodes.size === 0 || caseCodes.size === 0) {
-      simDtc = 0.0;
-    } else {
-      let matched = 0.0;
-      for (const code of reqCodes) {
-        if (caseCodes.has(code)) {
-          matched += 1.0;
-        } else {
-          let subMatch = false;
-          for (const other of caseCodes) {
-            if (areSameDtcSubsystem(code, other)) {
-              subMatch = true;
-              break;
-            }
+      } else if (reqEng && caseEng && reqEng === caseEng) {
+        simBrand = 0.8;
+      } else {
+        for (const sp of sharedPlatforms) {
+          if (sp.brands.has(bReq) && sp.brands.has(bCase) &&
+              sp.models.some((t) => mReqL.includes(t)) && sp.models.some((t) => mCaseL.includes(t))) {
+            simBrand = 0.8;
+            break;
           }
-          if (subMatch) matched += 0.60;
         }
       }
-      simDtc = Math.min(matched / Math.max(reqCodes.size, caseCodes.size), 1.0);
+      weightedSum += 0.10 * simBrand;
+      activeWeight += 0.10;
     }
 
-    const totalText =
-      0.10 * simBrand +
-      0.15 * simModel +
-      0.20 * simComplaint +
-      0.20 * simSymptom +
-      0.20 * simDtc;
+    // 2. Model (0.15): exact=1.0 | partial token=0.7 | diff=0.0
+    const mReqStr = String(req.model || '').trim().toLowerCase();
+    if (mReqStr) {
+      const mCaseStr = String(c.model || '').trim().toLowerCase();
+      const mReq = new Set(mReqStr.match(/[a-z0-9]+/g) || []);
+      const mCase = new Set(mCaseStr.match(/[a-z0-9]+/g) || []);
+      let simModel = 0.0;
+      if (mReqStr === mCaseStr) {
+        simModel = 1.0;
+      } else if (mReq.size > 0 && mCase.size > 0) {
+        const overlap = setIntersectionCount(mReq, mCase);
+        if (overlap > 0) simModel = (overlap === mReq.size && overlap === mCase.size) ? 1.0 : 0.7;
+      }
+      weightedSum += 0.15 * simModel;
+      activeWeight += 0.15;
+    }
 
-    let normalizedText = Math.min(totalText / 0.85, 1.0);
+    // 3. Kedekatan Tahun (0.10): max(0, 1 - |T_in - T_case| / 10)
+    if (req.year !== null && req.year !== undefined && req.year !== '' && c.year !== null && c.year !== undefined) {
+      const simYear = Math.max(0.0, 1.0 - Math.abs(Number(req.year) - Number(c.year)) / 10.0);
+      weightedSum += 0.10 * simYear;
+      activeWeight += 0.10;
+    }
+
+    // 4. Kedekatan Kilometer (0.15): max(0, 1 - |KM_in - KM_case| / 50000)
+    if (req.odometer_km !== null && req.odometer_km !== undefined && req.odometer_km !== '' &&
+        c.odometer_km !== null && c.odometer_km !== undefined && c.odometer_km !== '') {
+      const simKm = Math.max(0.0, 1.0 - Math.abs(Number(req.odometer_km) - Number(c.odometer_km)) / 50000.0);
+      weightedSum += 0.15 * simKm;
+      activeWeight += 0.15;
+    }
+
+    // 5. Keluhan & Gejala (0.25): Jaccard Similarity
+    const reqTxt = `${req.complaint || ''} ${req.symptom || ''}`.trim();
+    if (reqTxt) {
+      const cReq = new Set(preprocessSymptomTokens(reqTxt));
+      const cCase = new Set(preprocessSymptomTokens(`${c.complaint || ''} ${c.symptom || ''}`));
+      let simComplaint = 0.0;
+      if (cReq.size > 0 && cCase.size > 0) {
+        const inter = setIntersectionCount(cReq, cCase);
+        const union = cReq.size + cCase.size - inter;
+        simComplaint = union > 0 ? inter / union : 0.0;
+      }
+      weightedSum += 0.25 * simComplaint;
+      activeWeight += 0.25;
+    }
+
+    // 6. Kode DTC (0.25): redistribusi otomatis jika kosong
+    const reqCodes = new Set(extractAllRequestDtcs(req));
+    const caseCodes = new Set(splitDtcCodes(c.dtc));
+    let simDtc = null;
+    if (reqCodes.size > 0) {
+      if (caseCodes.size === 0) {
+        simDtc = 0.0;
+      } else {
+        let matched = 0.0;
+        for (const code of reqCodes) {
+          if (caseCodes.has(code)) {
+            matched += 1.0;
+          } else {
+            let subMatch = false;
+            for (const other of caseCodes) {
+              if (areSameDtcSubsystem(code, other)) { subMatch = true; break; }
+            }
+            if (subMatch) matched += 0.60;
+          }
+        }
+        simDtc = Math.min(matched / Math.max(reqCodes.size, caseCodes.size), 1.0);
+      }
+      weightedSum += 0.25 * simDtc;
+      activeWeight += 0.25;
+    }
+
+    if (activeWeight <= 0) return 0.0;
+    let normalizedText = Math.min(Math.max(weightedSum / activeWeight, 0.0), 1.0);
     if (reqCodes.size > 0 && simDtc === 0.0) {
-      normalizedText *= 0.30;
+      normalizedText *= 0.45;
     }
     return normalizedText;
+  }
+
+  function buildOfflineCustomerSummary(advice, req, reqCodes) {
+    const veh = `${req.brand || ''} ${req.model || ''}`.trim() || 'kendaraan Anda';
+    const sys = String((advice && advice.system_category) || 'mesin').toLowerCase();
+    const codeTxt = reqCodes.length ? ` (kode komputer ${reqCodes.slice(0, 2).join(', ')})` : '';
+    const firstAct = (advice && advice.repair_options && advice.repair_options[0] && advice.repair_options[0].title) || '';
+    let core = `Komputer mesin ${veh} mendeteksi gangguan pada bagian ${(advice && advice.system_category) || 'mesin'}${codeTxt} (${(advice && advice.diagnosis_title) || 'perlu pemeriksaan'}).`;
+    if (sys.includes('pengapian') || reqCodes.some((c) => /^P030|^P035/.test(c))) {
+      core = `Sistem pengapian (busi atau koil pemantik api) pada ${veh} terdeteksi tidak membakar bensin secara sempurna${codeTxt}, sehingga mesin terasa pincang/bergetar dan tenaga berkurang.`;
+    } else if (sys.includes('udara') || reqCodes.some((c) => ['P0171', 'P0101', 'P0105', 'P0107', 'P0507'].includes(c))) {
+      core = `Aliran udara yang masuk ke mesin ${veh} tidak seimbang${codeTxt}—umumnya karena selang udara/vakum bocor, throttle kotor, atau sensor udara kotor sehingga mesin terasa brebet dan boros BBM.`;
+    } else if (sys.includes('pendingin') || reqCodes.some((c) => /^P011|^P0128|^P048/.test(c))) {
+      core = `Sistem pendingin mesin ${veh} (sensor suhu air atau kipas radiator) terdeteksi bermasalah${codeTxt}. Segera ditangani agar suhu mesin tetap aman dari overheat.`;
+    }
+    return core + (firstAct ? ` Langkah yang disarankan bengkel: ${firstAct}, lalu lakukan uji jalan.` : ' Mekanik akan memeriksa komponen terkait terlebih dahulu sebelum penggantian suku cadang.');
   }
 
   function calculateLiveSimilarity(req, c) {
@@ -1189,8 +1244,16 @@
       let totScore = (hasAnyLiveData && lScore !== null)
         ? (0.85 * tScore + 0.15 * lScore)
         : tScore;
+      const verStatus = String(c.verification_status || 'TERVERIFIKASI').toUpperCase();
+      if (verStatus === 'TERVERIFIKASI' && totScore > 0.0) {
+        totScore = Math.min(totScore + 0.02, 1.0);
+      }
       totScore = Math.round(Math.min(Math.max(totScore, 0.0), 1.0) * 10000) / 10000;
       const catLabel = determineCategory(totScore);
+      const kmDiff = (req.odometer_km != null && req.odometer_km !== '' && c.odometer_km != null && c.odometer_km !== '')
+        ? Math.abs(Number(req.odometer_km) - Number(c.odometer_km)) : null;
+      const yearDiff = (req.year != null && req.year !== '' && c.year != null)
+        ? Math.abs(Number(req.year) - Number(c.year)) : null;
 
       const caseCodesSet = new Set(splitDtcCodes(c.dtc));
       if (reqCodesSet.size > 0 && setIntersectionCount(reqCodesSet, caseCodesSet) > 0) {
@@ -1214,6 +1277,13 @@
         model: c.model,
         year: c.year,
         engine_capacity: c.engine_capacity,
+        engine_code: c.engine_code || '',
+        odometer_km: c.odometer_km != null ? Number(c.odometer_km) : null,
+        km_diff: kmDiff,
+        year_diff: yearDiff,
+        license_plate: c.license_plate || '',
+        mechanic_name: c.mechanic_name || '',
+        verification_status: verStatus,
         complaint: c.complaint,
         symptom: c.symptom,
         dtc: c.dtc || 'Tidak ada',
@@ -1324,8 +1394,11 @@
       ? `${topMatch.final_diagnosis} — ${topMatch.total_score}% (${topMatch.category_label}), referensi ${topMatch.case_code}, sistem ${topMatch.system_category}`
       : 'Tidak ada kasus yang cocok';
     const directAdvice = (topMatch && topMatch.manual_advice)
-      ? topMatch.manual_advice
+      ? { ...topMatch.manual_advice }
       : getRepairManualGuidance('Umum', null);
+    if (!directAdvice.customer_summary) {
+      directAdvice.customer_summary = buildOfflineCustomerSummary(directAdvice, req, reqCodes);
+    }
 
     return {
       top_headline: topHeadline,

@@ -106,10 +106,10 @@ def patch_version_gradle() -> None:
     if not BUILD_GRADLE_PATH.exists():
         return
     txt = BUILD_GRADLE_PATH.read_text(encoding="utf-8")
-    txt = re.sub(r"versionCode\s+\d+", "versionCode 200", txt, count=1)
-    txt = re.sub(r'versionName\s+"[^"]+"', 'versionName "2.0.0"', txt, count=1)
+    txt = re.sub(r"versionCode\s+\d+", "versionCode 220", txt, count=1)
+    txt = re.sub(r'versionName\s+"[^"]+"', 'versionName "2.2.0"', txt, count=1)
     BUILD_GRADLE_PATH.write_text(txt, encoding="utf-8")
-    print("[SUKSES] build.gradle diperbarui ke versionCode 200 / versionName 2.0.0")
+    print("[SUKSES] build.gradle diperbarui ke versionCode 220 / versionName 2.2.0")
 
 
 def patch_launcher_icons_and_splash() -> None:
