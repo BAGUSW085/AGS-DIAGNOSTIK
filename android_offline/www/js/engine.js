@@ -953,7 +953,15 @@
     if (!text) return '';
     let s = String(text).replace(/\|\s*Pinout\s*&\s*Warna\s*Kabel:.*$/i, '').trim();
     s = s.replace(/^Solusi\s*Manual\s*:\s*/i, '').trim();
+    s = s.replace(/\bE\s*G\s*R\s*v\s*a\s*l\s*v\s*e\b/gi, 'Katup EGR (EGR Valve)');
+    s = s.replace(/\bEGRvalve\b/gi, 'Katup EGR (EGR Valve)');
+    s = s.replace(/\bE\s+C\s+M\b/g, 'ECM');
+    s = s.replace(/\bT\s+C\s+M\b/g, 'TCM');
+    s = s.replace(/\bB\s+C\s+M\b/g, 'BCM');
+    s = s.replace(/\bS\s+D\s+M\b/g, 'SDM');
+    s = s.replace(/[“"']?atauN[”"']?/g, '"ORN" (Oranye)');
     s = s.replace(/\bG\s+anti\b/g, 'Ganti');
+    s = s.replace(/\bSIrkuit\b/g, 'Sirkuit');
     s = s.replace(/\bSistim\b/g, 'Sistem');
     s = s.replace(/\bsistim\b/g, 'sistem');
     s = s.replace(/\bkoslet\b/gi, 'hubung singkat (korsleting)');
@@ -1040,6 +1048,16 @@
         const multiDesc = dtcEntries.map((d) => `${d.code} (${d.description_id})`).join('; ');
         specialist.diagnosis_title = `Terdeteksi Multi-DTC Manual Book: ${multiDesc}`;
       }
+      if (catEntry) {
+        if (Array.isArray(catEntry.idle_standards) && catEntry.idle_standards.length) {
+          specialist.idle_standards = catEntry.idle_standards.map((x) => ({ ...x }));
+        }
+        if (Array.isArray(catEntry.scanner_standards) && catEntry.scanner_standards.length) {
+          specialist.scanner_standards = catEntry.scanner_standards.map((x) => ({ ...x }));
+        }
+        if (catEntry.sim_circuit_key) specialist.sim_circuit_key = String(catEntry.sim_circuit_key);
+        if (catEntry.atlas_module_id) specialist.atlas_module_id = String(catEntry.atlas_module_id);
+      }
       return specialist;
     }
 
@@ -1115,23 +1133,34 @@
     }
 
     const pinStr = pinouts.slice(0, 3).map((p) => p.pin.split(' ')[0]).join(', ') || 'terminal modul';
-    const repairOptions = [
-      {
-        tag: 'Opsi 1 • Utama (Komponen)',
-        title: `Ganti / Servis Komponen Utama (${primary.description_id})`,
-        desc: `Periksa dan ganti unit sensor/aktuator pada sirkuit '${primary.description_id}' bila hasil ukur multimeter di luar standar.`
-      },
-      {
-        tag: 'Opsi 2 • Soket & Kabel',
-        title: `Perbaiki Soket Konektor & Jalur Kabel (${pinStr})`,
-        desc: `Bersihkan pin konektor dengan contact cleaner, rapatkan pin kendor, dan perbaiki kabel putus menuju ${pinStr}.`
-      },
-      {
-        tag: 'Opsi 3 • Suplai & Reset',
-        title: `Periksa Sekering / Massa Ground & Reset Memori DTC ${primary.code}`,
-        desc: 'Pastikan suplai tegangan kerja (12V/5V) dan titik ground normal (< 0.3V), lalu hapus DTC via scan tool.'
-      }
-    ];
+    const repairOptions = (catEntry && Array.isArray(catEntry.curated_repair_options) && catEntry.curated_repair_options.length > 0)
+      ? catEntry.curated_repair_options.map((o) => ({ ...o }))
+      : [
+          {
+            tag: 'Opsi 1 • Utama (Komponen)',
+            title: `Ganti / Servis Komponen Utama (${primary.description_id})`,
+            desc: `Periksa dan ganti unit sensor/aktuator pada sirkuit '${primary.description_id}' bila hasil ukur multimeter di luar standar.`
+          },
+          {
+            tag: 'Opsi 2 • Soket & Kabel',
+            title: `Perbaiki Soket Konektor & Jalur Kabel (${pinStr})`,
+            desc: `Bersihkan pin konektor dengan contact cleaner, rapatkan pin kendor, dan perbaiki kabel putus menuju ${pinStr}.`
+          },
+          {
+            tag: 'Opsi 3 • Suplai & Reset',
+            title: `Periksa Sekering / Massa Ground & Reset Memori DTC ${primary.code}`,
+            desc: 'Pastikan suplai tegangan kerja (12V/5V) dan titik ground normal (< 0.3V), lalu hapus DTC via scan tool.'
+          }
+        ];
+
+    const idleStandards = (catEntry && Array.isArray(catEntry.idle_standards))
+      ? catEntry.idle_standards.map((x) => ({ ...x }))
+      : [];
+    const scannerStandards = (catEntry && Array.isArray(catEntry.scanner_standards))
+      ? catEntry.scanner_standards.map((x) => ({ ...x }))
+      : [];
+    const simCircuitKey = (catEntry && catEntry.sim_circuit_key) ? String(catEntry.sim_circuit_key) : null;
+    const atlasModuleId = (catEntry && catEntry.atlas_module_id) ? String(catEntry.atlas_module_id) : null;
 
     const titleDesc = dtcEntries.length === 1
       ? primary.description_id
@@ -1147,6 +1176,10 @@
       cause_items: causeItems,
       repair_options: repairOptions,
       sensor_standards: standards,
+      idle_standards: idleStandards,
+      scanner_standards: scannerStandards,
+      sim_circuit_key: simCircuitKey,
+      atlas_module_id: atlasModuleId,
       wiring_pinout: pinouts,
       step_by_step_repair: authenticSteps,
       relearn_reset_steps: [

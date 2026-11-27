@@ -1451,7 +1451,7 @@ def resolve_vehicle_applicability(
     hint_low = f"{m_clean} {eng_clean}".lower()
     if matched_variant and matched_variant.get("fuel"):
         resolved_fuel_type = str(matched_variant["fuel"])
-    elif any(k in hint_low for k in ("air ev", "binguo", "cloud ev", "atto 3", "dolphin", "seal", "byd m6", "mg4 ev", " bev", "listrik")):
+    elif any(k in hint_low for k in ("air ev", "binguo", "cloud ev", "atto 3", "dolphin", "seal", "byd m6", "mg4 ev", "ioniq", "kona electric", "leaf", "bz4x", "ev6", "ev9", "neta", "electric", "listrik")) or bool(re.search(r"\b(?:ev|bev)\b", hint_low)):
         resolved_fuel_type = "EV"
     elif any(k in hint_low for k in ("hybrid", "hev", "phev", "zenix hybrid", "e:hev", "shvs", "eq boost")):
         resolved_fuel_type = "Hybrid"

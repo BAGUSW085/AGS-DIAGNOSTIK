@@ -966,12 +966,13 @@ def lookup_modern_dtc(dtc_code: str, fuel_type: str = "Bensin") -> dict[str, Any
 # ---------------------------------------------------------------------------
 
 _EV_FORBIDDEN_KEYWORDS = (
-    "sensor o2", "o2 sensor", "ho2s", "oksigen", "oxygen",
+    "sensor o2", "o2 sensor", "ho2s", "oksigen", "oxygen", "a/f sensor", "sensor a/f",
     "busi", "spark plug", "koil", "ignition coil", "pengapian",
     "injektor", "injector", "fuel pump", "pompa bensin", "tangki bensin",
     "bahan bakar", "bbm", "pertalite", "pertamax", "solar", "katalis",
-    "catalytic", "egr", "throttle body", "karburator", "klep", "timing belt",
-    "timing chain", "turbo", "knalpot", "exhaust", "misfire", "stft", "ltft",
+    "catalytic", "egr", "evap", "throttle body", "trotel", "karburator", "klep", "pcv",
+    "selang vakum", "timing belt", "timing chain", "turbo", "knalpot", "exhaust",
+    "misfire", "stft", "ltft", "sensor maf", "sensor map", "sensor ckp", "sensor cmp",
 )
 
 _DIESEL_FORBIDDEN_KEYWORDS = (

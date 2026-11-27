@@ -626,6 +626,10 @@ class ManualRepairAdvice(BaseModel):
     repair_options: list[dict[str, str]] = []
     step_by_step_repair: list[str]
     sensor_standards: list[dict[str, str]]
+    idle_standards: list[dict[str, str]] = []
+    scanner_standards: list[dict[str, str]] = []
+    sim_circuit_key: str | None = None
+    atlas_module_id: str | None = None
     wiring_pinout: list[dict[str, str]]
     relearn_reset_steps: list[str]
     is_pinout_verified: bool = True
@@ -1797,7 +1801,15 @@ class WeightedDiagnosticEngine:
             return ""
         s = re.sub(r"\|\s*Pinout\s*&\s*Warna\s*Kabel:.*$", "", text, flags=re.IGNORECASE).strip()
         s = re.sub(r"^Solusi\s*Manual\s*:\s*", "", s, flags=re.IGNORECASE).strip()
+        s = re.sub(r"\bE\s*G\s*R\s*v\s*a\s*l\s*v\s*e\b", "Katup EGR (EGR Valve)", s, flags=re.IGNORECASE)
+        s = re.sub(r"\bEGRvalve\b", "Katup EGR (EGR Valve)", s, flags=re.IGNORECASE)
+        s = re.sub(r"\bE\s+C\s+M\b", "ECM", s)
+        s = re.sub(r"\bT\s+C\s+M\b", "TCM", s)
+        s = re.sub(r"\bB\s+C\s+M\b", "BCM", s)
+        s = re.sub(r"\bS\s+D\s+M\b", "SDM", s)
+        s = re.sub(r"[“\"']?atauN[”\"']?", '"ORN" (Oranye)', s)
         s = re.sub(r"\bG\s+anti\b", "Ganti", s)
+        s = re.sub(r"\bSIrkuit\b", "Sirkuit", s)
         s = re.sub(r"\bSistim\b", "Sistem", s)
         s = re.sub(r"\bsistim\b", "sistem", s)
         s = re.sub(r"\bkoslet\b", "hubung singkat (korsleting)", s, flags=re.IGNORECASE)
@@ -1907,7 +1919,10 @@ class WeightedDiagnosticEngine:
         cat_entry: dict[str, Any] | None,
         pinouts: list[dict[str, str]],
     ) -> list[dict[str, str]]:
-        """Menyusun Opsi-Opsi Tindakan Perbaikan yang Terbukti (diurutkan dari tindakan komponen utama ke opsi pendukung)."""
+        """Menyusun Opsi-Opsi Tindakan Perbaikan yang Terbukti (diurutkan logis: servis/bersihkan/uji komponen dulu -> soket/kabel -> suplai/scanner/ECM)."""
+        if cat_entry and cat_entry.get("curated_repair_options"):
+            return [dict(opt) for opt in cat_entry["curated_repair_options"]]
+
         code = primary["code"]
         desc_id = primary["description_id"]
         pin_str = ", ".join(p["pin"].split(" ")[0] for p in pinouts[:3]) if pinouts else "terminal modul"
@@ -2006,6 +2021,15 @@ class WeightedDiagnosticEngine:
             if len(dtc_entries) > 1:
                 multi_desc = "; ".join(f"{d['code']} ({d['description_id']})" for d in dtc_entries)
                 specialist.diagnosis_title = f"Terdeteksi Multi-DTC Manual Book: {multi_desc}"
+            if cat_entry:
+                if cat_entry.get("idle_standards"):
+                    specialist.idle_standards = [dict(x) for x in cat_entry["idle_standards"]]
+                if cat_entry.get("scanner_standards"):
+                    specialist.scanner_standards = [dict(x) for x in cat_entry["scanner_standards"]]
+                if cat_entry.get("sim_circuit_key"):
+                    specialist.sim_circuit_key = str(cat_entry["sim_circuit_key"])
+                if cat_entry.get("atlas_module_id"):
+                    specialist.atlas_module_id = str(cat_entry["atlas_module_id"])
             return specialist
 
         sys_cat, grp_cat = cls._classify_dtc_workshop_system(primary["code"], primary["system"], primary["description_id"])
@@ -2118,6 +2142,11 @@ class WeightedDiagnosticEngine:
         structured_repair_options = cls._structure_manual_dtc_repair_options(primary, cat_entry, pinouts)
         doc_tag = f" [ID: {cat_entry['suzuki_doc_id']}]" if cat_entry and cat_entry.get("suzuki_doc_id") else ""
 
+        idle_stds = [dict(x) for x in (cat_entry.get("idle_standards") or [])] if cat_entry else []
+        scanner_stds = [dict(x) for x in (cat_entry.get("scanner_standards") or [])] if cat_entry else []
+        sim_key = str(cat_entry.get("sim_circuit_key")) if cat_entry and cat_entry.get("sim_circuit_key") else None
+        atlas_mod = str(cat_entry.get("atlas_module_id")) if cat_entry and cat_entry.get("atlas_module_id") else None
+
         return ManualRepairAdvice(
             diagnosis_title=f"DTC {dtc_str}: {title_desc}",
             system_category=sys_cat,
@@ -2127,6 +2156,10 @@ class WeightedDiagnosticEngine:
             cause_items=structured_causes,
             repair_options=structured_repair_options,
             sensor_standards=standards,
+            idle_standards=idle_stds,
+            scanner_standards=scanner_stds,
+            sim_circuit_key=sim_key,
+            atlas_module_id=atlas_mod,
             wiring_pinout=pinouts,
             step_by_step_repair=authentic_steps,
             relearn_reset_steps=[
@@ -3143,6 +3176,59 @@ class WeightedDiagnosticEngine:
                                 wp_copy["function"] = f"[Contoh Ref. JB420 — Cek Soket Fisik] {func_str}"
                         tagged_pinouts.append(wp_copy)
                 direct_advice.wiring_pinout = tagged_pinouts
+
+        # 4. Pastikan SELALU tersedia 3 tingkatan standar pengukuran (Statis IG ON/OFF, Saat Mesin Idle, & Nilai Scanner OBD-II)
+        cat_map_final = cls._get_jb420_dtc_catalog_map()
+        matched_cat_final = None
+        for rc in req_codes:
+            if rc.upper() in cat_map_final:
+                matched_cat_final = cat_map_final[rc.upper()]
+                break
+        if matched_cat_final:
+            if not direct_advice.idle_standards and matched_cat_final.get("idle_standards"):
+                direct_advice.idle_standards = [dict(x) for x in matched_cat_final["idle_standards"]]
+            if not direct_advice.scanner_standards and matched_cat_final.get("scanner_standards"):
+                direct_advice.scanner_standards = [dict(x) for x in matched_cat_final["scanner_standards"]]
+            if not direct_advice.sim_circuit_key and matched_cat_final.get("sim_circuit_key"):
+                direct_advice.sim_circuit_key = str(matched_cat_final["sim_circuit_key"])
+            if not direct_advice.atlas_module_id and matched_cat_final.get("atlas_module_id"):
+                direct_advice.atlas_module_id = str(matched_cat_final["atlas_module_id"])
+
+        if not direct_advice.idle_standards:
+            if vehicle_fuel == "EV":
+                direct_advice.idle_standards = [
+                    {"parameter": "Tegangan Aki 12V Aux Saat Mode READY (DC-DC Aktif)", "normal_range": "13.6 – 14.5 V", "unit": "V DC"},
+                    {"parameter": "Tahanan Isolasi Sistem HV (Insulation Tester 500V)", "normal_range": "> 10 MΩ (Wajib APD 1000V)", "unit": "MΩ"},
+                ]
+            elif vehicle_fuel == "Diesel":
+                direct_advice.idle_standards = [
+                    {"parameter": "Tekanan Common-Rail Bahan Bakar Saat Idle Panas", "normal_range": "30 – 45 MPa (300 – 450 bar)", "unit": "MPa"},
+                    {"parameter": "Putaran Mesin Idle Panas & Pengisian Alternator", "normal_range": "700 – 800 RPM · 13.5 – 14.5 V", "unit": "RPM / V"},
+                ]
+            else:
+                direct_advice.idle_standards = [
+                    {"parameter": "Putaran Mesin Idle Tanpa Beban (Panas Kerja 80–90°C)", "normal_range": "650 – 750 ± 50 RPM", "unit": "RPM"},
+                    {"parameter": "Tegangan Pengisian Alternator Saat Idle", "normal_range": "13.5 – 14.5 V (Stabil)", "unit": "V DC"},
+                    {"parameter": "Vakum Intake Manifold / Tegangan Sensor MAP Saat Idle", "normal_range": "24 – 38 kPa (~1.1 – 1.5 V)", "unit": "kPa / V"},
+                ]
+
+        if not direct_advice.scanner_standards:
+            if vehicle_fuel == "EV":
+                direct_advice.scanner_standards = [
+                    {"parameter": "HV BATTERY CELL VOLTAGE DELTA (Live Data BMS)", "normal_range": "< 50 mV antar sel", "unit": "mV"},
+                    {"parameter": "HV BATTERY SOC / SOH & SUHU PACK", "normal_range": "20 – 100% · 20 – 45 °C", "unit": "% / °C"},
+                ]
+            elif vehicle_fuel == "Diesel":
+                direct_advice.scanner_standards = [
+                    {"parameter": "FUEL RAIL PRESSURE ACTUAL vs TARGET (Idle)", "normal_range": "30 – 45 MPa (Selisih < ±3 MPa)", "unit": "MPa"},
+                    {"parameter": "INJECTOR FEEDBACK / CORRECTION VOLUME", "normal_range": "–2.5 s/d +2.5 mm³/st", "unit": "mm³/st"},
+                ]
+            else:
+                direct_advice.scanner_standards = [
+                    {"parameter": "COOLANT TEMP (ECT · Bab 1A-34 Idle Panas)", "normal_range": "80 – 100 °C", "unit": "°C"},
+                    {"parameter": "SHORT FT B1 (STFT) & LONG FT B1 (LTFT · Bab 1A-35)", "normal_range": "–10% s/d +10% (Ambang ±20%)", "unit": "%"},
+                    {"parameter": "MAF & MAP Saat Idle Panas (Bab 1A-34/35)", "normal_range": "1.0 – 4.0 g/s · 24 – 38 kPa", "unit": "g/s · kPa"},
+                ]
 
         if not direct_advice.customer_summary:
             direct_advice.customer_summary = cls._build_customer_summary(

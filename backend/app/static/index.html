@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=4.0, user-scalable=yes, viewport-fit=cover">
   <meta name="theme-color" content="#020617">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,6 +18,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Local SheetJS (100% Offline Excel .xlsx Export/Import — REQ-13) -->
   <script src="/static/js/xlsx.full.min.js" defer></script>
+  <!-- Dark Cockpit Atlas Wiring & Foto Asli OEM Suzuki Grand Vitara JB420 -->
+  <script src="/static/js/jb420-wiring-atlas.js"></script>
+  <script src="/static/js/jb420-cockpit-ui.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -95,40 +98,93 @@
       transform-box: fill-box;
       animation: spinFan 0.6s linear infinite;
     }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill {
+      -webkit-text-fill-color: #f8fafc !important;
+      -webkit-box-shadow: 0 0 0px 1000px #020617 inset !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    /* ZOOM INTERAKTIF & PINCH-TO-ZOOM RAMAH MEKANIK SENIOR */
+    .agos-zoom-stage {
+      width: 100%;
+      max-width: 100%;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y pinch-zoom;
+    }
+    .agos-zoom-stage svg {
+      display: block;
+      flex-shrink: 0 !important;
+      height: auto !important;
+      max-width: none !important;
+      transition: width 0.14s ease-out;
+    }
+    /* MODE TEKS BESAR (A+) — RAMAH MATA MEKANIK SENIOR */
+    html.agos-senior-text {
+      font-size: 18px;
+    }
+    html.agos-senior-text body {
+      line-height: 1.65;
+    }
+    html.agos-senior-text .text-\[9\.5px\],
+    html.agos-senior-text .text-\[10px\],
+    html.agos-senior-text .text-\[10\.5px\] {
+      font-size: 12.5px !important;
+      line-height: 1.45 !important;
+    }
+    html.agos-senior-text .text-\[11px\],
+    html.agos-senior-text .text-\[11\.5px\] {
+      font-size: 13.5px !important;
+      line-height: 1.5 !important;
+    }
+    html.agos-senior-text .text-xs {
+      font-size: 14.5px !important;
+      line-height: 1.55 !important;
+    }
+    html.agos-senior-text .text-sm {
+      font-size: 16px !important;
+      line-height: 1.6 !important;
+    }
+    html.agos-senior-text table td,
+    html.agos-senior-text table th {
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+    }
+    html.agos-senior-text p,
+    html.agos-senior-text li {
+      line-height: 1.65 !important;
+    }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-[#050b18] text-slate-100 min-h-screen flex flex-col">
 
-  <!-- TOP ANDROID APPBAR & DESKTOP NAVIGATION HEADER -->
-  <header class="bg-slate-950/95 backdrop-blur border-b border-slate-800 sticky top-0 z-50 shadow-md">
+  <!-- TOP ANDROID APPBAR & DESKTOP NAVIGATION HEADER (DARK COCKPIT 3-PILAR SKRIPSI) -->
+  <header class="bg-[#070e1d]/95 backdrop-blur border-b border-cyan-900/50 sticky top-0 z-50 shadow-lg shadow-black/40">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <!-- ROW 1: BRAND LOGO + TITLE + INSTALL/SHARE BUTTON + STATUS -->
+      <!-- ROW 1: BRAND LOGO + TITLE + STATUS -->
       <div class="h-14 sm:h-16 flex items-center justify-between gap-2">
         <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-cyan-500/40 bg-[#131A2C] flex items-center justify-center shadow-lg shadow-brand-500/25 shrink-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-cyan-500/50 bg-[#131A2C] flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
             <img src="/static/icon-192.png" alt="Logo AGOS Diagnostik" class="w-full h-full object-cover">
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-sm sm:text-lg font-extrabold tracking-tight text-white truncate">AGOS DIAGNOSTIK</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-mono font-semibold shrink-0">v2.2.0</span>
+              <span class="hidden xs:inline text-[10px] px-1.5 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-700/80 font-mono font-semibold shrink-0">v2.3.0 · JB420</span>
             </div>
-            <p class="text-[11px] text-slate-400 truncate hidden md:block">AGOS SMART DIAGNOSTIK by Agos Corporation • Android & Web AI Platform</p>
+            <p class="text-[11px] text-slate-400 truncate hidden md:block">Dark Cockpit 3-Pilar · Fokus Suzuki Grand Vitara JB420 (2.0L J20A) &amp; Weighted CBR</p>
           </div>
         </div>
 
-        <!-- ACTION CLUSTER: ADMIN PIN LOCK + INSTALL ANDROID APP & SHARE + ONLINE STATUS -->
+        <!-- ACTION CLUSTER: MODE TEKS BESAR A+ (MEKANIK SENIOR) + ORIENTASI + STATUS ENGINE -->
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <button type="button" onclick="openAdminSecurityModal()" id="btn-header-admin-lock" title="Mode Kepala Bengkel (PIN Pengaman & Backup Database)" class="px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-amber-300 text-[11px] sm:text-xs font-bold flex items-center gap-1.5 transition active:scale-95">
-            <i id="header-admin-lock-icon" class="fa-solid fa-lock text-xs"></i>
-            <span id="header-admin-lock-label" class="hidden xs:inline sm:inline">Admin</span>
+          <button type="button" id="btn-toggle-senior-text" onclick="toggleSeniorTextMode()" class="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-amber-300 bg-amber-950/70 hover:bg-amber-900/80 border border-amber-500/60 px-2.5 py-1.5 rounded-full shrink-0 active:scale-95 transition whitespace-nowrap" title="Perbesar Ukuran Teks — Ramah Mata Mekanik Senior">
+            <i class="fa-solid fa-magnifying-glass-plus text-amber-400"></i>
+            <span id="label-senior-text">A+</span><span class="hidden sm:inline"> Teks Besar</span>
           </button>
-
-          <button type="button" onclick="toggleModalAppInstall(true)" id="btn-header-install-app" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-[11px] sm:text-xs font-bold shadow-md shadow-emerald-600/25 flex items-center gap-1.5 transition active:scale-95">
-            <i class="fa-brands fa-android text-sm"></i>
-            <span>Pasang App / Bagikan</span>
-          </button>
-
+          <!-- OFFLINE_ORIENTATION_SLOT -->
           <div class="hidden sm:flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-full shrink-0">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="server-status-text" class="font-medium">Engine Online</span>
@@ -136,32 +192,23 @@
         </div>
       </div>
 
-      <!-- ROW 2: DESKTOP/TABLET NAVIGATION TABS (ON MOBILE, REPLACED BY ANDROID BOTTOM NAV BAR) -->
-      <nav class="hidden sm:flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-3">
-        <button onclick="switchTab('diagnostic')" id="tab-btn-diagnostic" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg text-white bg-brand-600 transition flex items-center gap-1.5 shadow-sm active:scale-95">
-          <i class="fa-solid fa-microchip text-xs"></i>
-          <span>Diagnosa Cepat</span>
+      <!-- ROW 2: DESKTOP/TABLET NAVIGATION TABS — BERSIH 3 PILAR UTAMA SKRIPSI R&D 4D -->
+      <nav class="hidden sm:flex items-center gap-2 overflow-x-auto no-scrollbar pb-3">
+        <button onclick="switchTab('diagnostic')" id="tab-btn-diagnostic" class="nav-tab shrink-0 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl text-white bg-gradient-to-r from-cyan-600 to-brand-600 transition flex items-center gap-2 shadow-md shadow-cyan-950/50 active:scale-95">
+          <i class="fa-solid fa-bolt text-xs text-amber-300"></i>
+          <span>1. Diagnosis Cepat</span>
         </button>
-        <button onclick="switchTab('database')" id="tab-btn-database" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
-          <i class="fa-solid fa-database text-xs"></i>
-          <span>Data Kasus</span>
+        <button onclick="switchTab('database')" id="tab-btn-database" class="nav-tab shrink-0 px-4 py-2 text-xs sm:text-sm font-medium rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/90 border border-slate-800 transition flex items-center gap-2 active:scale-95">
+          <i class="fa-solid fa-database text-xs text-cyan-400"></i>
+          <span>2. Data Kasus Kemiripan (CBR)</span>
         </button>
-        <button onclick="switchTab('manuals')" id="tab-btn-manuals" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
-          <i class="fa-solid fa-book-open text-xs"></i>
-          <span>Manual & Wiring</span>
+        <button onclick="switchTab('manuals')" id="tab-btn-manuals" class="nav-tab shrink-0 px-4 py-2 text-xs sm:text-sm font-medium rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/90 border border-slate-800 transition flex items-center gap-2 active:scale-95">
+          <i class="fa-solid fa-diagram-project text-xs text-amber-400"></i>
+          <span>3. Wiring Asli &amp; DTC (JB420)</span>
         </button>
-        <button onclick="switchTab('tools')" id="tab-btn-tools" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
-          <i class="fa-solid fa-screwdriver-wrench text-amber-400 text-xs"></i>
-          <span>Tool Diagnostik</span>
-        </button>
-        <button onclick="switchTab('pos')" id="tab-btn-pos" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-1.5 active:scale-95">
-          <i class="fa-solid fa-cash-register text-emerald-400 text-xs"></i>
-          <span>Web POS Bengkel (Demo)</span>
-        </button>
-        <a href="/wiring-viewer" class="nav-tab shrink-0 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg text-amber-300 bg-amber-500/15 border border-amber-500/40 hover:bg-amber-500 hover:text-slate-950 transition flex items-center gap-1.5 shadow-sm active:scale-95">
-          <i class="fa-solid fa-diagram-project text-xs"></i>
-          <span>Wiring Interaktif (Layar Penuh)</span>
-        </a>
+        <!-- Tab tunda pasca-skripsi (disembunyikan rapi sesuai ruang lingkup 3 pilar) -->
+        <button onclick="switchTab('tools')" id="tab-btn-tools" class="nav-tab hidden"><span>Tool</span></button>
+        <button onclick="switchTab('pos')" id="tab-btn-pos" class="nav-tab hidden"><span>POS</span></button>
       </nav>
     </div>
   </header>
@@ -181,7 +228,7 @@
             <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-bolt text-xs"></i>
             </span>
-            <span>Uji Coba Cepat: Pilih Contoh Kasus Bengkel (8 Kasus)</span>
+            <span>Uji Coba Cepat: Kasus Suzuki Grand Vitara JB420 &amp; Multi-Merek (8 Kasus)</span>
           </div>
           <div class="flex items-center gap-1.5 text-[11px] text-cyan-400 font-semibold shrink-0">
             <span class="hidden sm:inline">Klik untuk buka/tutup</span>
@@ -189,42 +236,42 @@
           </div>
         </summary>
         <div class="px-4 pb-3.5 pt-1 border-t border-slate-700/60">
-          <p class="text-[11px] text-slate-400 mb-2">Ketuk salah satu kasus di bawah untuk mengisi form diagnosa secara otomatis:</p>
+          <p class="text-[11px] text-slate-400 mb-2">Ketuk salah satu kasus di bawah untuk langsung mencoba Diagnosa Cepat + Kemiripan CBR + Foto Wiring Asli:</p>
           <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 sm:flex-wrap">
-            <button onclick="loadSample('K001')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-red-400"></span> K001: Avanza Brebet (P0171)
+            <button onclick="loadSample('GV01')" class="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-600 text-xs font-bold text-cyan-100 hover:text-white transition border border-cyan-500/50 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-red-400"></span> GV01: Grand Vitara Koil #2 (P0302)
             </button>
-            <button onclick="loadSample('K002')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-amber-400"></span> K002: Brio Pincang PCV
+            <button onclick="loadSample('GV02')" class="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-600 text-xs font-bold text-cyan-100 hover:text-white transition border border-cyan-500/50 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-pink-400"></span> GV02: Grand Vitara CKP Mati (P0335)
             </button>
-            <button onclick="loadSample('K003')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-blue-400"></span> K003: Xpander O2 Sensor (P0131)
+            <button onclick="loadSample('GV09')" class="shrink-0 px-3 py-1.5 rounded-lg bg-amber-950/80 hover:bg-amber-600 text-xs font-bold text-amber-200 hover:text-white transition border border-amber-500/50 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span> GV09: Grand Vitara Non-Wiring (P0171)
             </button>
-            <button onclick="loadSample('K005')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-purple-400"></span> K005: Ertiga Susah Hidup (ECT Dingin)
+            <button onclick="loadSample('GV07')" class="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-600 text-xs font-bold text-cyan-100 hover:text-white transition border border-cyan-500/50 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> GV07: Grand Vitara A/F Sensor (P0131)
             </button>
-            <button onclick="loadSample('K006')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> K006: Yaris Hilang Tenaga (MAF Kotor)
+            <button onclick="loadSample('GV12')" class="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-600 text-xs font-bold text-cyan-100 hover:text-white transition border border-cyan-500/50 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> GV12: Grand Vitara Fan Radiator (P0480)
             </button>
-            <button onclick="loadSample('K007')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-yellow-400"></span> K007: Mobilio RPM 1.500 (Gasket TB)
+            <button onclick="loadSample('GV14')" class="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-600 text-xs font-bold text-cyan-100 hover:text-white transition border border-cyan-500/50 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span> GV14: Grand Vitara ABS Roda (C1021)
             </button>
-            <button onclick="loadSample('K008')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-rose-400"></span> K008: Xpander Kaya P0172 (Injektor)
+            <button onclick="loadSample('K001')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-slate-400"></span> K001: Avanza Brebet (Multi-Merek)
             </button>
-            <button onclick="loadSample('K012')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full bg-cyan-400"></span> K012: CR-V Trotel Kotor
+            <button onclick="loadSample('K005')" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-brand-600 text-xs font-medium text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-slate-400"></span> K005: Ertiga ECT Dingin (Multi-Merek)
             </button>
           </div>
         </div>
       </details>
 
       <!-- EXPRESS SEARCH: PENCARIAN KILAT 1 BARIS (REQ-04) -->
-      <div id="express-search-bar" class="bg-gradient-to-r from-slate-800/90 via-slate-800/90 to-brand-950/60 border border-cyan-500/40 rounded-2xl p-3.5 sm:p-4 shadow-lg space-y-2.5">
+      <div id="express-search-bar" class="bg-gradient-to-r from-[#081226] via-[#0a162e] to-cyan-950/50 border border-cyan-500/45 rounded-2xl p-3.5 sm:p-4 shadow-xl space-y-2.5">
         <div class="flex flex-col sm:flex-row sm:items-center gap-2">
           <div class="relative flex-1 min-w-0">
             <i class="fa-solid fa-bolt text-amber-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
-            <input type="text" id="input-express-search" oninput="runExpressSearchInstant(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();runExpressSearchInstant(this.value, true);}" placeholder="Cari cepat: Ketik Kode Mesin + DTC atau Gejala (Contoh: K14B P0107, 2KD susah hidup, 1NZ brebet)..." class="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-xl pl-8 pr-3 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition">
+            <input type="text" id="input-express-search" oninput="runExpressSearchInstant(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();runExpressSearchInstant(this.value, true);}" placeholder="Cari cepat: Ketik Kode DTC / Gejala Grand Vitara (Contoh: J20A P0302, P0335 susah hidup, P0171 kurus, C1021 ABS)..." class="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-xl pl-8 pr-3 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none transition">
           </div>
           <button type="button" onclick="runExpressSearchInstant(document.getElementById('input-express-search').value, true)" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow flex items-center justify-center gap-1.5 shrink-0 transition active:scale-95">
             <i class="fa-solid fa-magnifying-glass-chart"></i>
@@ -735,56 +782,59 @@
             <div id="diag-section-tabs" class="flex flex-wrap items-center gap-1.5">
               <button type="button" onclick="selectDiagResultTab('inti')" data-diagtab="inti" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-brand-600 text-white border border-cyan-400 transition active:scale-95">🎯 Inti &amp; Simulasi</button>
               <button type="button" onclick="selectDiagResultTab('sop')" data-diagtab="sop" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white transition active:scale-95">🔧 Langkah SOP <span id="diag-badge-sop" class="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono text-[10px]">0</span></button>
-              <button type="button" onclick="selectDiagResultTab('standar')" data-diagtab="standar" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white transition active:scale-95">⚡ Standar &amp; Pinout <span id="diag-badge-pin" class="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-[10px]">0</span></button>
+              <button type="button" onclick="selectDiagResultTab('standar')" data-diagtab="standar" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white transition active:scale-95">⚡ Statis, Idle &amp; Scanner <span id="diag-badge-pin" class="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-[10px]">0</span></button>
               <button type="button" onclick="selectDiagResultTab('kasus')" data-diagtab="kasus" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white transition active:scale-95">📊 Kasus Mirip <span id="diag-badge-kasus" class="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-[10px]">0</span></button>
               <button type="button" onclick="selectDiagResultTab('all')" data-diagtab="all" class="diag-subtab whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:text-white transition active:scale-95">📑 Semua</button>
             </div>
           </div>
 
-          <!-- KOTAK PENJELASAN BAHASA AWAM UNTUK PEMILIK MOBIL (REQ-07) -->
-          <div id="diag-sec-customer-summary" class="bg-gradient-to-r from-sky-950/50 via-slate-900/90 to-emerald-950/40 border border-sky-500/40 rounded-xl p-3.5 sm:p-4 space-y-1.5">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <h4 class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+          <!-- SUB-BAB A: PENJELASAN BAHASA AWAM UNTUK PEMILIK MOBIL (REQ-07) -->
+          <div id="diag-sec-customer-summary" class="bg-gradient-to-r from-sky-950/50 via-slate-900/90 to-emerald-950/40 border border-sky-500/40 rounded-xl p-3.5 sm:p-4 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-sky-800/50 pb-2">
+              <h4 class="text-xs font-bold text-sky-300 uppercase tracking-wider flex flex-wrap items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/50 text-sky-200 font-mono text-[10px] font-extrabold">SUB-BAB A</span>
                 <i class="fa-solid fa-user-check text-emerald-400"></i>
-                Penjelasan untuk Pemilik Mobil (Bahasa Awam / Non-Teknis)
+                <span>Penjelasan untuk Pemilik Mobil (Bahasa Awam)</span>
               </h4>
-              <button type="button" onclick="copyCustomerSummary()" class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-sky-700 border border-slate-700 text-sky-200 font-semibold transition">
+              <button type="button" onclick="copyCustomerSummary()" class="text-[10.5px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-sky-700 border border-slate-700 text-sky-200 font-semibold transition">
                 <i class="fa-solid fa-copy mr-1"></i><span id="copy-cust-summary-lbl">Salin untuk Pelanggan</span>
               </button>
             </div>
-            <p id="res-customer-summary-text" class="text-xs sm:text-sm text-slate-100 leading-relaxed">-</p>
+            <div id="res-customer-summary-text" class="text-xs sm:text-sm text-slate-100 leading-relaxed space-y-1.5">-</div>
           </div>
 
-          <!-- SUMMARY & ACTION (STRUCTURED ROOT CAUSES & INTERACTIVE MULTI-OPTION REPAIR) -->
+          <!-- SUB-BAB B: SUMMARY & ACTION (STRUCTURED ROOT CAUSES & INTERACTIVE MULTI-OPTION REPAIR) -->
           <div id="diag-sec-inti-causes" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-            <!-- KARTU KIRI: AKAR MASALAH KERUSAKAN TERSTRUKTUR -->
+            <!-- KARTU KIRI: SUB-BAB B.1 AKAR MASALAH KERUSAKAN TERSTRUKTUR -->
             <div class="bg-slate-900/90 border border-amber-500/30 p-4 rounded-xl flex flex-col justify-between space-y-3">
               <div class="space-y-2.5">
                 <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
-                  <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex flex-wrap items-center gap-1.5">
+                    <span class="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-amber-200 font-mono text-[10px] font-extrabold">B.1</span>
                     <i class="fa-solid fa-triangle-exclamation"></i>
-                    Akar Masalah Kerusakan
+                    <span>Akar Masalah Kerusakan</span>
                   </h4>
                   <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800/60">
                     Evaluasi Terstruktur
                   </span>
                 </div>
-                <p class="text-xs text-slate-300 leading-relaxed bg-slate-950/70 border border-slate-800/80 rounded-lg p-2.5" id="manual-cause-summary">
+                <div class="text-xs text-slate-200 leading-relaxed bg-slate-950/70 border border-slate-800/80 rounded-lg p-3 space-y-1.5" id="manual-cause-summary">
                   -
-                </p>
+                </div>
                 <div id="manual-cause-list" class="space-y-2">
                   <!-- populated dynamically -->
                 </div>
               </div>
             </div>
 
-            <!-- KARTU KANAN: TINDAKAN PERBAIKAN YANG TERBUKTI (MULTI-OPSI INTERAKTIF) -->
+            <!-- KARTU KANAN: SUB-BAB B.2 TINDAKAN PERBAIKAN YANG TERBUKTI (MULTI-OPSI INTERAKTIF) -->
             <div class="bg-slate-900/90 border border-emerald-500/30 p-4 rounded-xl flex flex-col justify-between space-y-3">
               <div class="space-y-2.5">
                 <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
-                  <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex flex-wrap items-center gap-1.5">
+                    <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 font-mono text-[10px] font-extrabold">B.2</span>
                     <i class="fa-solid fa-check-double"></i>
-                    Tindakan Perbaikan yang Terbukti
+                    <span>Tindakan Perbaikan Terbukti</span>
                   </h4>
                   <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
                     Pilih Opsi Tindakan
@@ -811,42 +861,104 @@
             </div>
           </div>
 
-          <!-- STEP BY STEP PROCEDURES -->
+          <!-- SUB-BAB E: STEP BY STEP PROCEDURES (TERSTRUKTUR PER SUB-BAB RAPI) -->
           <div id="diag-sec-sop" class="bg-slate-900/60 border border-slate-700/80 p-3.5 sm:p-4 rounded-xl space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+              <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex flex-wrap items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/50 text-cyan-200 font-mono text-[10px] font-extrabold">SUB-BAB E</span>
                 <i class="fa-solid fa-list-check text-brand-400"></i>
-                Langkah Pembongkaran, Pemeriksaan, &amp; Penggantian Manual Book
+                <span>Langkah SOP Pemeriksaan &amp; Perbaikan (Terstruktur Sub-Bab)</span>
               </h4>
-              <span class="text-[10px] text-cyan-300 font-medium">Ketuk langkah untuk centang selesai ✓</span>
+              <span class="text-[10.5px] text-cyan-300 font-medium">Ketuk kotak sub-bab untuk centang selesai ✓</span>
             </div>
-            <ul class="space-y-2 text-xs sm:text-sm text-slate-200" id="manual-repair-steps">
+            <ul class="space-y-3 text-xs sm:text-sm text-slate-200" id="manual-repair-steps">
               <!-- populated dynamically -->
             </ul>
           </div>
 
-          <!-- SENSOR SPECIFICATIONS & WIRING PINOUT (DUAL GRID) -->
-          <div id="diag-sec-standar" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-            <!-- TABEL STANDAR SENSOR -->
-            <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl space-y-2">
-              <h4 class="text-xs font-semibold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-bolt"></i>
-                Nilai Standar Sensor &amp; Multimeter
+          <!-- SUB-BAB D: SENSOR SPECIFICATIONS (STATIS + IDLE + SCANNER) & WIRING PINOUT -->
+          <div id="diag-sec-standar" class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+              <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-wider flex flex-wrap items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/50 text-cyan-200 font-mono text-[10px] font-extrabold">SUB-BAB D</span>
+                <span>Standar Pengukuran 3-Tingkat Resmi OEM (Statis · Saat Idle · Nilai Scanner)</span>
               </h4>
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                  <thead class="text-slate-400 border-b border-slate-800">
-                    <tr>
-                      <th class="py-1.5">Parameter</th>
-                      <th class="py-1.5">Rentang Normal</th>
-                      <th class="py-1.5">Satuan</th>
-                    </tr>
-                  </thead>
-                  <tbody id="table-sensor-standards" class="divide-y divide-slate-800 text-slate-300">
-                    <!-- populated dynamically -->
-                  </tbody>
-                </table>
+            </div>
+            <!-- 3-TINGKAT STANDAR PENGUKURAN RESMI OEM (STATIS · SAAT IDLE · NILAI SCANNER) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <!-- 1. STANDAR PENGUKURAN STATIS (IG ON / KUNCI OFF) -->
+              <div class="bg-[#070e1d] border border-cyan-500/40 p-4 rounded-xl space-y-2 shadow-md">
+                <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                  <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt"></i>
+                    1. Standar Statis (IG ON / OFF)
+                  </h4>
+                  <span class="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">Multimeter V/Ω</span>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs">
+                    <thead class="text-slate-400 border-b border-slate-800">
+                      <tr>
+                        <th class="py-1.5 pr-2">Parameter</th>
+                        <th class="py-1.5 pr-2">Nilai Normal</th>
+                        <th class="py-1.5">Satuan</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-sensor-standards" class="divide-y divide-slate-800 text-slate-300">
+                      <!-- populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- 2. STANDAR PENGUKURAN SAAT MESIN IDLE (PANAS KERJA 80-90°C) -->
+              <div class="bg-[#070e1d] border border-emerald-500/40 p-4 rounded-xl space-y-2 shadow-md">
+                <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                  <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    2. Standar Saat Mesin Idle
+                  </h4>
+                  <span class="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">Bab 1A-199</span>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs">
+                    <thead class="text-slate-400 border-b border-slate-800">
+                      <tr>
+                        <th class="py-1.5 pr-2">Parameter Idle</th>
+                        <th class="py-1.5 pr-2">Nilai Normal</th>
+                        <th class="py-1.5">Satuan</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-idle-standards" class="divide-y divide-slate-800 text-slate-300">
+                      <!-- populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- 3. STANDAR NILAI SCANNER OBD-II (LIVE DATA & ACTIVE TEST OEM) -->
+              <div class="bg-[#070e1d] border border-amber-500/40 p-4 rounded-xl space-y-2 shadow-md">
+                <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                  <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-tablet-screen-button"></i>
+                    3. Standar Nilai Scanner OBD-II
+                  </h4>
+                  <span class="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">Bab 1A-34</span>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs">
+                    <thead class="text-slate-400 border-b border-slate-800">
+                      <tr>
+                        <th class="py-1.5 pr-2">Data Scan Tool</th>
+                        <th class="py-1.5 pr-2">Referensi OEM</th>
+                        <th class="py-1.5">Satuan</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-scanner-standards" class="divide-y divide-slate-800 text-slate-300">
+                      <!-- populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
@@ -896,17 +1008,28 @@
               <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                 <select id="sim-circuit-select" onchange="changeSimCircuit(this.value)" class="w-full sm:w-auto min-w-0 max-w-full bg-slate-950 text-white border border-slate-700 rounded-lg px-2.5 py-2 text-xs font-semibold focus:border-brand-500 focus:outline-none truncate">
                   <option value="auto">Otomatis Sesuai Hasil Diagnosa Ini</option>
+                  <option value="egr_6w">Katup EGR Stepper Motor JB420 (6-Pin: +12V BLU/BLK · C37-03/04/05/06)</option>
+                  <option value="evap_2w">Katup EVAP Canister Purge JB420 (2-Pin: +12V BLU/BLK · C37-13)</option>
+                  <option value="imt_2w">IMT Vacuum Solenoid Valve JB420 (2-Pin: +12V BLU/BLK · C37-33)</option>
                   <option value="coil_4w">Koil Pengapian COP JB420 (3-Pin: +12V IG COIL · Trigger ECM · GND)</option>
                   <option value="af_6w">A/F Sensor-1 Depan JB420 (6-Pin Wideband: Main Relay + PWM + Sel)</option>
                   <option value="o2_4w">Sensor O2 Belakang HO2S-2 JB420 (4-Pin: Main Relay + Heater + Sinyal)</option>
-                  <option value="ckp_2w">Sensor CKP JB420 (2-Pin Induktif: C37-51 BLU · C37-36 PNK)</option>
+                  <option value="ckp_2w">Sensor CKP JB420 (2-Pin Induktif: C37-51 GRN · C37-36 PNK)</option>
                   <option value="cmp_3w">Sensor CMP JB420 (3-Pin Hall-IC: Main Relay · C37-52 · GND)</option>
                   <option value="ect_2w">Sensor Suhu ECT JB420 (2-Pin: C37-24 · C37-57)</option>
                   <option value="map_3w">Sensor MAP Vakum JB420 (3-Pin: +5V · Sinyal · GND)</option>
                   <option value="maf_5w">Sensor MAF + IAT JB420 (5-Pin: Main Relay + MAF + IAT)</option>
                   <option value="etc_6w">Throttle Body ETC JB420 (6-Pin: 2 Motor DC + 4 TPS Dual)</option>
                   <option value="fan_4w">Relay Kipas Radiator JB420 (3 Relay: +12V IG1 · E23-46/47/48)</option>
+                  <option value="knock_2w">Knock Sensor JB420 (2-Pin Piezo: C37-56 WHT · Shield GND)</option>
+                  <option value="gen_elc">Generator &amp; Sensor Beban ELC JB420 (C37-08/28/09 · +5V)</option>
+                  <option value="starter_rly">Relay Starter Control JB420 (C37-22 BLK/YEL · +12V ST SIG)</option>
+                  <option value="can_2w">Jaringan CAN Bus JB420 (E23-04 CAN-H · E23-19 CAN-L · 60 Ω)</option>
                 </select>
+
+                <button type="button" id="sim-btn-oem-photo" onclick="openActiveDiagOemPhoto()" class="w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-bold border border-amber-400/60 bg-amber-500/20 hover:bg-amber-500/35 text-amber-300 transition text-center shrink-0 active:scale-95 flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-image"></i> Foto Wiring OEM
+                </button>
 
                 <button type="button" id="sim-btn-fault-mode" onclick="toggleSimFaultMode()" class="w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-semibold border border-emerald-500/50 bg-emerald-500/15 text-emerald-400 transition text-center shrink-0 active:scale-95">
                   Mode: Jalur Normal (OK)
@@ -923,34 +1046,59 @@
             <!-- DIAGRAM SKEMATIK WIRING DINAMIS + PENAMPANG SOKET & DIGITAL MULTIMETER -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
 
-              <!-- SKEMATIK SVG DINAMIS (8 KOLOM) -->
+              <!-- SKEMATIK SVG DINAMIS (8 KOLOM — BISA DI-ZOOM & PINCH-TO-ZOOM DI HP) -->
               <div class="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between">
-                <div class="flex flex-wrap items-center justify-between px-2 pt-0.5 text-xs text-slate-400 gap-1">
-                  <span class="font-mono text-cyan-400 font-semibold" id="sim-ecm-header">MODUL ECM / FUSE / GND</span>
-                  <span class="text-amber-400 font-mono text-xs" id="sim-active-wire-badge">Diuji: -</span>
-                  <span class="font-mono text-emerald-400 font-semibold" id="sim-sensor-header">SOKET KOMPONEN</span>
+                <div class="flex flex-wrap items-center justify-between gap-1.5 px-1 pb-2 border-b border-slate-800/80">
+                  <div class="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400 min-w-0">
+                    <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/50 text-cyan-200 font-mono text-[10px] font-extrabold shrink-0">SUB-BAB C</span>
+                    <span class="font-mono text-cyan-400 font-semibold truncate" id="sim-ecm-header">MODUL ECM / FUSE / GND</span>
+                    <span class="text-amber-400 font-mono text-[11px] truncate" id="sim-active-wire-badge">Diuji: -</span>
+                    <span class="font-mono text-emerald-400 font-semibold hidden sm:inline" id="sim-sensor-header">SOKET KOMPONEN</span>
+                  </div>
+                  <!-- ZOOM CONTROLS RAMAH MEKANIK SENIOR -->
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button type="button" onclick="zoomSimWiringInline(-0.35)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-sm" title="Perkecil Skematik">−</button>
+                    <button type="button" id="sim-wiring-zoom-lbl" onclick="resetSimWiringInlineZoom()" class="px-2 h-8 min-w-[46px] rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-600 font-mono text-[11px] text-cyan-300 font-bold" title="Reset ke 100%">100%</button>
+                    <button type="button" onclick="zoomSimWiringInline(0.35)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-sm" title="Perbesar Skematik">+</button>
+                    <button type="button" id="btn-zoom-sim-wiring-fs" onclick="openAgosSvgZoomModal('sim-wiring')" class="px-2.5 h-8 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold flex items-center gap-1 shadow active:scale-95" title="Buka Skematik Wiring Layar Penuh (Bisa Cubit Zoom 2 Jari)">
+                      <i class="fa-solid fa-magnifying-glass-plus"></i>
+                      <span>Perbesar</span>
+                    </button>
+                  </div>
                 </div>
 
-                <svg id="sim-wiring-svg" viewBox="0 0 640 282" class="w-full h-auto select-none my-1"></svg>
+                <div id="sim-wiring-zoom-wrap" class="agos-zoom-stage rounded-lg bg-[#040916] my-1.5 border border-slate-800/70" ondblclick="openAgosSvgZoomModal('sim-wiring')">
+                  <svg id="sim-wiring-svg" viewBox="0 0 640 282" class="h-auto select-none my-1" style="width: 100%;"></svg>
+                </div>
 
-                <div class="px-2 pt-1.5 border-t border-slate-800/80 text-xs text-slate-200 flex items-center gap-2">
-                  <i class="fa-solid fa-circle-info text-cyan-400"></i>
-                  <span id="sim-instruction-bar" class="font-medium"></span>
+                <div class="px-2 pt-1.5 border-t border-slate-800/80 text-xs text-slate-200 flex items-start gap-2">
+                  <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 shrink-0"></i>
+                  <span id="sim-instruction-bar" class="font-medium leading-relaxed"></span>
                 </div>
               </div>
 
               <!-- PENAMPANG FISIK SOKET + LAYAR MULTIMETER DIGITAL & VONIS ALUR (4 KOLOM) -->
               <div class="lg:col-span-4 bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between space-y-2.5">
 
-                <!-- PENAMPANG DEPAN SOKET FISIK (CONNECTOR FACE VIEW) -->
-                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5">
-                  <div class="flex items-center justify-between text-xs mb-1">
-                    <span class="text-slate-300 font-semibold flex items-center gap-1.5">
-                      <i class="fa-solid fa-plug-circle-check text-cyan-400"></i> Penampang Soket Fisik
+                <!-- PENAMPANG DEPAN SOKET FISIK (CONNECTOR FACE VIEW — KETUK UNTUK PERBESAR RAKSASA!) -->
+                <div class="bg-slate-900/90 border border-cyan-500/35 rounded-xl p-2.5 space-y-1.5">
+                  <div class="flex items-center justify-between gap-1.5 text-xs">
+                    <span class="text-slate-200 font-bold flex items-center gap-1.5 min-w-0 truncate">
+                      <i class="fa-solid fa-plug-circle-check text-cyan-400 shrink-0"></i>
+                      <span class="truncate">Penampang Soket</span>
                     </span>
-                    <span id="sim-connector-type-label" class="font-mono text-cyan-400 text-xs">4-Pin Soket HO2S</span>
+                    <button type="button" id="btn-zoom-sim-connector-fs" onclick="openAgosSvgZoomModal('sim-connector')" class="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-300 text-[10.5px] font-extrabold flex items-center gap-1 shrink-0 active:scale-95 transition" title="Perbesar Gambar Soket & Nomor Pin di Layar Penuh">
+                      <i class="fa-solid fa-magnifying-glass-plus"></i>
+                      <span>Zoom Soket</span>
+                    </button>
                   </div>
-                  <svg id="sim-connector-svg" viewBox="0 0 220 62" class="w-full h-auto"></svg>
+                  <div id="sim-connector-type-label" class="font-mono text-cyan-400 text-[11px] truncate">4-Pin Soket HO2S</div>
+                  <div onclick="openAgosSvgZoomModal('sim-connector')" class="cursor-zoom-in rounded-lg bg-[#040916] border border-slate-800 hover:border-amber-400/60 p-1.5 transition" title="Ketuk gambar soket untuk memperbesar nomor pin!">
+                    <svg id="sim-connector-svg" viewBox="0 0 220 62" class="w-full h-auto"></svg>
+                    <div class="text-center text-[10px] text-amber-300/90 font-semibold mt-0.5">
+                      <i class="fa-solid fa-hand-pointer mr-1"></i>Ketuk soket untuk perbesar pin &amp; warna kabel
+                    </div>
+                  </div>
                 </div>
 
                 <!-- DIGITAL MULTIMETER -->
@@ -983,26 +1131,28 @@
             </div>
           </div>
 
-          <!-- PROSEDUR RESET & IDLE RELEARN -->
-          <div id="diag-sec-relearn" class="bg-brand-950/40 border border-brand-800/60 p-3.5 sm:p-4 rounded-xl space-y-2">
-            <h4 class="text-xs font-semibold text-brand-300 uppercase tracking-wider flex items-center gap-2">
+          <!-- SUB-BAB F: PROSEDUR RESET & IDLE RELEARN -->
+          <div id="diag-sec-relearn" class="bg-brand-950/40 border border-brand-800/60 p-3.5 sm:p-4 rounded-xl space-y-2.5">
+            <h4 class="text-xs font-bold text-brand-300 uppercase tracking-wider flex flex-wrap items-center gap-1.5 border-b border-brand-900/60 pb-2">
+              <span class="px-2 py-0.5 rounded bg-brand-600/30 border border-brand-400/50 text-cyan-200 font-mono text-[10px] font-extrabold">SUB-BAB F</span>
               <i class="fa-solid fa-arrows-rotate text-brand-400"></i>
-              Prosedur Reset ECU &amp; Kalibrasi Pasca Perbaikan (Idle Relearn)
+              <span>Prosedur Reset ECU &amp; Kalibrasi Pasca Perbaikan (Idle Relearn)</span>
             </h4>
-            <ul class="space-y-1.5 text-xs text-slate-300" id="manual-relearn-steps">
+            <ul class="space-y-2 text-xs sm:text-sm text-slate-200" id="manual-relearn-steps">
               <!-- populated dynamically -->
             </ul>
           </div>
         </div>
 
-        <!-- DUAL TABLE: TOP 3 KASUS PENGALAMAN MEKANIK TERMIRIP + TABEL RANKING & RINGKASAN SISTEM (REQ-14) -->
+        <!-- SUB-BAB G: DUAL TABLE TOP 3 KASUS PENGALAMAN MEKANIK TERMIRIP + TABEL RANKING (REQ-14) -->
         <div id="diag-sec-kasus" class="space-y-4">
           <!-- TOP 3 KASUS PENGALAMAN MEKANIK TERMIRIP (BERBASIS KM & TAHUN TERDEKAT) -->
           <div class="bg-slate-800/85 border border-cyan-500/35 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 pb-2.5">
-              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <h3 class="text-sm font-bold text-white flex flex-wrap items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 font-mono text-[10px] font-extrabold">SUB-BAB G</span>
                 <i class="fa-solid fa-award text-amber-400"></i>
-                Top 3 Kasus Pengalaman Mekanik Termirip (Kedekatan KM &amp; Tahun)
+                <span>Top 3 Kasus Pengalaman Mekanik Termirip (Kedekatan KM &amp; Tahun)</span>
               </h3>
               <span class="text-[11px] text-cyan-300 font-mono">Weighted CBR + Prioritas Verifikasi</span>
             </div>
@@ -1103,8 +1253,31 @@
           </div>
         </div>
 
-        <!-- TABEL DATA KASUS -->
-        <div class="overflow-x-auto">
+        <!-- DUAL-DATASET FILTER PILLS (GRAND VITARA JB420 + BENGKEL UMUM MULTI-MEREK) -->
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5">
+          <div class="flex flex-wrap items-center gap-1.5" id="db-dataset-filter-bar">
+            <button type="button" onclick="setCaseDatasetFilter('all')" data-ds="all" class="db-ds-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-600 to-brand-600 text-white border border-cyan-400/60 shadow transition">
+              🌐 Semua Kasus (<span id="ds-cnt-all">0</span>)
+            </button>
+            <button type="button" onclick="setCaseDatasetFilter('jb420')" data-ds="jb420" class="db-ds-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-cyan-200 border border-cyan-700/60 hover:border-cyan-400 transition">
+              🎯 Khusus Suzuki Grand Vitara JB420 (<span id="ds-cnt-jb420">0</span>)
+            </button>
+            <button type="button" onclick="setCaseDatasetFilter('multi')" data-ds="multi" class="db-ds-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:border-slate-500 transition">
+              🚗 Bengkel Umum Multi-Merek (<span id="ds-cnt-multi">0</span>)
+            </button>
+          </div>
+          <button type="button" onclick="toggleCbrInfoModal(true)" class="text-[11px] font-bold text-cyan-300 hover:text-cyan-200 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-700/60 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info"></i> Rumus Weighted CBR
+          </button>
+        </div>
+
+        <!-- KARTU DATA KASUS MOBILE (< 640px — RAPI TANPA SCROLL SAMPING!) -->
+        <div id="cards-all-cases-mobile" class="sm:hidden space-y-3">
+          <!-- populated dynamically -->
+        </div>
+
+        <!-- TABEL DATA KASUS (DESKTOP & TABLET >= 640px) -->
+        <div class="hidden sm:block overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead class="text-slate-400 bg-slate-900/60 border-b border-slate-700">
               <tr>
@@ -1127,23 +1300,91 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- TAB 3: BUKU MANUAL & PINOUT WIRING (RAG JB420 & INDONESIA)      -->
+    <!-- PILAR 3: DARK COCKPIT WIRING ASLI OEM & KODE DTC (JB420)       -->
     <!-- ============================================================== -->
-    <section id="tab-content-manuals" class="tab-pane space-y-6 hidden">
-      <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+    <section id="tab-content-manuals" class="tab-pane space-y-5 hidden">
+
+      <!-- DARK COCKPIT ATLAS WIRING DIAGRAM ASLI + ALUR PENJELASAN (SAKELAR 2-MODE) -->
+      <div id="jb420-cockpit-atlas" class="bg-[#081022] border border-cyan-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4">
+        <!-- Hero Header Cockpit -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-800 pb-3.5">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 font-mono text-[10px] font-extrabold tracking-wider">DARK COCKPIT · PILAR 3</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 font-mono text-[10px] font-bold">57 FOTO WIRING ASLI OEM · 207 DTC</span>
+            </div>
+            <h2 class="text-base sm:text-xl font-extrabold text-white mt-1.5 flex items-center gap-2">
+              <i class="fa-solid fa-diagram-project text-amber-400"></i>
+              Wiring Diagram Asli &amp; Alur Sinyal — Suzuki Grand Vitara JB420 (J20A)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Fokus <strong>Kategori 1 (Mesin &amp; EFI)</strong> + <strong>Kategori 2 (7 Modul Kontrol Ber-DTC)</strong> + <strong>Kategori 4 (Sekring, Ground, Warna Kabel &amp; Konektor)</strong>.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <a href="/wiring-viewer" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition active:scale-95">
+              <i class="fa-solid fa-up-right-from-square"></i>
+              <span>Viewer Layar Penuh</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Category Filter Bar (Kategori 1 + 2 + 4) + Instant Search -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            <button type="button" data-cat="efi" onclick="setJb420Category('efi')" class="jb420-cat-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 to-brand-600 text-white border border-cyan-400/60 flex items-center gap-1.5">
+              <span>⚙️ Mesin &amp; EFI</span>
+              <span class="jb420-cat-cnt px-1.5 py-0.5 rounded bg-black/30 font-mono text-[10px]">20</span>
+            </button>
+            <button type="button" data-cat="modules" onclick="setJb420Category('modules')" class="jb420-cat-btn shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-950/90 text-slate-300 border border-slate-700/90 flex items-center gap-1.5">
+              <span>🧠 7 Modul Kontrol</span>
+              <span class="jb420-cat-cnt px-1.5 py-0.5 rounded bg-black/30 font-mono text-[10px]">7</span>
+            </button>
+            <button type="button" data-cat="base" onclick="setJb420Category('base')" class="jb420-cat-btn shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-950/90 text-slate-300 border border-slate-700/90 flex items-center gap-1.5">
+              <span>🗺️ Peta Dasar (Sekring/Ground)</span>
+              <span class="jb420-cat-cnt px-1.5 py-0.5 rounded bg-black/30 font-mono text-[10px]">4</span>
+            </button>
+            <button type="button" data-cat="all" onclick="setJb420Category('all')" class="jb420-cat-btn shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-950/90 text-slate-300 border border-slate-700/90 flex items-center gap-1.5">
+              <span>🔎 Semua</span>
+              <span class="jb420-cat-cnt px-1.5 py-0.5 rounded bg-black/30 font-mono text-[10px]">31</span>
+            </button>
+          </div>
+          <div class="relative w-full lg:w-80 shrink-0">
+            <i class="fa-solid fa-magnifying-glass text-cyan-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+            <input type="text" id="jb420-atlas-search" oninput="filterJb420Atlas()" placeholder="Cari DTC/Komponen (P0302, P0171, C1021, Koil, Sekring)..." class="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Dropdown Cepat (Mobile-friendly) + Scrollable Module Cards -->
+        <div class="space-y-2">
+          <select id="jb420-module-select" onchange="selectJb420Module(this.value)" class="w-full bg-slate-950 border border-cyan-500/40 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400 focus:outline-none"></select>
+          <div id="jb420-module-pills" class="flex items-stretch gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+        </div>
+
+        <!-- ACTIVE DARK COCKPIT STAGE (Sakelar 2-Mode: Alur Interaktif | Foto Asli OEM + Kartu Jalur Kabel) -->
+        <div id="jb420-stage-host"></div>
+      </div>
+
+      <!-- KATALOG LENGKAP 207 DTC, 251 PINOUT & ASISTEN PENCARIAN MANUAL JB420 (COLLAPSIBLE RAPI) -->
+      <details class="group bg-[#081022] border border-slate-700/90 rounded-2xl shadow-xl overflow-hidden">
+        <summary class="cursor-pointer list-none px-4 sm:px-5 py-3.5 flex items-center justify-between gap-2 select-none hover:bg-slate-900/70 transition">
+          <div class="flex items-center gap-2.5 text-xs sm:text-sm font-bold text-emerald-300">
+            <i class="fa-solid fa-book-bookmark text-emerald-400"></i>
+            <span>Pencarian Teks Manual Resmi, Katalog 207 DTC &amp; 251 Pinout (RAG JB420 + Arsitektur Multi-Model)</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-cyan-400 font-semibold shrink-0">
+            <span class="hidden sm:inline">Buka / Tutup</span>
+            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200 group-open:rotate-180"></i>
+          </div>
+        </summary>
+      <div class="p-4 sm:p-5 border-t border-slate-800 space-y-4">
         <div class="border-b border-slate-700 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-book-bookmark text-emerald-400"></i>
-              Pusat Buku Pedoman Perbaikan &amp; Wiring Diagram Multi-Merek
+              Pusat Buku Pedoman Perbaikan &amp; Katalog Pinout Terstruktur
             </h2>
-            <p id="manuals-header-subtitle" class="text-xs text-slate-400">Katalog terstruktur berbasis Model, Generasi Tahun &amp; Kode Mesin (Multi-Buku Manual Resmi Terpasang).</p>
+            <p id="manuals-header-subtitle" class="text-xs text-slate-400">Referensi utama Suzuki Grand Vitara JB420 (207 DTC · 251 Pinout · 84/84 ECM Spek Lengkap) dengan arsitektur modular siap ekspansi multi-merek.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <a href="/wiring-viewer" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
-              <i class="fa-solid fa-diagram-project"></i>
-              <span>Buka Wiring Interaktif (Layar Penuh)</span>
-            </a>
             <button type="button" onclick="toggleModalManualImporter(true)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
               <i class="fa-solid fa-file-circle-plus"></i>
               <span>Tambah Manual Model Baru</span>
@@ -1412,6 +1653,7 @@
           <!-- populated dynamically -->
         </div>
       </div>
+      </details>
     </section>
 
     <!-- ============================================================== -->
@@ -1855,16 +2097,16 @@
 
   </main>
 
-  <!-- FOOTER RESMI SERAGAM v2.2.0 (REQ-03) -->
-  <footer class="border-t border-slate-800/90 bg-slate-950/80 text-slate-400 text-[11px] py-3 px-4 mb-16 sm:mb-0">
+  <!-- FOOTER RESMI VERSI SKRIPSI R&D 4D (3 PILAR DARK COCKPIT) -->
+  <footer class="border-t border-cyan-950/80 bg-[#040812] text-slate-400 text-[11px] py-3 px-4 mb-16 sm:mb-0">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
       <div>
-        <strong class="text-slate-200">AGOS SMART DIAGNOSTIK v2.2.0</strong> — Agos Corporation • 8 Paket Manual OEM (BYOD) • 17+ Kasus Terverifikasi CBR
+        <strong class="text-slate-200">AGOS SMART DIAGNOSTIK v2.2.0</strong> — Fokus 3 Pilar Dark Cockpit · Suzuki Grand Vitara JB420 (57 Foto Wiring OEM) &amp; Weighted CBR
       </div>
       <div class="flex items-center gap-3">
-        <a href="/wiring-viewer" class="text-amber-300 hover:text-amber-200 font-semibold">Wiring Viewer v2.2.0</a>
+        <button type="button" onclick="switchTab('manuals')" class="text-amber-300 hover:text-amber-200 font-semibold">Atlas Wiring JB420</button>
         <span>•</span>
-        <button type="button" onclick="switchTab('pos')" class="text-emerald-300 hover:text-emerald-200 font-semibold">Web POS Bengkel</button>
+        <a href="/wiring-viewer" class="text-cyan-300 hover:text-cyan-200 font-semibold">Wiring Viewer Layar Penuh</a>
       </div>
     </div>
   </footer>
@@ -2009,30 +2251,74 @@
   </div>
 
   <!-- ====================================================================== -->
-  <!-- FIXED ANDROID BOTTOM NAVIGATION BAR (KHUSUS TAMPILAN APLIKASI HP)       -->
+  <!-- MODAL FULLSCREEN HD FOTO WIRING ASLI OEM JB420 (DARK COCKPIT LIGHTBOX) -->
   <!-- ====================================================================== -->
-  <nav id="mobile-bottom-nav" class="sm:hidden fixed bottom-0 inset-x-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 z-40 px-1.5 py-1.5 shadow-2xl">
-    <div class="grid grid-cols-5 gap-1 max-w-md mx-auto">
-      <button type="button" onclick="switchTab('diagnostic')" id="mob-tab-btn-diagnostic" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-cyan-400 bg-brand-600/20 font-bold transition active:scale-95">
-        <i class="fa-solid fa-microchip text-sm mb-0.5"></i>
-        <span class="text-[9.5px] tracking-tight">Diagnosa</span>
+  <div id="modal-jb420-photo-fullscreen" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[80] flex flex-col hidden">
+    <div class="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-5 py-2.5 bg-[#070e1d] border-b border-cyan-900/60 shrink-0">
+      <div class="min-w-0">
+        <div id="fs-jb420-photo-title" class="text-xs sm:text-sm font-extrabold text-white truncate">Foto Wiring Asli OEM JB420</div>
+        <div id="fs-jb420-photo-source" class="text-[10.5px] text-slate-400 truncate">Sumber Resmi Buku Manual Suzuki Grand Vitara JB420</div>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+        <div class="inline-flex rounded-lg border border-slate-700 overflow-hidden text-[11px] font-bold">
+          <button type="button" onclick="setJb420PhotoTheme('paper')" class="px-2.5 py-1.5 bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-amber-300 transition">☀️ Asli</button>
+          <button type="button" onclick="setJb420PhotoTheme('blueprint')" class="px-2.5 py-1.5 bg-slate-900 hover:bg-cyan-600 text-cyan-300 hover:text-white transition">🌙 Blueprint</button>
+        </div>
+        <button type="button" onclick="zoomJb420Fullscreen(-0.25)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold">−</button>
+        <span id="fs-jb420-zoom-label" class="font-mono text-xs text-cyan-300 min-w-[42px] text-center">100%</span>
+        <button type="button" onclick="zoomJb420Fullscreen(0.25)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold">+</button>
+        <button type="button" onclick="closeJb420PhotoFullscreen()" class="px-3 h-9 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold">✕ Tutup</button>
+      </div>
+    </div>
+    <div id="fs-jb420-photo-wrap" class="flex-1 overflow-auto p-3 sm:p-5 bg-white transition-colors touch-pan-x touch-pan-y">
+      <img id="fs-jb420-photo-img" src="" alt="Foto Wiring Asli OEM" class="mx-auto block rounded-lg" style="width: 100%; max-width: none;" />
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL FULLSCREEN ZOOM VECTOR WIRING & SOKET (RAMAH MEKANIK SENIOR!)    -->
+  <!-- ====================================================================== -->
+  <div id="modal-svg-zoom" class="fixed inset-0 bg-[#030712]/98 backdrop-blur-md z-[85] flex flex-col hidden">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 sm:px-5 py-2.5 bg-[#070e1d] border-b border-cyan-500/40 shrink-0">
+      <div class="min-w-0 flex-1">
+        <div id="modal-svg-zoom-title" class="text-xs sm:text-sm font-extrabold text-white leading-snug">Zoom Detail Wiring &amp; Soket</div>
+        <div id="modal-svg-zoom-subtitle" class="text-[10.5px] text-cyan-300 leading-snug mt-0.5">Gunakan tombol +/− atau cubit 2 jari untuk memperbesar · Geser layar untuk melihat nomor pin</div>
+      </div>
+      <div class="flex flex-wrap items-center justify-between sm:justify-end gap-1.5 shrink-0">
+        <div class="flex items-center gap-1.5">
+          <button type="button" onclick="zoomAgosSvgModal(-0.35)" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-extrabold text-base active:scale-95" title="Perkecil">−</button>
+          <button type="button" id="modal-svg-zoom-lbl" onclick="setAgosSvgModalZoom(1.0)" class="px-2.5 h-10 min-w-[52px] rounded-lg bg-slate-900 hover:bg-slate-800 border border-cyan-500/60 font-mono text-xs text-cyan-300 font-extrabold active:scale-95" title="Reset ke 100%">160%</button>
+          <button type="button" onclick="zoomAgosSvgModal(0.35)" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-extrabold text-base active:scale-95" title="Perbesar">+</button>
+          <button type="button" onclick="setAgosSvgModalZoom(2.2)" class="px-2.5 h-10 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-300 text-xs font-extrabold active:scale-95" title="Perbesar Cepat 220%">220%</button>
+        </div>
+        <button type="button" onclick="closeAgosSvgZoomModal()" class="px-3.5 h-10 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold active:scale-95">✕ Tutup</button>
+      </div>
+    </div>
+    <div id="modal-svg-zoom-viewport" class="agos-zoom-stage flex-1 p-3 sm:p-6 bg-[#040916]">
+      <div id="modal-svg-zoom-host" class="block w-max min-w-full py-4"></div>
+    </div>
+    <div id="modal-svg-zoom-legend" class="hidden shrink-0 max-h-[34vh] overflow-y-auto bg-[#070e1d] border-t border-cyan-900/60 px-3.5 py-2.5 text-xs text-slate-200 space-y-1.5"></div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- FIXED ANDROID BOTTOM NAVIGATION BAR — BERSIH 3 PILAR UTAMA SKRIPSI      -->
+  <!-- ====================================================================== -->
+  <nav id="mobile-bottom-nav" class="sm:hidden fixed bottom-0 inset-x-0 bg-[#060d1c]/95 backdrop-blur-md border-t border-cyan-900/50 z-40 px-2 py-1.5 shadow-2xl">
+    <div class="grid grid-cols-3 gap-1.5 max-w-md mx-auto">
+      <button type="button" onclick="switchTab('diagnostic')" id="mob-tab-btn-diagnostic" class="mob-nav-tab flex flex-col items-center justify-center py-2 rounded-xl text-cyan-300 bg-cyan-600/25 border border-cyan-500/40 font-bold transition active:scale-95">
+        <i class="fa-solid fa-bolt text-base mb-0.5 text-amber-300"></i>
+        <span class="text-[10.5px] tracking-tight">1. Diagnosa</span>
       </button>
-      <button type="button" onclick="switchTab('database')" id="mob-tab-btn-database" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
-        <i class="fa-solid fa-database text-sm mb-0.5"></i>
-        <span class="text-[9.5px] tracking-tight">Kasus</span>
+      <button type="button" onclick="switchTab('database')" id="mob-tab-btn-database" class="mob-nav-tab flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
+        <i class="fa-solid fa-database text-base mb-0.5"></i>
+        <span class="text-[10.5px] tracking-tight">2. Data Kasus</span>
       </button>
-      <button type="button" onclick="switchTab('manuals')" id="mob-tab-btn-manuals" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
-        <i class="fa-solid fa-book-open text-sm mb-0.5"></i>
-        <span class="text-[9.5px] tracking-tight">Manual</span>
+      <button type="button" onclick="switchTab('manuals')" id="mob-tab-btn-manuals" class="mob-nav-tab flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
+        <i class="fa-solid fa-diagram-project text-base mb-0.5"></i>
+        <span class="text-[10.5px] tracking-tight">3. Wiring JB420</span>
       </button>
-      <button type="button" onclick="switchTab('tools')" id="mob-tab-btn-tools" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
-        <i class="fa-solid fa-screwdriver-wrench text-sm mb-0.5"></i>
-        <span class="text-[9.5px] tracking-tight">Tool</span>
-      </button>
-      <button type="button" onclick="switchTab('pos')" id="mob-tab-btn-pos" class="mob-nav-tab flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-white font-medium transition active:scale-95">
-        <i class="fa-solid fa-cash-register text-sm mb-0.5"></i>
-        <span class="text-[9.5px] tracking-tight">POS Demo</span>
-      </button>
+      <button type="button" onclick="switchTab('tools')" id="mob-tab-btn-tools" class="mob-nav-tab hidden"></button>
+      <button type="button" onclick="switchTab('pos')" id="mob-tab-btn-pos" class="mob-nav-tab hidden"></button>
     </div>
   </nav>
 
@@ -2460,7 +2746,11 @@
       const brandVal = document.getElementById('input-brand').value.trim();
       const modelVal = document.getElementById('input-model').value.trim();
       const appInfo = lastDiagnosticData && lastDiagnosticData.vehicle_applicability;
-      switchTab('manuals');
+      if (typeof window.openJb420AtlasByDtc === 'function') {
+        window.openJb420AtlasByDtc(dtcVal, 'flow');
+      } else {
+        switchTab('manuals');
+      }
       if (appInfo && appInfo.active_pack_id && appInfo.active_pack_id !== activeManualPackId) {
         activeManualEngineFilter = appInfo.engine_code ? String(appInfo.engine_code).split(' ')[0].trim() : '';
         await selectActiveManualBook(appInfo.active_pack_id);
@@ -3722,8 +4012,50 @@
       }
     }
 
-    // DATA CONTOH KASUS DARI EXCEL REFERENSI PENGGUNA (DILENGKAPI TAHUN & KODE MESIN)
+    // DATA CONTOH KASUS UNGGULAN SUZUKI GRAND VITARA JB420 & MULTI-MEREK
     const SAMPLE_CASES = {
+      'GV01': {
+        brand: 'Suzuki', model: 'Grand Vitara JB420', year: 2008, engine: 'J20A', km: 98000,
+        complaint: 'Mesin pincang getar kasar saat idle dan akselerasi, check engine berkedip',
+        symptom: 'Silinder #2 misfire, tenaga turun saat digas',
+        dtc: 'P0302', stft: 8, ltft: 5, rpm: 710, o2: 0.45, map: 42, maf: 2.9, ect: 90,
+        system_filter: 'Pengapian'
+      },
+      'GV02': {
+        brand: 'Suzuki', model: 'Grand Vitara JB420', year: 2009, engine: 'J20A', km: 118000,
+        complaint: 'Mesin bisa distarter tapi susah hidup atau mendadak mati saat panas',
+        symptom: 'Cranking kuat, RPM di scanner 0 rpm, api koil hilang',
+        dtc: 'P0335', stft: '', ltft: '', rpm: 0, o2: '', map: '', maf: '', ect: 92,
+        system_filter: 'Pengapian'
+      },
+      'GV07': {
+        brand: 'Suzuki', model: 'Grand Vitara JB420', year: 2010, engine: 'J20A', km: 125000,
+        complaint: 'Mesin brebet ringan, knalpot bau bensin dan lampu check engine menyala',
+        symptom: 'Tegangan A/F sensor depan tidak responsif di live data',
+        dtc: 'P0131', stft: 14, ltft: 9, rpm: 780, o2: 0.18, map: 38, maf: 3.1, ect: 90,
+        system_filter: 'Emisi'
+      },
+      'GV09': {
+        brand: 'Suzuki', model: 'Grand Vitara JB420', year: 2009, engine: 'J20A', km: 115000,
+        complaint: 'Idle kasar bergetar, tarikan loyo di tanjakan, lampu check engine menyala',
+        symptom: 'Campuran bahan bakar terlalu kurus (STFT/LTFT tinggi), suara desis vakum',
+        dtc: 'P0171', stft: 18, ltft: 21, rpm: 740, o2: 0.25, map: 44, maf: 2.4, ect: 89,
+        system_filter: 'Bahan Bakar'
+      },
+      'GV12': {
+        brand: 'Suzuki', model: 'Grand Vitara JB420', year: 2008, engine: 'J20A', km: 128000,
+        complaint: 'Suhu mesin naik hampir overheat saat macet dan AC tidak dingin saat berhenti',
+        symptom: 'Kipas radiator utama tidak berputar saat suhu panas atau AC ON',
+        dtc: 'P0480', stft: '', ltft: '', rpm: 800, o2: '', map: '', maf: '', ect: 105,
+        system_filter: 'Pendingin'
+      },
+      'GV14': {
+        brand: 'Suzuki', model: 'Grand Vitara JB420', year: 2011, engine: 'J20A', km: 88000,
+        complaint: 'Lampu indikator ABS menyala terus di speedometer saat berjalan',
+        symptom: 'Sensor kecepatan roda depan kanan terbaca 0 km/jam',
+        dtc: 'C1021', stft: '', ltft: '', rpm: 760, o2: '', map: '', maf: '', ect: 88,
+        system_filter: 'Kelistrikan'
+      },
       'K001': {
         brand: 'Toyota', model: 'Avanza', year: 2015, engine: '1.3 K3-VE', km: 85400, complaint: 'Mesin brebet saat idle',
         symptom: 'Idle tidak stabil, RPM naik turun, tenaga sedikit berkurang',
@@ -3907,10 +4239,24 @@
       const packs = (globalInstalledPacksCache && globalInstalledPacksCache.length) ? globalInstalledPacksCache : BUILTIN_MANUAL_PACKS;
       const matchedPack = parsed.meta ? packs.find(p => p.pack_id === parsed.meta.pack) : null;
       const qLow = parsed.q.toLowerCase();
-      const matchedCases = (allCasesCache || []).filter(c => {
+      const dtcLow = parsed.dtc ? parsed.dtc.toLowerCase() : '';
+      const dtcFilteredCases = dtcLow
+        ? (allCasesCache || []).filter(c => `${c.dtc || ''} ${c.final_diagnosis || ''}`.toLowerCase().includes(dtcLow))
+        : [];
+      const basePool = dtcFilteredCases.length ? dtcFilteredCases : (allCasesCache || []).filter(c => {
         const hay = `${c.brand} ${c.model} ${c.engine_code || ''} ${c.dtc || ''} ${c.complaint} ${c.symptom} ${c.final_diagnosis}`.toLowerCase();
-        if (parsed.dtc && hay.includes(parsed.dtc.toLowerCase())) return true;
         return qLow.split(/\s+/).filter(w => w.length >= 2).some(w => hay.includes(w));
+      });
+      const matchedCases = [...basePool].sort((a, b) => {
+        const scoreItem = (c) => {
+          const hay = `${c.brand} ${c.model} ${c.engine_code || ''} ${c.dtc || ''}`.toLowerCase();
+          let s = 0;
+          if (dtcLow && (c.dtc || '').toLowerCase().includes(dtcLow)) s += 50;
+          if (parsed.engKey && hay.includes(parsed.engKey.toLowerCase())) s += 30;
+          if (parsed.meta && hay.includes((parsed.meta.model || '').toLowerCase())) s += 15;
+          return s;
+        };
+        return scoreItem(b) - scoreItem(a);
       }).slice(0, 2);
 
       const titleLabel = parsed.dtc
@@ -3948,8 +4294,8 @@
             <button type="button" onclick="applyExpressSearchToForm(true, 'standar')" class="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95">
               <i class="fa-solid fa-plug"></i> Lihat Pinout &amp; Nilai Ukur
             </button>
-            <button type="button" onclick="openInteractiveWiringViewer('${esc(parsed.dtc)}','${esc(parsed.engKey)}','${esc(caseParam)}')" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95">
-              <i class="fa-solid fa-diagram-project"></i> Buka Wiring Interaktif
+            <button type="button" onclick="if(typeof openJb420AtlasByDtc==='function'){openJb420AtlasByDtc('${esc(parsed.dtc || parsed.q)}','flow');}else{openInteractiveWiringViewer('${esc(parsed.dtc)}','${esc(parsed.engKey)}','${esc(caseParam)}');}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95">
+              <i class="fa-solid fa-diagram-project"></i> Buka Foto &amp; Alur Wiring
             </button>
             <button type="button" onclick="applyExpressSearchToForm(false)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95">
               <i class="fa-solid fa-pen-to-square"></i> Isi ke Form Lengkap
@@ -3994,11 +4340,11 @@
     function switchTab(tabName) {
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.nav-tab').forEach(el => {
-        el.classList.remove('bg-brand-600', 'text-white');
-        el.classList.add('text-slate-400');
+        el.classList.remove('bg-brand-600', 'bg-gradient-to-r', 'from-cyan-600', 'to-brand-600', 'text-white', 'font-bold', 'shadow-md');
+        el.classList.add('text-slate-300');
       });
       document.querySelectorAll('.mob-nav-tab').forEach(el => {
-        el.classList.remove('text-cyan-400', 'bg-brand-600/20', 'font-bold');
+        el.classList.remove('text-cyan-300', 'text-cyan-400', 'bg-brand-600/20', 'bg-cyan-600/25', 'border', 'border-cyan-500/40', 'font-bold');
         el.classList.add('text-slate-400', 'font-medium');
       });
 
@@ -4007,19 +4353,20 @@
       const activeMobBtn = document.getElementById(`mob-tab-btn-${tabName}`);
       if (activeContent) activeContent.classList.remove('hidden');
       if (activeBtn) {
-        activeBtn.classList.remove('text-slate-400');
-        activeBtn.classList.add('bg-brand-600', 'text-white');
+        activeBtn.classList.remove('text-slate-300', 'text-slate-400');
+        activeBtn.classList.add('bg-gradient-to-r', 'from-cyan-600', 'to-brand-600', 'text-white', 'font-bold', 'shadow-md');
         try {
           activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         } catch (e) {}
       }
       if (activeMobBtn) {
         activeMobBtn.classList.remove('text-slate-400', 'font-medium');
-        activeMobBtn.classList.add('text-cyan-400', 'bg-brand-600/20', 'font-bold');
+        activeMobBtn.classList.add('text-cyan-300', 'bg-cyan-600/25', 'border', 'border-cyan-500/40', 'font-bold');
       }
 
       if (tabName === 'database') loadAllCases();
       if (tabName === 'manuals') {
+        if (typeof initJb420CockpitAtlas === 'function') initJb420CockpitAtlas();
         loadVehicleMatrix();
         refreshActiveManualBookUI();
       }
@@ -5263,7 +5610,7 @@
       const summaryEl = document.getElementById('manual-cause-summary');
       const causeListEl = document.getElementById('manual-cause-list');
       if (summaryEl) {
-        summaryEl.textContent = advice.cause_summary || '-';
+        summaryEl.innerHTML = formatLongTextParagraphs(advice.cause_summary || '-');
       }
 
       // Render daftar poin Akar Masalah Kerusakan yang tersusun rapi
@@ -5360,7 +5707,7 @@
                     <span class="text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-200'} leading-snug">
                       ${esc(opt.title || '-')}
                     </span>
-                    <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded border shrink-0 ${tagCls}">
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded border max-w-full whitespace-normal break-words ${tagCls}">
                       ${esc(opt.tag || `Opsi ${idx + 1}`)}
                     </span>
                   </div>
@@ -5556,33 +5903,55 @@
         document.getElementById('manual-book-section-label').textContent = advice.manual_book_section;
         renderStructuredCausesAndOptions(advice, topItem);
 
-        // Ringkasan Bahasa Awam untuk Pemilik Mobil (REQ-07)
+        // Ringkasan Bahasa Awam untuk Pemilik Mobil (REQ-07 — dirapikan per paragraf agar nyaman dibaca di HP)
         const custEl = document.getElementById('res-customer-summary-text');
         if (custEl) {
           const fallbackCust = `Komputer mesin mendeteksi gangguan pada ${advice.system_category || 'sistem mesin'} (${advice.diagnosis_title || data.top_diagnosis}). Mekanik menyarankan pemeriksaan komponen terkait terlebih dahulu sebelum penggantian suku cadang.`;
-          custEl.textContent = advice.customer_summary || fallbackCust;
+          custEl.innerHTML = formatLongTextParagraphs(advice.customer_summary || fallbackCust);
         }
 
-        // Steps (Kartu Checklist Interaktif Mekanik — ramah HP & tetap terbaca oleh Print Worksheet)
+        // Steps (Kartu Sub-Bab Terstruktur + Checklist Interaktif Mekanik — sangat mudah dibaca mekanik senior di HP!)
         const stepsContainer = document.getElementById('manual-repair-steps');
-        stepsContainer.innerHTML = advice.step_by_step_repair.map((s, idx) => {
-          const cleanStep = String(s || '').replace(/^\d+[.)]\s*/, '').trim();
-          return `
-          <li onclick="toggleGuidanceChecklistItem(this)" data-done="0" data-num="${idx + 1}" class="cursor-pointer flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 hover:border-cyan-500/50 transition select-none">
-            <span class="gchk-box w-5 h-5 rounded-md bg-slate-800 border border-slate-600 text-cyan-300 flex items-center justify-center text-[10px] font-mono font-bold shrink-0 mt-0.5">${idx + 1}</span>
-            <span class="gchk-text text-xs sm:text-sm text-slate-200 leading-relaxed break-words">${esc(cleanStep || s)}</span>
-          </li>`;
-        }).join('');
+        stepsContainer.innerHTML = (advice.step_by_step_repair || []).map((s, idx) => formatSopStepIntoSubBab(s, idx)).join('');
 
-        // Sensor Standards Table
+        // 1. Standar Pengukuran Statis (IG ON / Kunci OFF)
         const sensorTable = document.getElementById('table-sensor-standards');
-        sensorTable.innerHTML = advice.sensor_standards.map(st => `
+        const staticList = Array.isArray(advice.sensor_standards) ? advice.sensor_standards : [];
+        sensorTable.innerHTML = staticList.length ? staticList.map(st => `
           <tr>
             <td class="py-2 pr-2 font-medium text-white align-top break-words">${esc(st.parameter)}</td>
             <td class="py-2 pr-2 text-cyan-300 font-mono align-top break-words">${esc(st.normal_range)}</td>
             <td class="py-2 text-slate-400 align-top">${esc(st.unit || '-')}</td>
           </tr>
-        `).join('');
+        `).join('') : '<tr><td colspan="3" class="py-2 text-slate-400">Ukur tegangan suplai (+12V / +5V) &amp; kontinuitas kabel (&lt; 2 Ω) sesuai pinout.</td></tr>';
+
+        // 2. Standar Pengukuran Saat Mesin Idle (Panas Kerja 80-90°C)
+        const idleTable = document.getElementById('table-idle-standards');
+        if (idleTable) {
+          const idleList = Array.isArray(advice.idle_standards) ? advice.idle_standards : [];
+          idleTable.innerHTML = idleList.length ? idleList.map(st => `
+            <tr>
+              <td class="py-2 pr-2 font-medium text-white align-top break-words">${esc(st.parameter)}</td>
+              <td class="py-2 pr-2 text-emerald-300 font-mono align-top break-words">${esc(st.normal_range)}</td>
+              <td class="py-2 text-slate-400 align-top">${esc(st.unit || '-')}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="3" class="py-2 text-slate-400">Idle panas 650 ± 50 RPM · Pengisian aki 13.5–14.5 V DC stabil.</td></tr>';
+        }
+
+        // 3. Standar Nilai Scanner OBD-II (Live Data & Active Test Resmi OEM)
+        const scannerTable = document.getElementById('table-scanner-standards');
+        if (scannerTable) {
+          const scanList = Array.isArray(advice.scanner_standards) ? advice.scanner_standards : [];
+          scannerTable.innerHTML = scanList.length ? scanList.map(st => `
+            <tr>
+              <td class="py-2 pr-2 font-medium text-white align-top break-words">${esc(st.parameter)}</td>
+              <td class="py-2 pr-2 text-amber-300 font-mono align-top break-words">${esc(st.normal_range)}</td>
+              <td class="py-2 text-slate-400 align-top">${esc(st.unit || '-')}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="3" class="py-2 text-slate-400">ECT 80–100°C · STFT/LTFT ±10% · MAF 1.0–4.0 g/s · MAP 24–38 kPa.</td></tr>';
+        }
+
+        window.__lastActiveDiagAdvice = advice;
 
         // Perbarui judul seksi pinout ECU sesuai konektor buku manual aktif
         const pinTitleEl = document.getElementById('pinout-section-title');
@@ -5609,14 +5978,16 @@
           </tr>
         `).join('');
 
-        // Relearn Steps
+        // Relearn Steps (Sub-Bab F dengan penomoran jelas agar nyaman dibaca di HP)
         const relearnContainer = document.getElementById('manual-relearn-steps');
-        relearnContainer.innerHTML = advice.relearn_reset_steps.map(r => `
-          <li class="flex items-start gap-2 p-2 rounded-lg bg-slate-950/70 border border-brand-900/50">
-            <i class="fa-solid fa-arrow-right text-brand-400 mt-0.5 shrink-0"></i>
-            <span class="leading-relaxed break-words">${esc(r)}</span>
-          </li>
-        `).join('');
+        relearnContainer.innerHTML = (advice.relearn_reset_steps || []).map((r, rIdx) => {
+          const cleanR = String(r || '').replace(/^\d+[.)]\s*/, '').trim();
+          return `
+          <li class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-950/80 border border-brand-900/60">
+            <span class="w-5 h-5 rounded-md bg-brand-600/30 border border-brand-400/50 text-cyan-300 font-mono font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">${rIdx + 1}</span>
+            <span class="leading-relaxed break-words text-slate-100">${esc(cleanR || r)}</span>
+          </li>`;
+        }).join('');
 
         // Perbarui badge hitungan pada Sub-Menu Hasil Diagnosa
         const sopBadge = document.getElementById('diag-badge-sop');
@@ -6878,6 +7249,425 @@
             faultVerdict: 'Relay Kipas #2/#3 atau kabel RED / RED/YEL putus sehingga mode High Speed / AC gagal aktif.'
           }
         ]
+      },
+
+      egr_6w: {
+        badge: 'SOKET 6-PIN · KATUP EGR (STEPPER MOTOR)',
+        connectorLabel: '6-Pin Soket Katup EGR Stepper JB420 (J20A)',
+        ecmHeader: 'MAIN RLY (E23) · ECM JB420 (C37)',
+        sensorHeader: 'KATUP EGR STEPPER (6-PIN)',
+        sensorTitle: 'EGR VALVE',
+        sensorSub: '4 Kumparan Stepper + 2 Suplai +12V',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'C37-05', sensorPin: 'Pin 1', ecmFunc: 'EGR Coil 1', label: 'YEL/BLK (Stepper Coil 1 · 10–14V / Pulsa)', color: '#facc15' },
+          { sourceType: 'power', ecmPin: 'E23-01', sensorPin: 'Pin 2', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Suplai Coil 1 & 2)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-06', sensorPin: 'Pin 3', ecmFunc: 'EGR Coil 2', label: 'YEL/RED (Stepper Coil 2 · 10–14V / Pulsa)', color: '#f97316' },
+          { sourceType: 'ecm', ecmPin: 'C37-03', sensorPin: 'Pin 4', ecmFunc: 'EGR Coil 3', label: 'YEL/GRN (Stepper Coil 3 · 10–14V / Pulsa)', color: '#22c55e' },
+          { sourceType: 'power', ecmPin: 'E23-16', sensorPin: 'Pin 5', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Suplai Coil 3 & 4)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-04', sensorPin: 'Pin 6', ecmFunc: 'EGR Coil 4', label: 'YEL (Stepper Coil 4 · 10–14V / Pulsa)', color: '#38bdf8' }
+        ],
+        steps: [
+          {
+            title: '1. Suplai +12V EGR (Pin 2 & 5)',
+            sub: 'BLU/BLK (Main Relay) → Massa Bodi',
+            activeWires: [1, 4],
+            faultWire: 1,
+            posSide: 'sensor', posWire: 1,
+            negSide: 'chassis_gnd', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): Pin 2 & Pin 5 (BLU/BLK)',
+            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
+            normalVal: '12.40 V',
+            faultVal: '0.00 V (KABEL BLU/BLK PUTUS)',
+            spec: 'Standar JB420 Bab 1A-123: 10.0 – 14.0 V (IG ON)',
+            instruction: 'Langkah 1: Kunci kontak OFF → lepas soket 6-pin Katup EGR → kunci kontak ON. Ukur tegangan +12V pada kabel BLU/BLK (Pin 2 & Pin 5) terhadap massa bodi.',
+            normalVerdict: 'Suplai daya +12.40V dari Main Relay (BLU/BLK) ke kedua titik tengah kumparan katup EGR utuh.',
+            faultVerdict: 'Tegangan 0.00V! Jalur suplai BLU/BLK dari Main Relay putus atau sekering FI bermasalah.'
+          },
+          {
+            title: '2. Tahanan 4 Kumparan Stepper',
+            sub: 'Pin 2↔1/3 & Pin 5↔4/6 (20–31 Ω)',
+            activeWires: [0, 1, 2, 3, 4, 5],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 1,
+            negSide: 'sensor', negWire: 0,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): Pin 2 (atau Pin 5) EGR',
+            probeNegLabel: 'Hitam(-): Pin 1, 3 (atau 4, 6) EGR',
+            normalVal: '24.5 Ω',
+            faultVal: 'OL / < 5 Ω (KUMPARAN EGR RUSAK)',
+            spec: 'Standar JB420 Bab 1A-124 & 1B: 20 – 31 Ω @ 20°C',
+            instruction: 'Langkah 2: Kunci kontak OFF, soket dilepas. Ukur tahanan 4 kumparan stepper motor pada bodi katup EGR: Pin 2↔1, Pin 2↔3, Pin 5↔4, dan Pin 5↔6 (atau ukur dari ECM E23-01 ↔ C37-03/04/05/06).',
+            normalVerdict: 'Keempat kumparan stepper motor katup EGR sehat (24.5 Ω). Bersihkan kerak karbon katup EGR bila macet mekanis.',
+            faultVerdict: 'Salah satu kumparan stepper motor EGR putus/korslet (pemicu langsung P0403)! Ganti unit Katup EGR.'
+          },
+          {
+            title: '3. Cek Korslet Massa / Sirkuit Lain',
+            sub: 'C37-03/04/05/06 → Massa (OL / 0V)',
+            activeWires: [0, 2, 3, 5],
+            faultWire: 2,
+            posSide: 'ecm', posWire: 2,
+            negSide: 'chassis_gnd', negWire: 2,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): YEL/BLK, YEL/RED, YEL/GRN, YEL',
+            probeNegLabel: 'Hitam(-): Massa Mesin (GND)',
+            normalVal: 'OL (> 1 MΩ)',
+            faultVal: '0.8 Ω (KABEL KORSLET MASSA)',
+            spec: 'Standar Bab 1A-124 Langkah 3–5: Tak Terhingga (OFF) · 0 V (ECM Lepas)',
+            instruction: 'Langkah 3: Kunci kontak OFF, lepas soket EGR & soket ECM. Ukur isolasi keempat kabel kontrol (YEL/BLK, YEL/RED, YEL/GRN, YEL) terhadap massa dan antar kabel — semua wajib OL.',
+            normalVerdict: 'Keempat kabel kontrol stepper EGR bebas korslet ke massa maupun antar jalur.',
+            faultVerdict: 'Kabel harness kontrol EGR terkelupas/korslet ke massa mesin atau saling menempel! Perbaiki wire harness.'
+          },
+          {
+            title: '4. Tegangan Idle & Pulsa Active Test',
+            sub: 'C37-03..06: 13.8V Idle · Pulsa Aktif',
+            activeWires: [0, 2, 3, 5],
+            faultWire: 3,
+            posSide: 'ecm', posWire: 3,
+            negSide: 'chassis_gnd', negWire: 3,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-03 / 04 / 05 / 06',
+            probeNegLabel: 'Hitam(-): Massa Mesin (C37-58)',
+            normalVal: '13.8 V (Idle) / Pulsa 0–14V',
+            faultVal: '0.00 V / TIDAK ADA PULSA',
+            spec: 'Bab 1A-199: 10–14V Idle (0% EGR) · 0–1V↑↓10–14V Pulsa Crank/Aktif',
+            instruction: 'Langkah 4: Soket terpasang, mesin idle panas (EGR Opening 0% → 10–14V stabil). Lakukan Active Test buka EGR 30–50% via scanner: tegangan harus berdenyut 0–1V ↔ 10–14V dan mesin langsung bergetar.',
+            normalVerdict: 'Driver ECM C37-03..06 mengeluarkan pulsa stepper normal dan respon katup EGR sesuai perintah scanner.',
+            faultVerdict: 'Driver output ECM tidak merespons atau kabel putus meski tahanan katup EGR normal!'
+          }
+        ]
+      },
+
+      evap_2w: {
+        badge: 'SOKET 2-PIN · KATUP EVAP PURGE (C16)',
+        connectorLabel: '2-Pin Soket EVAP Canister Purge JB420',
+        ecmHeader: 'MAIN RLY · ECM JB420 (C37)',
+        sensorHeader: 'KATUP EVAP PURGE (2-PIN)',
+        sensorTitle: 'EVAP PURGE',
+        sensorSub: 'Solenoid 2-Pin (30–34 Ω)',
+        wires: [
+          { sourceType: 'power', ecmPin: 'E23-01', sensorPin: 'Pin 1', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Suplai Main Relay)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-13', sensorPin: 'Pin 2', ecmFunc: 'EVAP Purge PWM', label: 'GRN/BLK (Kontrol Duty ECM · 0% Idle)', color: '#22c55e' }
+        ],
+        steps: [
+          {
+            title: '1. Suplai +12V EVAP (Pin 1)',
+            sub: 'BLU/BLK → Massa Bodi (IG ON)',
+            activeWires: [0],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'chassis_gnd', negWire: 0,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): Pin 1 (BLU/BLK)',
+            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
+            normalVal: '12.40 V',
+            faultVal: '0.00 V (OPEN)',
+            spec: 'Standar JB420 Bab 1A-127: 10.0 – 14.0 V (IG ON)',
+            instruction: 'Langkah 1: Lepas soket 2-pin EVAP Purge Valve, kunci kontak ON. Ukur tegangan +12V pada Pin 1 (BLU/BLK) terhadap massa.',
+            normalVerdict: 'Suplai +12V Main Relay ke katup EVAP Purge normal.',
+            faultVerdict: 'Suplai +12V hilang! Cek kabel BLU/BLK dari Main Relay.'
+          },
+          {
+            title: '2. Tahanan Solenoid EVAP (Pin 1–2)',
+            sub: 'Pin 1 ↔ Pin 2 (30–34 Ω @ 20°C)',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'sensor', negWire: 1,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): Pin 1 Katup EVAP',
+            probeNegLabel: 'Hitam(-): Pin 2 Katup EVAP',
+            normalVal: '32.0 Ω',
+            faultVal: 'OL / PUTUS (P0443)',
+            spec: 'Standar JB420 Bab 1B: 30 – 34 Ω pada 20°C',
+            instruction: 'Langkah 2: Kunci kontak OFF, ukur tahanan kumparan katup EVAP antara Pin 1 dan Pin 2 serta uji tiup (harus kedap saat OFF).',
+            normalVerdict: 'Kumparan katup EVAP Purge sehat (32.0 Ω) dan katup menutup rapat.',
+            faultVerdict: 'Kumparan solenoid EVAP putus/korslet! Ganti unit EVAP Canister Purge Valve.'
+          },
+          {
+            title: '3. Kontrol Duty C37-13 (Idle / Test)',
+            sub: 'C37-13 (GRN/BLK) → Massa',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'chassis_gnd', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-13 (GRN/BLK)',
+            probeNegLabel: 'Hitam(-): Massa Mesin',
+            normalVal: '12.4V Idle · Pulsa 52% Test',
+            faultVal: '0.00 V (KABEL PUTUS/SHORT)',
+            spec: 'Bab 1A-200: 10–14V (IG ON/Idle 0%) · 0–0.6V↑↓10–14V (Misc Test 52%)',
+            instruction: 'Langkah 3: Soket terpasang, ukur C37-13 saat IG ON/Idle (10–14V) lalu aktifkan EVAP 52% via scanner Misc Test.',
+            normalVerdict: 'Jalur kontrol PWM C37-13 (GRN/BLK) bekerja sesuai perintah scanner.',
+            faultVerdict: 'Kabel GRN/BLK putus/korslet ke massa atau driver ECM C37-13 bermasalah.'
+          }
+        ]
+      },
+
+      imt_2w: {
+        badge: 'SOKET 2-PIN · IMT VACUUM SOLENOID',
+        connectorLabel: '2-Pin Soket IMT Vacuum Solenoid JB420',
+        ecmHeader: 'MAIN RLY · ECM JB420 (C37)',
+        sensorHeader: 'SOLENOID IMT (2-PIN)',
+        sensorTitle: 'IMT SOLENOID',
+        sensorSub: 'Intake Manifold Tuning (P0660)',
+        wires: [
+          { sourceType: 'power', ecmPin: 'E23-01', sensorPin: 'Pin 1', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Main Relay)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-33', sensorPin: 'Pin 2', ecmFunc: 'IMT Solenoid (-)', label: 'GRY/RED (10–14V IG ON · 0–1V Idle ON)', color: '#38bdf8' }
+        ],
+        steps: [
+          {
+            title: '1. Suplai +12V IMT (Pin 1)',
+            sub: 'BLU/BLK → Massa Bodi (IG ON)',
+            activeWires: [0],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'chassis_gnd', negWire: 0,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): Pin 1 (BLU/BLK)',
+            probeNegLabel: 'Hitam(-): Massa Mesin',
+            normalVal: '12.40 V',
+            faultVal: '0.00 V (OPEN)',
+            spec: 'Bab 1A-153: 10.0 – 14.0 V (IG ON)',
+            instruction: 'Langkah 1: Lepas soket 2-pin IMT Vacuum Solenoid, kunci kontak ON. Ukur +12V pada BLU/BLK.',
+            normalVerdict: 'Suplai +12V Main Relay ke solenoid IMT normal.',
+            faultVerdict: 'Kabel BLU/BLK putus! Perbaiki jalur suplai dari Main Relay.'
+          },
+          {
+            title: '2. Tahanan Solenoid IMT (Pin 1–2)',
+            sub: 'Pin 1 ↔ Pin 2 (30–40 Ω @ 20°C)',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'sensor', negWire: 1,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): Pin 1 Solenoid IMT',
+            probeNegLabel: 'Hitam(-): Pin 2 Solenoid IMT',
+            normalVal: '35.0 Ω',
+            faultVal: 'OL / PUTUS (P0660)',
+            spec: 'Standar Bab 1C Vacuum Tank Assy: 30 – 40 Ω',
+            instruction: 'Langkah 2: Kunci kontak OFF, ukur tahanan kumparan solenoid IMT (Pin 1↔2) dan periksa kebocoran selang vakum.',
+            normalVerdict: 'Kumparan solenoid IMT sehat (35.0 Ω).',
+            faultVerdict: 'Kumparan solenoid IMT putus! Ganti IMT Vacuum Solenoid Valve.'
+          },
+          {
+            title: '3. Aktivasi Idle C37-33 (0–1 V ON)',
+            sub: 'C37-33 (GRY/RED) → Massa',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'chassis_gnd', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-33 (GRY/RED)',
+            probeNegLabel: 'Hitam(-): Massa Bodi',
+            normalVal: '0.45 V (Idle ON) · 12.4V (IG ON)',
+            faultVal: '12.4 V STUCK / 0V OPEN',
+            spec: 'Bab 1A-202: 10–14V IG ON · 0–1V Saat Idle (ON) · 10–14V ≥4700 RPM',
+            instruction: 'Langkah 3: Ukur tegangan C37-33 saat IG ON (10–14V) lalu hidupkan mesin idle (turun ke 0–1V, tuas aktuator IMT tertarik).',
+            normalVerdict: 'Kontrol ECM C37-33 aktif normal saat idle (INTAKE TUNING SOL = ON).',
+            faultVerdict: 'Kabel GRY/RED putus/korslet atau driver ECM C37-33 gagal mengaktifkan solenoid!'
+          }
+        ]
+      },
+
+      knock_2w: {
+        badge: 'SOKET 2-PIN · KNOCK SENSOR (PIEZO)',
+        connectorLabel: '2-Pin Soket Knock Sensor JB420 (J20A)',
+        ecmHeader: 'ECM JB420 (C37) · SHIELD GND',
+        sensorHeader: 'KNOCK SENSOR (2-PIN)',
+        sensorTitle: 'KNOCK SENSOR',
+        sensorSub: 'Piezo 500–620 kΩ (P0327/P0328)',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'C37-56', sensorPin: 'Pin 1', ecmFunc: 'Knock Signal', label: 'WHT (Sinyal Piezo · 2–3V Bias IG ON)', color: '#e2e8f0' },
+          { sourceType: 'ground', ecmPin: 'C37-58', sensorPin: 'Shield', ecmFunc: 'Massa Shield', label: 'SHIELD / BLK/YEL (Pelindung Massa)', color: '#10b981' }
+        ],
+        steps: [
+          {
+            title: '1. Tegangan Bias C37-56 (IG ON)',
+            sub: 'C37-56 (WHT) → Massa (2–3 V)',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'ground', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-56 (WHT)',
+            probeNegLabel: 'Hitam(-): Massa ECM (C37-58)',
+            normalVal: '2.50 V',
+            faultVal: '0.00 V / 5.00 V (P0327/P0328)',
+            spec: 'Bab 1A-204: 2.0 – 3.0 V DC (IG ON & Idle)',
+            instruction: 'Langkah 1: Kunci kontak ON, ukur tegangan bias ECM pada C37-56 (WHT) terhadap massa C37-58.',
+            normalVerdict: 'Tegangan bias sirkuit Knock Sensor ECM normal (2.50 V).',
+            faultVerdict: 'Tegangan bias hilang (0V) atau terlalu tinggi (5V)! Cek kabel WHT korslet shield atau sensor putus.'
+          },
+          {
+            title: '2. Tahanan Internal Piezo (500–620 kΩ)',
+            sub: 'Pin 1 ↔ Pin 2 / Bodi Sensor',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'sensor', negWire: 1,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): Terminal 1 Knock Sensor',
+            probeNegLabel: 'Hitam(-): Terminal 2 / Bodi Sensor',
+            normalVal: '560 kΩ',
+            faultVal: 'OL / < 100 kΩ (SENSOR RUSAK)',
+            spec: 'Standar JB420 Bab 1C: 500 – 620 kΩ @ 20°C (Torsi baut 23 N·m)',
+            instruction: 'Langkah 2: Kunci kontak OFF, lepas soket knock sensor. Ukur tahanan internal elemen piezo (500–620 kΩ) dan cek kekencangan baut 23 N·m.',
+            normalVerdict: 'Elemen piezo Knock Sensor sehat (560 kΩ).',
+            faultVerdict: 'Knock Sensor rusak/retak internal! Ganti sensor dan kencangkan tepat 23 N·m.'
+          }
+        ]
+      },
+
+      gen_elc: {
+        badge: 'SIRKUIT GENERATOR & SENSOR BEBAN ELC',
+        connectorLabel: 'Alternator (C37-08/28) & ELC Sensor (C37-09)',
+        ecmHeader: 'ECM JB420 (C37) · +5V REF',
+        sensorHeader: 'ALTERNATOR & ELC',
+        sensorTitle: 'GEN / ELC',
+        sensorSub: 'P0620/P0625/P0626 · P1501/P1502',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'C37-08', sensorPin: 'FR/Field', ecmFunc: 'Field Monitor', label: 'BRN/BLK (Monitor Field · 10–14V / Pulsa)', color: '#d97706' },
+          { sourceType: 'ecm', ecmPin: 'C37-28', sensorPin: 'C/Ctrl', ecmFunc: 'Gen Control', label: 'BRN/BLK (Kontrol Pengisian · Pulsa 5–7V)', color: '#f59e0b' },
+          { sourceType: 'ecm', ecmPin: 'C37-14', sensorPin: 'ELC +5V', ecmFunc: 'Ref +5V', label: 'GRY/RED (+5V Ref ELC Sensor)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-09', sensorPin: 'ELC Sig', ecmFunc: 'ELC Signal', label: 'BLU (0.5–1.0V IG ON · 1.3–2.4V Beban)', color: '#38bdf8' },
+          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'ELC GND', ecmFunc: 'Sensor GND', label: 'GRY/GRN (Massa Sensor < 0.3V)', color: '#10b981' }
+        ],
+        steps: [
+          {
+            title: '1. Tegangan Pengisian Aki (Idle)',
+            sub: 'Aki B+ ↔ Massa (13.5–14.5 V)',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'chassis_gnd', negWire: 0,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-08 / Terminal B+ Aki',
+            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
+            normalVal: '14.15 V (Idle)',
+            faultVal: '11.80 V (TIDAK MENGISI)',
+            spec: 'Bab 1A-35 & 1A-199: 13.5–14.5 V Idle · Field Duty 10–50%',
+            instruction: 'Langkah 1: Hidupkan mesin idle panas, ukur tegangan aki & sinyal monitor C37-08 (BRN/BLK). Cek V-belt & IC regulator bila < 13.2V.',
+            normalVerdict: 'Alternator mengisi stabil (14.15 V) dan monitor field C37-08 bekerja normal.',
+            faultVerdict: 'Alternator tidak mengisi atau IC regulator/sikat arang aus! Servis alternator & cek kabel C37-08/28.'
+          },
+          {
+            title: '2. Sinyal Sensor Beban ELC (C37-09)',
+            sub: 'C37-09 (BLU) → C37-57 (GRY/GRN)',
+            activeWires: [2, 3, 4],
+            faultWire: 3,
+            posSide: 'ecm', posWire: 3,
+            negSide: 'ground', negWire: 4,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-09 (BLU ELC Signal)',
+            probeNegLabel: 'Hitam(-): C37-57 (GRY/GRN GND)',
+            normalVal: '0.75 V IG ON · 1.95 V Beban HI',
+            faultVal: '0.00 V / 5.00 V (P1501/P1502)',
+            spec: 'Bab 1A-200: 0.5–1.0V (IG ON) · 1.8–2.4V (2000 RPM Lampu+Blower HI)',
+            instruction: 'Langkah 2: Ukur +5V di C37-14 dan sinyal ELC di C37-09 saat IG ON (0.5–1.0V) lalu nyalakan lampu besar + blower HI pada 2.000 RPM (1.8–2.4V).',
+            normalVerdict: 'Sensor arus beban listrik (ELC) & referensi +5V C37-14 bekerja presisi.',
+            faultVerdict: 'Sensor ELC atau kabel GRY/RED (+5V) / BLU putus/korslet (pemicu P1501/P1502)!'
+          }
+        ]
+      },
+
+      starter_rly: {
+        badge: 'SIRKUIT RELAY STARTER CONTROL',
+        connectorLabel: 'Relay Starter & ECM C37-22 (JB420)',
+        ecmHeader: 'FUSE ST SIG · ECM (C37-22) · GND',
+        sensorHeader: 'RELAY STARTER CONTROL',
+        sensorTitle: 'STARTER RLY',
+        sensorSub: 'P0616 / P0617 (C37-22 BLK/YEL)',
+        wires: [
+          { sourceType: 'power', ecmPin: 'ST SIG', sensorPin: 'Pin 30+', ecmFunc: 'Suplai +12V', label: 'BLK/WHT (+12V Sekering STR MOT/ST SIG)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-22', sensorPin: 'Pin 85', ecmFunc: 'Starter Ctrl', label: 'BLK/YEL (0–1V IG ON · 8–14V Posisi ST)', color: '#f59e0b' },
+          { sourceType: 'ground', ecmPin: 'GND BODI', sensorPin: 'Pin 86', ecmFunc: 'Massa Koil', label: 'BLK (Massa Koil Relay Starter)', color: '#10b981' }
+        ],
+        steps: [
+          {
+            title: '1. Standby C37-22 (IG ON: 0–1 V)',
+            sub: 'C37-22 (BLK/YEL) → Massa (IG ON)',
+            activeWires: [1, 2],
+            faultWire: 1,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'ground', negWire: 2,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-22 (BLK/YEL)',
+            probeNegLabel: 'Hitam(-): Massa Bodi',
+            normalVal: '0.10 V (IG ON)',
+            faultVal: '12.4 V (SHORT POWER P0617)',
+            spec: 'Bab 1A-201: 0 – 1 V (IG ON) · 8 – 14 V (Kunci Posisi ST)',
+            instruction: 'Langkah 1: Kunci kontak ON (mesin mati), ukur C37-22 (normal 0–1V). Lalu putar ke posisi ST (cranking): harus naik ke 8–14V.',
+            normalVerdict: 'Sirkuit perintah Relay Starter C37-22 (BLK/YEL) bekerja sesuai posisi kunci kontak.',
+            faultVerdict: 'Tegangan abnormal! Cek Relay Starter, sekering ST SIG, atau kabel BLK/YEL putus/korslet.'
+          },
+          {
+            title: '2. Tahanan Koil Relay Starter (85–86)',
+            sub: 'Pin 85 ↔ Pin 86 (60–120 Ω)',
+            activeWires: [1, 2],
+            faultWire: 1,
+            posSide: 'sensor', posWire: 1,
+            negSide: 'sensor', negWire: 2,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): Pin 85 Relay Starter',
+            probeNegLabel: 'Hitam(-): Pin 86 Relay Starter',
+            normalVal: '85.0 Ω',
+            faultVal: 'OL / PUTUS (P0616)',
+            spec: 'Standar Relay OEM: 60 – 120 Ω @ 20°C',
+            instruction: 'Langkah 2: Cabut Relay Starting Motor Control, ukur tahanan kumparan (Pin 85–86) dan uji klik dengan +12V.',
+            normalVerdict: 'Kumparan Relay Starter sehat (85.0 Ω).',
+            faultVerdict: 'Koil Relay Starter putus! Ganti Relay Starting Motor Control.'
+          }
+        ]
+      },
+
+      can_2w: {
+        badge: 'JARINGAN CAN BUS (CAN-H / CAN-L · 60 Ω)',
+        connectorLabel: 'Twisted Pair CAN Bus DLC 6–14 / ECM E23-04 & E23-19',
+        ecmHeader: 'ECM JB420 (E23) · DLC OBD-II',
+        sensorHeader: 'JARINGAN CAN BUS',
+        sensorTitle: 'CAN BUS',
+        sensorSub: 'ECM ↔ ABS ↔ TCM ↔ BCM',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'E23-04', sensorPin: 'DLC #6', ecmFunc: 'CAN High (+)', label: 'WHT/RED (CAN-H · 2.5–3.6V Pulsa)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'E23-19', sensorPin: 'DLC #14', ecmFunc: 'CAN Low (-)', label: 'WHT/BLU (CAN-L · 1.5–2.5V Pulsa)', color: '#38bdf8' }
+        ],
+        steps: [
+          {
+            title: '1. Tahanan Terminasi CAN (54–66 Ω)',
+            sub: 'DLC Pin 6 ↔ Pin 14 (Aki Dilepas!)',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'sensor', negWire: 1,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): DLC Pin 6 / E23-04 (CAN-H)',
+            probeNegLabel: 'Hitam(-): DLC Pin 14 / E23-19 (CAN-L)',
+            normalVal: '60.2 Ω',
+            faultVal: '120 Ω (PUTUS) / 2 Ω (SHORT)',
+            spec: 'Standar CAN ISO 11898: 54 – 66 Ω (2 Resistor 120 Ω Paralel)',
+            instruction: 'Langkah 1: WAJIB lepas kabel negatif aki dulu! Ukur tahanan antara DLC Pin 6 (CAN-H) dan Pin 14 (CAN-L). Normal 54–66 Ω.',
+            normalVerdict: 'Tahanan terminasi jaringan CAN Bus sempurna (60.2 Ω) — kedua resistor 120 Ω terhubung utuh.',
+            faultVerdict: 'Tahanan CAN menyimpang! Jika ~120 Ω salah satu jalur putus; jika < 10 Ω jalur CAN-H & CAN-L korslet.'
+          },
+          {
+            title: '2. Tegangan Pulsa CAN-H & CAN-L',
+            sub: 'E23-04 (~2.7V) & E23-19 (~2.3V)',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'chassis_gnd', negWire: 0,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): E23-04 (CAN-H) / E23-19 (CAN-L)',
+            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
+            normalVal: '2.72 V (H) · 2.28 V (L)',
+            faultVal: '0.00 V / 12.4 V (BUS OFF)',
+            spec: 'Bab 1A-205: CAN-H 2.5–4.5V · CAN-L 0.5–2.5V (Total H+L ≈ 5.0V)',
+            instruction: 'Langkah 2: Pasang aki, kunci kontak ON. Ukur tegangan CAN-H (E23-04) & CAN-L (E23-19) terhadap massa — jumlah keduanya harus ≈ 5.0V.',
+            normalVerdict: 'Tegangan diferensial jaringan CAN normal (H + L = 5.00 V).',
+            faultVerdict: 'Jalur CAN terganggu/korslet! Lepas soket modul ABS/TCM/BCM satu per satu untuk menemukan modul penyebab.'
+          }
+        ]
       }
     };
 
@@ -7171,12 +7961,25 @@
     function buildDynamicCircuitFromPinout(advice, appInfo, detectedKind) {
       const packId = (advice && advice.active_pack_id) || (appInfo && appInfo.active_pack_id) || '';
       const wires = expandPinoutRowsToWires(advice.wiring_pinout || [], detectedKind, packId);
+      if (wires.length === 1) {
+        wires.push({
+          sourceType: 'ground',
+          ecmPin: 'GND BODI',
+          sensorPin: 'GND',
+          ecmFunc: 'Massa Referensi',
+          rawFunc: 'Titik massa bodi / blok mesin referensi pengukuran (< 1 Ohm)',
+          label: 'BLK (Referensi Massa Bodi / Mesin)',
+          color: '#10b981'
+        });
+      }
       if (wires.length < 2) return null;
+
+      const isSrsAirbag = /\bB10\d{2}\b|air\s*bag|sdm|initiator|pretensioner/i.test(`${advice.diagnosis_title || ''} ${advice.manual_book_section || ''}`);
 
       // Cari indeks kabel ground/massa untuk referensi probe hitam (-) pada mode DC VOLT
       let gndIdx = wires.findIndex(w => w.sourceType === 'ground');
       if (gndIdx === -1) {
-        gndIdx = wires.findIndex(w => /^(E2|ETHW|ETHA|E2G|E2PM|EVG|ETA|C01-20|C01-21|C01-41|C01-22|C37-57|C37-41)$/i.test(w.sensorPin) || /massa|ground/i.test(w.ecmFunc + ' ' + w.label));
+        gndIdx = wires.findIndex(w => /^(E2|ETHW|ETHA|E2G|E2PM|EVG|ETA|C01-20|C01-21|C01-41|C01-22|C37-57|C37-41|G47-20|E03-01|E92-01)$/i.test(w.sensorPin) || /massa|ground/i.test(w.ecmFunc + ' ' + w.label));
       }
 
       const prefixes = [...new Set(wires.filter(w => w.sourceType === 'ecm').map(w => w.ecmPin.split('-')[0].trim()).filter(p => /^[A-Z]{1,2}\d{1,2}$/.test(p)))];
@@ -7186,14 +7989,27 @@
         ? `${appInfo.brand || ''} ${appInfo.model || ''}`.trim()
         : 'Manual Resmi';
       const engCode = (appInfo && appInfo.engine_code) ? String(appInfo.engine_code).split(' ')[0] : '';
+      const modPrefixLabel = isSrsAirbag ? 'MODUL SDM AIR BAG'
+        : (/^E92/.test(prefixes[0] || '') || /\bTCM\b|Transmisi/i.test(advice.manual_book_section || '')) ? 'MODUL TCM A/T'
+        : (/^E03/.test(prefixes[0] || '') || /\bABS\b/i.test(advice.manual_book_section || '')) ? 'MODUL ABS / EBD'
+        : (/^G52/.test(prefixes[0] || '') || /HVAC|Air Conditioner/i.test(advice.manual_book_section || '')) ? 'MODUL AUTO A/C (HVAC)'
+        : (/^G51/.test(prefixes[0] || '') || /\bBCM\b/i.test(advice.manual_book_section || '')) ? 'MODUL BCM'
+        : `ECM ${engCode || vehicleTag.toUpperCase()}`;
       const ecmHeader = [
         hasPwr ? 'FUSE/RLY' : '',
-        prefixes.length ? `ECM ${engCode ? engCode + ' ' : ''}(${prefixes.join('/')})` : `ECM ${engCode || vehicleTag.toUpperCase()}`,
+        prefixes.length ? `${modPrefixLabel} (${prefixes.join('/')})` : modPrefixLabel,
         hasGnd ? 'GND' : ''
       ].filter(Boolean).join(' · ');
 
       const kindNames = {
         coil_4w: { header: 'SOKET KOIL PENGAPIAN', title: 'KOIL COP', sub: `${wires.length} Jalur Resmi ${engCode || vehicleTag}` },
+        egr_6w: { header: 'SOKET KATUP EGR (6-PIN)', title: 'KATUP EGR', sub: `${wires.length} Jalur Stepper ${engCode || vehicleTag}` },
+        evap_2w: { header: 'SOKET KATUP EVAP PURGE', title: 'EVAP PURGE', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        imt_2w: { header: 'SOKET SOLENOID IMT', title: 'IMT VALVE', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        knock_2w: { header: 'SOKET KNOCK SENSOR', title: 'KNOCK SENSOR', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        gen_elc: { header: 'ALTERNATOR & ELC', title: 'GEN / ELC', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        starter_rly: { header: 'RELAY STARTER CONTROL', title: 'STARTER RLY', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        can_2w: { header: 'JARINGAN CAN BUS', title: 'CAN BUS', sub: `${wires.length} Jalur Twisted Pair` },
         map_3w: { header: 'SOKET SENSOR MAP', title: 'SENSOR MAP', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
         ect_2w: { header: 'SOKET SENSOR ECT', title: 'SENSOR ECT', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
         etc_6w: { header: 'SOKET THROTTLE ETC', title: 'THROTTLE ETC', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
@@ -7204,14 +8020,26 @@
         fan_4w: { header: 'RELAY KIPAS RADIATOR', title: 'RELAY KIPAS', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
         maf_5w: { header: 'SOKET SENSOR MAF/IAT', title: 'MAF / IAT', sub: `${wires.length} Jalur (${engCode || vehicleTag})` }
       };
+      const cleanCompName = String(advice.diagnosis_title || 'KOMPONEN')
+        .replace(/^DTC\s+[A-Z0-9,\s]+:\s*/i, '')
+        .replace(/^Sirkuit\s+/i, '')
+        .replace(/^\[[^\]]+\]\s*/g, '')
+        .trim();
       const kMeta = kindNames[detectedKind] || {
-        header: `SOKET KOMPONEN (${wires.length}-PIN)`,
-        title: String(advice.diagnosis_title || 'KOMPONEN').replace(/^DTC\s+[A-Z0-9,\s]+:\s*/i, '').replace(/^\[[^\]]+\]\s*/g, '').slice(0, 16).toUpperCase() || 'KOMPONEN',
+        header: isSrsAirbag ? 'SOKET SRS AIR BAG (KUNING — SAFETY)' : `SOKET ${cleanCompName.slice(0, 26).toUpperCase()} (${wires.length}-PIN)`,
+        title: (cleanCompName.slice(0, 16) || 'KOMPONEN').toUpperCase(),
         sub: `${wires.length} Jalur Resmi ${engCode || vehicleTag}`
       };
 
       const steps = wires.slice(0, 4).map((w, idx) => {
         const mInfo = parseManualPinMeasurementStep(w, w.rawFunc, idx, wires, gndIdx, vehicleTag);
+        if (isSrsAirbag && mInfo.mode === 'OHMMETER (Ω)' && !/ground|massa|g47-20/i.test(`${w.ecmPin} ${w.label} ${w.rawFunc}`)) {
+          mInfo.mode = 'SCANNER SDM (SAFETY)';
+          mInfo.normalVal = '1.8 – 3.5 Ω (Via Scanner)';
+          mInfo.faultVal = 'DILARANG UKUR OHM LANGSUNG!';
+          mInfo.spec = 'WAJIB CABUT AKI ≥ 90 DETIK · Dilarang tusuk Ohmmeter ke inflator Airbag!';
+          mInfo.instruction = `PERINGATAN KESELAMATAN SRS: Jangan pernah mengukur tahanan Ohm langsung pada jalur ${w.ecmPin} saat modul airbag terhubung! Cabut negatif aki ≥ 90 detik, cek soket kuning & baca nilai tahanan aman lewat Scanner SDM.`;
+        }
         return {
           title: `${idx + 1}. Cek ${w.ecmPin}`,
           sub: `${w.sensorPin} · ${w.label.split(/[—–(]/)[0].trim().slice(0, 16)}`,
@@ -7234,14 +8062,16 @@
       });
 
       return {
-        badge: `SOKET ${wires.length}-PIN (${wires.length} JALUR)`,
-        connectorLabel: `Konektor ${wires.length}-Pin (${engCode || prefixes.join('/') || 'OEM'})`,
+        badge: isSrsAirbag ? `SRS SAFETY · SOKET ${wires.length}-PIN (${prefixes.join('/') || 'G47'})` : `SOKET ${wires.length}-PIN (${wires.length} JALUR · ${cleanCompName.slice(0, 22).toUpperCase()})`,
+        connectorLabel: `Konektor ${wires.length}-Pin (${prefixes.join('/') || engCode || 'OEM'})`,
         ecmHeader,
         sensorHeader: kMeta.header,
         sensorTitle: kMeta.title,
         sensorSub: kMeta.sub,
         manualSourceVerified: true,
-        manualSourceLabel: `✅ PINOUT RESMI: ${vehicleTag.toUpperCase()}${engCode ? ' (' + engCode + ')' : ''}`,
+        manualSourceLabel: isSrsAirbag
+          ? `⚠️ SRS SAFETY · PINOUT RESMI: ${vehicleTag.toUpperCase()}`
+          : `✅ PINOUT RESMI: ${vehicleTag.toUpperCase()}${engCode ? ' (' + engCode + ')' : ''}`,
         manualSourceSubtitle: `Menggunakan pinout, warna kabel & standar tegangan asli dari ${advice.manual_book_section || vehicleTag}.`,
         wires,
         steps
@@ -7256,42 +8086,80 @@
     }
 
     function detectCircuitKindFromAdvice(advice) {
+      // 0. Prioritaskan kunci sirkuit eksplisit dari katalog OEM (ANTI salah arah ke Koil!)
+      if (advice && advice.sim_circuit_key) {
+        if (advice.sim_circuit_key === 'dynamic') return 'dynamic';
+        if (WIRING_CIRCUITS[advice.sim_circuit_key]) return advice.sim_circuit_key;
+      }
+
       const inputDtcRaw = (document.getElementById('input-dtc')?.value || '').toUpperCase();
       const titleRaw = `${advice.diagnosis_title || ''} ${advice.manual_book_section || ''} ${inputDtcRaw}`;
       const pinText = (advice.wiring_pinout || []).map(p => `${p.pin} ${p.signal} ${p.function}`).join(' ');
-      const allText = `${titleRaw} ${pinText}`;
 
-      // 1. Prioritaskan kode DTC eksplisit — pisahkan CKP, CMP, A/F-1, HO2S-2, dan Koil secara ketat!
-      const dtcs = allText.toUpperCase().match(/\b[PCBU][0-9A-F]{4}\b/g) || [];
+      // 1. Prioritaskan kode DTC eksplisit dari input + judul (BUKAN teks pinout mentah!)
+      const dtcs = titleRaw.toUpperCase().match(/\b[PCBU][0-9A-F]{4}\b/g) || [];
       for (const c of dtcs) {
+        if (/^P040[0-6]$/.test(c)) return 'egr_6w';
+        if (/^P044[3-5]$/.test(c)) return 'evap_2w';
+        if (/^P0660$/.test(c)) return 'imt_2w';
         if (/^P030[0-8]$|^P035[1-8]$/.test(c)) return 'coil_4w';
+        if (/^P032[5-8]$/.test(c)) return 'knock_2w';
         if (/^P033[5-9]$/.test(c)) return 'ckp_2w';
         if (/^P034[0-9]$/.test(c)) return 'cmp_3w';
         if (/^P048[0-5]$/.test(c)) return 'fan_4w';
         if (/^P011[5-9]$|^P012[58]$/.test(c)) return 'ect_2w';
         if (/^P010[5-9]$|^P222[7-9]$/.test(c)) return 'map_3w';
-        if (/^P010[0-4]$/.test(c)) return 'maf_5w';
+        if (/^P010[0-4]$|^P011[0-4]$/.test(c)) return 'maf_5w';
         if (/^P003[0-2]$|^P013[0-5]$/.test(c)) return 'af_6w';
         if (/^P003[6-8]$|^P013[6-9]$|^P014[0-1]$/.test(c)) return 'o2_4w';
         if (/^P012[0-4]$|^P022[0-3]$|^P0507$|^P21[0-3][0-9]$/.test(c)) return 'etc_6w';
-        if (/^P017[12]$/.test(c)) return 'map_3w';
+        if (/^P061[5-7]$/.test(c)) return 'starter_rly';
+        if (/^P062[056]$|^P150[12]$/.test(c)) return 'gen_elc';
+        if (/^P167[468]$|^P1685$|^U[0-9A-F]{4}$/.test(c)) return 'can_2w';
+        if (/^P017[12]$|^P219[56]$/.test(c)) return 'map_3w';
+        if (/^P0420$|^P0430$/.test(c)) return 'o2_4w';
+        if (/^(?:B10|B11|B15|C10|P07|P08|P09|P16|P17|P18|P046|P050|P053|P060|P151)/.test(c)) return 'dynamic';
       }
 
-      // 2. Pencocokan kata kunci dengan batas kata ketat
+      // 2. Pencocokan kata kunci ketat pada judul (DILARANG memakai kata tunggal 'coil' karena bentrok dengan EGR stepper coil / SRS contact coil / field coil!)
       const tLow = titleRaw.toLowerCase();
-      const cLow = allText.toLowerCase();
-      if (/\b(kipas|cooling fan|radiator fan)\b/i.test(cLow) || /e23-46|e01-42/.test(cLow)) return 'fan_4w';
+      const cLow = `${tLow} ${pinText.toLowerCase()}`;
+      if (/\b(egr|exhaust gas recirculation|daur ulang gas buang)\b/i.test(tLow)) return 'egr_6w';
+      if (/\b(evap|purge|canister)\b/i.test(tLow)) return 'evap_2w';
+      if (/\b(imt|intake manifold tuning)\b/i.test(tLow)) return 'imt_2w';
+      if (/\b(knock)\b/i.test(tLow)) return 'knock_2w';
+      if (/\b(generator|alternator|electric load current)\b/i.test(tLow)) return 'gen_elc';
+      if (/\b(relay starter|starting motor)\b/i.test(tLow)) return 'starter_rly';
+      if (/\b(komunikasi can|can bus)\b/i.test(tLow)) return 'can_2w';
+      if (/\b(air\s*bag|sdm|srs|abs|wheel speed|tcm|transmisi|solenoid|hvac|bcm|immobilizer|keyless|fuel level|switch rem|refrigerant)\b/i.test(tLow)) return 'dynamic';
+      if (/\b(kipas|cooling fan|radiator fan)\b/i.test(tLow) || /e23-46|e01-42/.test(cLow)) return 'fan_4w';
       if (/\b(ckp|crankshaft|poros engkol)\b/i.test(tLow)) return 'ckp_2w';
       if (/\b(cmp|camshaft|poros nok)\b/i.test(tLow)) return 'cmp_3w';
-      if (/\b(koil|coil|misfire|pengapian|ignition|busi)\b/i.test(tLow)) return 'coil_4w';
+      if (/\b(ignition\s*coil|koil\s*pengapian|koil\s*cop|misfire|salah\s*pengapian|busi)\b/i.test(tLow)) return 'coil_4w';
       if (/\b(ho2s-2|sensor 2|belakang)\b/i.test(tLow) && /\b(o2|ho2s|oksigen)\b/i.test(cLow)) return 'o2_4w';
-      if (/\b(a\/f|wideband|ho2s|o2|oksigen|oxygen|lambda)\b/i.test(cLow)) return 'af_6w';
+      if (/\b(a\/f|wideband|ho2s|o2|oksigen|oxygen|lambda)\b/i.test(tLow)) return 'af_6w';
       if (/\b(throttle|tps|etc|etcs|pedal|app)\b/i.test(tLow)) return 'etc_6w';
-      if (/\b(maf|mass air flow)\b/i.test(cLow)) return 'maf_5w';
-      if (/\b(ect|coolant|suhu air|water temp|thermostat)\b/i.test(cLow) || /c37-24|c01-32/.test(cLow)) return 'ect_2w';
-      if (/\b(map|vakum|manifold|intake)\b/i.test(cLow) || /c37-55|c01-29/.test(cLow)) return 'map_3w';
-      if (/\b(koil|coil|misfire|pengapian|ignition)\b/i.test(cLow)) return 'coil_4w';
-      return null;
+      if (/\b(maf|mass air flow|intake air temp|iat)\b/i.test(tLow)) return 'maf_5w';
+      if (/\b(ect|coolant|suhu air|water temp|thermostat)\b/i.test(tLow) || /c37-24|c01-32/.test(cLow)) return 'ect_2w';
+      if (/\b(map|vakum|manifold|barometric)\b/i.test(tLow) || /c37-55|c01-29/.test(cLow)) return 'map_3w';
+      return 'dynamic';
+    }
+
+    function openActiveDiagOemPhoto() {
+      const adv = window.__lastActiveDiagAdvice || {};
+      const inputDtc = (document.getElementById('input-dtc')?.value || '').trim();
+      if (adv.atlas_module_id && typeof selectJb420Module === 'function') {
+        switchTab('manuals');
+        selectJb420Module(adv.atlas_module_id, 'photo');
+        const el = document.getElementById('jb420-cockpit-atlas');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      if (typeof openJb420AtlasByDtc === 'function') {
+        openJb420AtlasByDtc(inputDtc || adv.diagnosis_title || 'A-5', 'photo');
+      } else {
+        switchTab('manuals');
+      }
     }
 
     function selectSimCoilCylinder(cylNum) {
@@ -7324,18 +8192,18 @@
       const yearNum = Number((appInfo && appInfo.year) || document.getElementById('input-year')?.value || 0);
       const modelLow = String((appInfo && appInfo.model) || document.getElementById('input-model')?.value || '').toLowerCase();
 
-      // 1. Jika sirkuit Koil Pengapian pada kendaraan Bensin yang punya arsitektur EWD OEM resmi -> pakai Builder Koil COP Per Silinder!
+      // 1. Khusus Koil Pengapian pada kendaraan Bensin yang punya arsitektur EWD OEM resmi -> pakai Builder Koil COP Per Silinder!
       const coilArchKey = (baseKey === 'coil_4w' && fuelType !== 'diesel') ? resolveCoilArchKey(packId, appInfo) : null;
       if (isVerified && coilArchKey) {
         const useAlt = (coilArchKey === 'toyota_yaris_vios_1nzfe_2003_2016' && modelLow.includes('vios'))
           || (coilArchKey === 'toyota_fortuner_gen1_2005_2015' && yearNum > 0 && yearNum <= 2008);
         dynamicAutoCircuit = buildOemCoilCircuit(coilArchKey, targetCyl, { useAltConnector: useAlt });
       } else if (isCustomPack) {
-        const built = buildDynamicCircuitFromPinout(advice, appInfo, baseKey);
+        const built = buildDynamicCircuitFromPinout(advice, appInfo, baseKey === 'dynamic' ? null : baseKey);
         if (built) {
           dynamicAutoCircuit = built;
         } else {
-          const tplKey = (baseKey && WIRING_CIRCUITS[baseKey]) ? baseKey : 'map_3w';
+          const tplKey = (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) ? baseKey : 'map_3w';
           dynamicAutoCircuit = JSON.parse(JSON.stringify(WIRING_CIRCUITS[tplKey]));
           dynamicAutoCircuit.manualSourceVerified = false;
           dynamicAutoCircuit.manualSourceLabel = '⚠️ ILUSTRASI UMUM (PINOUT TUNGGAL — CEK SOKET FISIK)';
@@ -7344,20 +8212,26 @@
       } else if (isVerified && packId === 'suzuki_jb420_builtin') {
         if (baseKey === 'coil_4w') {
           dynamicAutoCircuit = buildOemCoilCircuit('suzuki_jb420_builtin', targetCyl);
-        } else if (baseKey && WIRING_CIRCUITS[baseKey]) {
+        } else if (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) {
           dynamicAutoCircuit = JSON.parse(JSON.stringify(WIRING_CIRCUITS[baseKey]));
           dynamicAutoCircuit.manualSourceVerified = true;
           dynamicAutoCircuit.manualSourceLabel = '✅ PINOUT RESMI: SUZUKI GRAND VITARA JB420 (J20A)';
-          dynamicAutoCircuit.manualSourceSubtitle = 'Menggunakan topologi soket, warna kabel & standar multimeter asli JB420 Bab 1A-15 & 1H-2.';
+          dynamicAutoCircuit.manualSourceSubtitle = `Menggunakan topologi soket, warna kabel & standar multimeter asli JB420 (${advice.manual_book_section || 'Bab 1A & 9A'}).`;
         } else {
-          dynamicAutoCircuit = buildDynamicCircuitFromPinout(advice, appInfo, baseKey) || JSON.parse(JSON.stringify(WIRING_CIRCUITS.map_3w));
+          // Bangun dinamis langsung dari pinout ASLI kode DTC tersebut (TCM, ABS, SRS, HVAC, BCM, ICM, Fuel Level, Brake, A/C, dll.) — JANGAN pernah jatuh ke Koil!
+          dynamicAutoCircuit = buildDynamicCircuitFromPinout(advice, appInfo, null) || JSON.parse(JSON.stringify(WIRING_CIRCUITS.map_3w));
         }
       } else {
-        // Mode Universal / Diesel tanpa tabel pinout spesifik model ini
-        const tplKey = (baseKey && WIRING_CIRCUITS[baseKey]) ? baseKey : (fuelType === 'diesel' ? 'ckp_2w' : 'coil_4w');
-        dynamicAutoCircuit = tplKey === 'coil_4w'
-          ? buildOemCoilCircuit('suzuki_jb420_builtin', targetCyl)
-          : JSON.parse(JSON.stringify(WIRING_CIRCUITS[tplKey]));
+        // Mode Universal / Diesel — prioritaskan diagram dinamis dari pinout DTC aktif; JANGAN pernah fallback ke Koil Pengapian untuk DTC non-pengapian!
+        const builtUniv = (baseKey === 'dynamic' || !baseKey) ? buildDynamicCircuitFromPinout(advice, appInfo, null) : null;
+        if (builtUniv) {
+          dynamicAutoCircuit = builtUniv;
+        } else {
+          const tplKey = (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) ? baseKey : (fuelType === 'diesel' ? 'ckp_2w' : 'map_3w');
+          dynamicAutoCircuit = tplKey === 'coil_4w'
+            ? buildOemCoilCircuit('suzuki_jb420_builtin', targetCyl)
+            : JSON.parse(JSON.stringify(WIRING_CIRCUITS[tplKey]));
+        }
         const vehName = appInfo && (appInfo.brand || appInfo.model)
           ? `${appInfo.brand || ''} ${appInfo.model || ''} ${appInfo.year || ''}`.trim()
           : 'Model Ini';
@@ -7730,11 +8604,378 @@
         vTitle.className = 'text-red-400 font-bold';
         vDesc.textContent = s.faultVerdict;
       }
+      applySimWiringInlineZoom();
     }
 
     // -------------------------------------------------------------
-    // TAB 2: DATABASE KASUS HISTORIS
+    // PEMFORMAT SUB-BAB RAPI UNTUK TEKS PANJANG & LANGKAH SOP MANUAL
     // -------------------------------------------------------------
+    function formatLongTextParagraphs(rawText) {
+      const txt = String(rawText || '-').trim();
+      if (!txt || txt === '-') return '<p>-</p>';
+      // Pisahkan menjadi poin/paragraf bila teks panjang (> 150 karakter & memiliki multi kalimat atau pemisah "|")
+      if (txt.includes(' | ')) {
+        return txt.split(/\s*\|\s*/).filter(Boolean).map((seg, i) =>
+          `<div class="flex items-start gap-2"><span class="text-cyan-400 font-bold shrink-0">${i + 1}.</span><span class="leading-relaxed">${esc(seg)}</span></div>`
+        ).join('');
+      }
+      if (txt.length > 155) {
+        const sentences = txt.split(/(?<=[.!?])\s+(?=[A-Z0-9“"'])/).map(s => s.trim()).filter(Boolean);
+        if (sentences.length >= 2) {
+          return sentences.map(s => `<p class="leading-relaxed">${esc(s)}</p>`).join('');
+        }
+      }
+      return `<p class="leading-relaxed">${esc(txt)}</p>`;
+    }
+
+    function formatSopStepIntoSubBab(rawStep, idx) {
+      const num = idx + 1;
+      let text = String(rawStep || '').replace(/^\d+[.)]\s*/, '').trim();
+      // Rapikan artefak kecil OCR seperti "Apakah periksa tegangan" -> "Apakah tegangan"
+      text = text.replace(/Apakah\s+periksa\s+tegangan/gi, 'Apakah tegangan');
+      text = text.replace(/Periksa\s+Kabel\s+sirkuit\s+periksa/gi, 'Periksa sirkuit kabel');
+
+      // 1. Pisahkan cabang solusi "→ [Solusi jika TIDAK: ...]"
+      let noAction = '';
+      const solMatch = text.match(/→\s*\[?Solusi jika TIDAK:\s*([^\]]+)\]?/i);
+      if (solMatch) {
+        noAction = solMatch[1].trim();
+        text = text.slice(0, solMatch.index).trim();
+      }
+
+      // 2. Pisahkan pertanyaan verifikasi "Apakah ...?"
+      let verifyQuestion = '';
+      const qMatch = text.match(/(Apakah\s+[^?]+\?)\s*$/i);
+      if (qMatch && qMatch.index > 6) {
+        verifyQuestion = qMatch[1].trim();
+        text = text.slice(0, qMatch.index).trim();
+      }
+
+      // 3. Pisahkan judul Sub-Bab dan daftar sub-langkah "1) ... 2) ... 3) ..."
+      let heading = text;
+      let subSteps = [];
+      const firstSubIdx = text.search(/(?:^|\s)1\)\s+/);
+      if (firstSubIdx !== -1) {
+        heading = text.slice(0, firstSubIdx).trim();
+        const subBody = text.slice(firstSubIdx).trim();
+        subSteps = subBody
+          .split(/(?=(?:^|\s)\d+\)\s+)/)
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+
+      if (!heading && verifyQuestion) {
+        heading = verifyQuestion;
+        verifyQuestion = '';
+      }
+
+      // Render sub-langkah (dukung juga sub-poin bullet "• ...")
+      const subStepsHtml = subSteps.length ? `
+        <div class="mt-2 space-y-1.5 pl-1 border-l-2 border-cyan-500/35">
+          ${subSteps.map(item => {
+            const m = item.match(/^(\d+)\)\s*([\s\S]+)$/);
+            const subNo = m ? m[1] : '•';
+            let subTxt = m ? m[2].trim() : item;
+            let bulletsHtml = '';
+            if (subTxt.includes('•')) {
+              const parts = subTxt.split(/\s*•\s*/).map(p => p.trim()).filter(Boolean);
+              subTxt = parts[0] || '';
+              if (parts.length > 1) {
+                bulletsHtml = `<div class="mt-1 space-y-1 pl-2">${parts.slice(1).map(bp =>
+                  `<div class="flex items-start gap-1.5 text-slate-300"><span class="text-amber-400 shrink-0">•</span><span class="leading-relaxed">${esc(bp)}</span></div>`
+                ).join('')}</div>`;
+              }
+            }
+            return `
+              <div class="pl-2.5 flex items-start gap-2">
+                <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[10.5px] font-bold shrink-0 mt-0.5">${esc(subNo)})</span>
+                <div class="flex-1 min-w-0 text-slate-200 leading-relaxed break-words">
+                  <span>${esc(subTxt)}</span>
+                  ${bulletsHtml}
+                </div>
+              </div>`;
+          }).join('')}
+        </div>` : '';
+
+      const verifyHtml = verifyQuestion ? `
+        <div class="mt-2 rounded-lg bg-cyan-950/50 border border-cyan-500/40 px-2.5 py-2 flex items-start gap-2 text-cyan-100">
+          <span class="text-cyan-400 font-extrabold shrink-0">❓ Cek:</span>
+          <span class="font-semibold leading-relaxed">${esc(verifyQuestion)}</span>
+        </div>` : '';
+
+      const noActionHtml = noAction ? `
+        <div class="mt-1.5 rounded-lg bg-amber-950/45 border border-amber-500/45 px-2.5 py-2 flex items-start gap-2 text-amber-100">
+          <span class="text-amber-400 font-extrabold shrink-0">⚠️ Jika TIDAK:</span>
+          <span class="leading-relaxed">${esc(noAction)}</span>
+        </div>` : '';
+
+      return `
+        <li onclick="toggleGuidanceChecklistItem(this)" data-done="0" data-num="${num}" class="cursor-pointer rounded-xl bg-slate-950/90 border border-slate-800 hover:border-cyan-500/50 p-3 sm:p-3.5 transition select-none">
+          <div class="flex items-start gap-2.5">
+            <span class="gchk-box w-6 h-6 rounded-lg bg-slate-800 border border-slate-600 text-cyan-300 flex items-center justify-center text-xs font-mono font-bold shrink-0 mt-0.5">${num}</span>
+            <div class="gchk-text flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] font-extrabold uppercase shrink-0">Sub-Bab ${num}</span>
+                <span class="font-bold text-white text-xs sm:text-sm leading-snug break-words">${esc(heading || rawStep)}</span>
+              </div>
+              ${subStepsHtml}
+              ${verifyHtml}
+              ${noActionHtml}
+            </div>
+          </div>
+        </li>`;
+    }
+
+    // -------------------------------------------------------------
+    // MODE TEKS BESAR (A+) & ZOOM INTERAKTIF + PINCH-TO-ZOOM (MEKANIK SENIOR)
+    // -------------------------------------------------------------
+    function syncSeniorTextUI() {
+      const on = document.documentElement.classList.contains('agos-senior-text');
+      const btn = document.getElementById('btn-toggle-senior-text');
+      const lbl = document.getElementById('label-senior-text');
+      if (btn) {
+        btn.className = on
+          ? 'flex items-center gap-1 text-[11px] sm:text-xs font-extrabold text-slate-950 bg-amber-400 hover:bg-amber-300 border border-amber-300 px-2.5 py-1.5 rounded-full shrink-0 active:scale-95 transition whitespace-nowrap shadow-md shadow-amber-500/30'
+          : 'flex items-center gap-1 text-[11px] sm:text-xs font-bold text-amber-300 bg-amber-950/70 hover:bg-amber-900/80 border border-amber-500/60 px-2.5 py-1.5 rounded-full shrink-0 active:scale-95 transition whitespace-nowrap';
+      }
+      if (lbl) lbl.textContent = on ? 'A+ ON' : 'A+';
+    }
+
+    function toggleSeniorTextMode() {
+      const next = !document.documentElement.classList.contains('agos-senior-text');
+      document.documentElement.classList.toggle('agos-senior-text', next);
+      try { localStorage.setItem('agosSeniorText', next ? '1' : '0'); } catch (e) {}
+      syncSeniorTextUI();
+    }
+
+    // Inisialisasi Mode Teks Besar dari penyimpanan lokal (jika pernah diaktifkan mekanik)
+    (function initSeniorTextPref() {
+      try {
+        if (localStorage.getItem('agosSeniorText') === '1') {
+          document.documentElement.classList.add('agos-senior-text');
+        }
+      } catch (e) {}
+      syncSeniorTextUI();
+    })();
+
+    // Inline Zoom untuk Pilar 1 Skematik Wiring (#sim-wiring-svg — gunakan lebar piksel eksplisit agar 100% zoom di WebView!)
+    let simWiringInlineZoom = 1.0;
+    function applySimWiringInlineZoom() {
+      const wrap = document.getElementById('sim-wiring-zoom-wrap');
+      const svg = document.getElementById('sim-wiring-svg');
+      const lbl = document.getElementById('sim-wiring-zoom-lbl');
+      if (svg) {
+        const baseW = (wrap && wrap.clientWidth > 60) ? wrap.clientWidth : 300;
+        const targetPx = Math.round(baseW * simWiringInlineZoom);
+        svg.classList.remove('w-full');
+        svg.style.width = simWiringInlineZoom <= 1.01 ? '100%' : `${targetPx}px`;
+        svg.style.minWidth = simWiringInlineZoom <= 1.01 ? '0' : `${targetPx}px`;
+        svg.style.maxWidth = 'none';
+      }
+      if (lbl) lbl.textContent = `${Math.round(simWiringInlineZoom * 100)}%`;
+    }
+    function zoomSimWiringInline(delta) {
+      simWiringInlineZoom = Math.max(1.0, Math.min(3.2, Math.round((simWiringInlineZoom + delta) * 100) / 100));
+      applySimWiringInlineZoom();
+    }
+    function resetSimWiringInlineZoom() {
+      simWiringInlineZoom = 1.0;
+      applySimWiringInlineZoom();
+    }
+
+    // Native 2-Finger Pinch-to-Zoom Helper (Bekerja mulus di WebView Android & Browser HP!)
+    window.attachAgosPinchZoom = function (containerEl, getScale, setScale, minS = 1.0, maxS = 3.5) {
+      if (!containerEl || containerEl.dataset.agosPinchBound === '1') return;
+      containerEl.dataset.agosPinchBound = '1';
+      let startDist = 0;
+      let startScale = 1.0;
+
+      function touchDist(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.hypot(dx, dy);
+      }
+
+      containerEl.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length === 2) {
+          startDist = touchDist(e.touches);
+          startScale = Number(getScale()) || 1.0;
+        }
+      }, { passive: true });
+
+      containerEl.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches.length === 2 && startDist > 10) {
+          e.preventDefault();
+          const curDist = touchDist(e.touches);
+          const ratio = curDist / startDist;
+          const next = Math.max(minS, Math.min(maxS, Math.round(startScale * ratio * 100) / 100));
+          setScale(next);
+        }
+      }, { passive: false });
+
+      containerEl.addEventListener('touchend', (e) => {
+        if (!e.touches || e.touches.length < 2) startDist = 0;
+      }, { passive: true });
+    };
+
+    // Universal Fullscreen SVG & Socket Zoom Modal (Pilar 1 Wiring, Soket Fisik, & Pilar 3 PCB!)
+    let agosSvgModalZoom = 1.6;
+    function applyAgosSvgModalZoom() {
+      const vp = document.getElementById('modal-svg-zoom-viewport');
+      const host = document.getElementById('modal-svg-zoom-host');
+      const lbl = document.getElementById('modal-svg-zoom-lbl');
+      const svg = host ? host.querySelector('svg') : null;
+      if (svg) {
+        const vpW = (vp && vp.clientWidth > 60) ? (vp.clientWidth - 24) : Math.max(320, window.innerWidth - 24);
+        const targetPx = Math.round(vpW * agosSvgModalZoom);
+        svg.classList.remove('w-full');
+        svg.style.width = `${targetPx}px`;
+        svg.style.minWidth = `${targetPx}px`;
+        svg.style.maxWidth = 'none';
+        svg.style.height = 'auto';
+        svg.style.margin = agosSvgModalZoom <= 1.02 ? '0 auto' : '0';
+      }
+      if (lbl) lbl.textContent = `${Math.round(agosSvgModalZoom * 100)}%`;
+    }
+    window.zoomAgosSvgModal = function (delta) {
+      agosSvgModalZoom = Math.max(0.8, Math.min(4.0, Math.round((agosSvgModalZoom + delta) * 100) / 100));
+      applyAgosSvgModalZoom();
+    };
+    window.setAgosSvgModalZoom = function (val) {
+      agosSvgModalZoom = Math.max(0.8, Math.min(4.0, Number(val) || 1.0));
+      applyAgosSvgModalZoom();
+    };
+    window.closeAgosSvgZoomModal = function () {
+      const modal = document.getElementById('modal-svg-zoom');
+      if (modal) modal.classList.add('hidden');
+    };
+    window.openAgosSvgZoomModal = function (sourceKey) {
+      const modal = document.getElementById('modal-svg-zoom');
+      const host = document.getElementById('modal-svg-zoom-host');
+      const titleEl = document.getElementById('modal-svg-zoom-title');
+      const subEl = document.getElementById('modal-svg-zoom-subtitle');
+      const legendEl = document.getElementById('modal-svg-zoom-legend');
+      if (!modal || !host) return;
+
+      let srcSvg = null;
+      let title = 'Zoom Detail Wiring & Soket';
+      let sub = 'Cubit 2 jari atau tekan tombol +/− untuk memperbesar · Geser layar untuk melihat nomor pin';
+      let legendHtml = '';
+      const isPhone = window.innerWidth < 640;
+
+      if (sourceKey === 'sim-wiring') {
+        srcSvg = document.getElementById('sim-wiring-svg');
+        const badge = document.getElementById('sim-wire-count-badge')?.textContent || 'Skematik Wiring';
+        const activeWire = document.getElementById('sim-active-wire-badge')?.textContent || '';
+        const instr = document.getElementById('sim-instruction-bar')?.textContent || '';
+        title = `Skematik Jalur Wiring — ${badge}`;
+        sub = activeWire ? `${activeWire} · Cubit 2 jari / tombol + untuk zoom hingga 400%` : sub;
+        agosSvgModalZoom = isPhone ? 1.8 : 1.3;
+        if (instr) {
+          legendHtml = `<div class="flex items-start gap-2"><span class="text-cyan-400 font-bold shrink-0">📍 Panduan Ukur:</span><span class="leading-relaxed">${esc(instr)}</span></div>`;
+        }
+      } else if (sourceKey === 'sim-connector') {
+        srcSvg = document.getElementById('sim-connector-svg');
+        const cLbl = document.getElementById('sim-connector-type-label')?.textContent || 'Penampang Soket Fisik';
+        const posLbl = document.getElementById('sim-dmm-probe-pos')?.textContent || '';
+        const negLbl = document.getElementById('sim-dmm-probe-neg')?.textContent || '';
+        const specLbl = document.getElementById('sim-dmm-spec')?.textContent || '';
+        const dmmVal = document.getElementById('sim-dmm-value')?.textContent || '';
+        title = `Penampang Soket Fisik (Tampak Depan) — ${cLbl}`;
+        sub = 'Nomor pin & posisi probe Merah (+) / Hitam (−) diperbesar penuh untuk mekanik senior';
+        agosSvgModalZoom = isPhone ? 1.5 : 1.15;
+        const pinRows = Array.from(document.querySelectorAll('#table-wiring-pinouts tr')).slice(0, 6).map(tr => {
+          const tds = tr.querySelectorAll('td');
+          if (tds.length < 2) return '';
+          return `<span class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 font-mono text-[11px]"><strong class="text-amber-300">${esc(tds[0].textContent.trim())}</strong> · ${esc(tds[1].textContent.trim())}</span>`;
+        }).filter(Boolean).join('');
+        legendHtml = `
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="font-mono text-xs text-emerald-300 font-bold">${esc(posLbl)} &nbsp;|&nbsp; ${esc(negLbl)} &nbsp;→&nbsp; <span class="text-amber-300">${esc(dmmVal)}</span></div>
+            <div class="text-[11px] text-slate-300">${esc(specLbl)}</div>
+          </div>
+          ${pinRows ? `<div class="flex flex-wrap gap-1.5 pt-1">${pinRows}</div>` : ''}`;
+      } else if (sourceKey === 'pilar3-unified') {
+        srcSvg = document.querySelector('#jb420-unified-svg-wrap svg');
+        const modTitle = document.querySelector('#jb420-stage-host h3')?.textContent || 'Simulasi Alur Sirkuit JB420';
+        title = `Papan Sirkuit Terpadu — ${modTitle}`;
+        sub = 'Cubit 2 jari atau tekan tombol +/− untuk zoom detail jalur kabel, pin ECM & osiloskop';
+        agosSvgModalZoom = isPhone ? 1.85 : 1.25;
+      }
+
+      if (!srcSvg) return;
+      const clone = srcSvg.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.classList.remove('w-full');
+      host.innerHTML = '';
+      host.appendChild(clone);
+
+      if (titleEl) titleEl.textContent = title;
+      if (subEl) subEl.textContent = sub;
+      if (legendEl) {
+        if (legendHtml) {
+          legendEl.innerHTML = legendHtml;
+          legendEl.classList.remove('hidden');
+        } else {
+          legendEl.innerHTML = '';
+          legendEl.classList.add('hidden');
+        }
+      }
+
+      modal.classList.remove('hidden');
+      applyAgosSvgModalZoom();
+
+      const vp = document.getElementById('modal-svg-zoom-viewport');
+      if (vp) {
+        vp.scrollLeft = 0;
+        vp.scrollTop = 0;
+        window.attachAgosPinchZoom(vp, () => agosSvgModalZoom, (s) => {
+          agosSvgModalZoom = s;
+          applyAgosSvgModalZoom();
+        }, 0.8, 4.0);
+      }
+    };
+
+    // Bind 2-Finger Pinch-to-Zoom pada elemen inline & modal foto saat DOM siap
+    window.addEventListener('DOMContentLoaded', () => {
+      const simWrap = document.getElementById('sim-wiring-zoom-wrap');
+      if (simWrap) {
+        window.attachAgosPinchZoom(simWrap, () => simWiringInlineZoom, (s) => {
+          simWiringInlineZoom = s;
+          applySimWiringInlineZoom();
+        }, 1.0, 3.2);
+      }
+      const fsPhotoWrap = document.getElementById('fs-jb420-photo-wrap');
+      if (fsPhotoWrap && typeof window.setJb420FullscreenZoomAbs === 'function') {
+        window.attachAgosPinchZoom(fsPhotoWrap, () => window.getJb420FullscreenZoom ? window.getJb420FullscreenZoom() : 1.0, (s) => {
+          window.setJb420FullscreenZoomAbs(s);
+        }, 0.75, 4.0);
+      }
+    });
+
+    // -------------------------------------------------------------
+    // TAB 2: DATABASE KASUS HISTORIS (DUAL-DATASET: JB420 + MULTI-MEREK)
+    // -------------------------------------------------------------
+    let activeCaseDatasetFilter = 'all'; // 'all' | 'jb420' | 'multi'
+
+    function isJb420Case(c) {
+      const code = String(c.case_code || '').toUpperCase();
+      const mod = String(c.model || '').toLowerCase();
+      return code.startsWith('GV') || mod.includes('vitara') || mod.includes('jb420');
+    }
+
+    function setCaseDatasetFilter(ds) {
+      activeCaseDatasetFilter = ds;
+      document.querySelectorAll('.db-ds-btn').forEach(btn => {
+        if (btn.dataset.ds === ds) {
+          btn.className = 'db-ds-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-600 to-brand-600 text-white border border-cyan-400/60 shadow transition';
+        } else {
+          btn.className = 'db-ds-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700 hover:border-cyan-500 transition';
+        }
+      });
+      renderCasesTable();
+    }
+
     async function loadAllCases() {
       try {
         const res = await fetch(`${API_BASE}/diagnostics/cases`);
@@ -7748,7 +8989,19 @@
     function renderCasesTable() {
       const searchEl = document.getElementById('filter-case-search');
       const search = (searchEl ? searchEl.value : '').toLowerCase();
+
+      const jbCount = allCasesCache.filter(isJb420Case).length;
+      const multiCount = allCasesCache.length - jbCount;
+      const elAll = document.getElementById('ds-cnt-all');
+      const elJb = document.getElementById('ds-cnt-jb420');
+      const elMu = document.getElementById('ds-cnt-multi');
+      if (elAll) elAll.textContent = allCasesCache.length;
+      if (elJb) elJb.textContent = jbCount;
+      if (elMu) elMu.textContent = multiCount;
+
       const filtered = allCasesCache.filter(c => {
+        if (activeCaseDatasetFilter === 'jb420' && !isJb420Case(c)) return false;
+        if (activeCaseDatasetFilter === 'multi' && isJb420Case(c)) return false;
         if (!search) return true;
         return (c.brand || '').toLowerCase().includes(search) ||
                (c.model || '').toLowerCase().includes(search) ||
@@ -7762,7 +9015,7 @@
       const subEl = document.getElementById('db-cases-subtitle');
       if (subEl) {
         const verCnt = allCasesCache.filter(c => String(c.verification_status || 'TERVERIFIKASI').toUpperCase() === 'TERVERIFIKASI').length;
-        subEl.textContent = `${allCasesCache.length} Kasus Bengkel (${verCnt} Terverifikasi Standar · Basis Pengetahuan CBR) & Auto-Sync Excel (DATA_KASUS_AGOS.xlsx).`;
+        subEl.textContent = `${allCasesCache.length} Kasus Dual-Dataset (${jbCount} Khusus Grand Vitara JB420 + ${multiCount} Multi-Merek · ${verCnt} Terverifikasi CBR) & Auto-Sync Excel.`;
       }
 
       const tbody = document.getElementById('table-all-cases');
@@ -7808,6 +9061,58 @@
           </td>
         </tr>`;
       }).join('');
+
+      // Render Kartu Kasus Vertikal Rapi Khusus HP (< 640px)
+      const mobHost = document.getElementById('cards-all-cases-mobile');
+      if (mobHost) {
+        if (!filtered.length) {
+          mobHost.innerHTML = '<div class="rounded-xl bg-slate-950/80 border border-slate-800 p-4 text-center text-xs text-slate-400">Tidak ada kasus cocok dengan filter pencarian.</div>';
+        } else {
+          mobHost.innerHTML = filtered.map(c => {
+            const st = String(c.verification_status || 'TERVERIFIKASI').toUpperCase();
+            const isVer = st === 'TERVERIFIKASI';
+            const statusPill = isVer
+              ? '<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">✓ TERVERIFIKASI</span>'
+              : '<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[10px] font-bold">DRAFT</span>';
+            const kmStr = c.odometer_km != null ? `${Number(c.odometer_km).toLocaleString('id-ID')} km` : '-';
+            const dtcChip = c.dtc && c.dtc !== 'Tidak ada'
+              ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/40 font-mono text-[10.5px] font-bold">${esc(c.dtc)}</span>`
+              : '<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-mono text-[10px]">Non-DTC</span>';
+            const verifyMobBtn = !isVer
+              ? `<button onclick="verifyCaseStandard(${c.id}, '${esc(c.case_code)}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold">✓ Verifikasi</button>`
+              : '';
+            return `
+              <div class="rounded-xl bg-[#070e1d] border border-slate-700/90 p-3.5 space-y-2 shadow-md">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-mono text-xs font-extrabold text-cyan-300">${esc(c.case_code)}</span>
+                    ${statusPill}
+                    ${dtcChip}
+                  </div>
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[10px] shrink-0">${esc(c.system_category)}</span>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">${esc(c.brand)} ${esc(c.model)} (${esc(c.year || '-')})</div>
+                  <div class="text-[10.5px] text-slate-400 font-mono mt-0.5 flex flex-wrap gap-2">
+                    ${c.engine_code ? `<span class="text-cyan-300">${esc(c.engine_code)}</span>` : ''}
+                    <span>${kmStr}</span>
+                    ${c.license_plate ? `<span class="text-amber-300">${esc(c.license_plate)}</span>` : ''}
+                  </div>
+                </div>
+                <div class="text-[11.5px] text-slate-300 leading-snug"><strong class="text-slate-400">Keluhan:</strong> ${esc(c.complaint)}</div>
+                <div class="rounded-lg bg-slate-950/90 border border-slate-800 p-2.5 space-y-1">
+                  <div class="text-xs font-bold text-white">${esc(c.final_diagnosis)}</div>
+                  <div class="text-[11px] text-emerald-300">→ ${esc(c.repair_action)}</div>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-1">
+                  ${verifyMobBtn}
+                  <button onclick="testCaseFromTable(${c.id})" class="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-bold flex items-center gap-1"><i class="fa-solid fa-magnifying-glass"></i> Uji Diagnosa</button>
+                  <button onclick="deleteCase(${c.id}, '${esc(c.case_code)}')" class="px-2.5 py-1.5 rounded-lg bg-red-950 hover:bg-red-700 text-red-200 border border-red-800/60 text-[11px]"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </div>`;
+          }).join('');
+        }
+      }
     }
 
     async function verifyCaseStandard(id, code) {
@@ -10358,6 +11663,7 @@
 
     syncShareQrAndUrl();
     populateActiveManualBookSelectors();
+    if (typeof initJb420CockpitAtlas === 'function') initJb420CockpitAtlas();
     renderWiringSimulator();
     renderManualComponentSimulator();
     renderPosDemo();

@@ -33,6 +33,7 @@ MAIN_ACTIVITY_JAVA = """package {package_name};
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
@@ -63,6 +64,12 @@ public class MainActivity extends BridgeActivity {{
             WebView wv = this.bridge.getWebView();
             if (wv != null) {{
                 wv.addJavascriptInterface(new AgosNativeBridge(), "AgosNative");
+                WebSettings ws = wv.getSettings();
+                ws.setSupportZoom(true);
+                ws.setBuiltInZoomControls(true);
+                ws.setDisplayZoomControls(false);
+                ws.setUseWideViewPort(true);
+                ws.setLoadWithOverviewMode(true);
             }}
         }}
     }}
@@ -106,10 +113,10 @@ def patch_version_gradle() -> None:
     if not BUILD_GRADLE_PATH.exists():
         return
     txt = BUILD_GRADLE_PATH.read_text(encoding="utf-8")
-    txt = re.sub(r"versionCode\s+\d+", "versionCode 220", txt, count=1)
-    txt = re.sub(r'versionName\s+"[^"]+"', 'versionName "2.2.0"', txt, count=1)
+    txt = re.sub(r"versionCode\s+\d+", "versionCode 230", txt, count=1)
+    txt = re.sub(r'versionName\s+"[^"]+"', 'versionName "2.3.0"', txt, count=1)
     BUILD_GRADLE_PATH.write_text(txt, encoding="utf-8")
-    print("[SUKSES] build.gradle diperbarui ke versionCode 220 / versionName 2.2.0")
+    print("[SUKSES] build.gradle diperbarui ke versionCode 230 / versionName 2.3.0")
 
 
 def patch_launcher_icons_and_splash() -> None:

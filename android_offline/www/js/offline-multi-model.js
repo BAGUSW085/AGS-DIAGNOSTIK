@@ -700,7 +700,7 @@
     const hintLow = `${mClean} ${engClean}`.toLowerCase();
     let fuel = 'Bensin';
     if (matchedVar && matchedVar.fuel) fuel = matchedVar.fuel;
-    else if (/air ev|binguo|cloud ev|atto 3|dolphin|seal|byd m6|mg4 ev|listrik/.test(hintLow)) fuel = 'EV';
+    else if (/air ev|binguo|cloud ev|atto 3|dolphin|seal|byd m6|mg4 ev|ioniq|kona electric|leaf|bz4x|ev6|ev9|neta|electric|listrik|\b(?:ev|bev)\b/.test(hintLow)) fuel = 'EV';
     else if (/hybrid|hev|phev|zenix hybrid|e:hev|shvs|eq boost/.test(hintLow)) fuel = 'Hybrid';
     else if (/diesel|solar|2gd|2kd|1gd|1kd|4n15|4d56|d4hb|4ja1|rz4e|crdi|vnt|vrz/.test(hintLow)) fuel = 'Diesel';
     else if (chosenGen && chosenGen.fuel_types && chosenGen.fuel_types.length) fuel = chosenGen.fuel_types[0];
@@ -813,7 +813,7 @@
   }
 
   // --- MODERN DTC, FUEL FILTER, ADAPTIVE LIVE DATA & CUTOFF ---
-  const EV_FORBIDDEN = ['sensor o2', 'ho2s', 'oksigen', 'busi', 'spark plug', 'koil', 'ignition coil', 'injektor', 'fuel pump', 'pompa bensin', 'bahan bakar', 'bbm', 'katalis', 'egr', 'throttle body', 'turbo', 'misfire'];
+  const EV_FORBIDDEN = ['sensor o2', 'o2 sensor', 'ho2s', 'oksigen', 'a/f sensor', 'sensor a/f', 'busi', 'spark plug', 'koil', 'ignition coil', 'pengapian', 'injektor', 'injector', 'fuel pump', 'pompa bensin', 'bahan bakar', 'bbm', 'katalis', 'catalytic', 'egr', 'evap', 'throttle body', 'trotel', 'pcv', 'selang vakum', 'turbo', 'knalpot', 'exhaust', 'misfire', 'sensor maf', 'sensor map', 'sensor ckp', 'sensor cmp'];
   const DIESEL_FORBIDDEN = ['busi', 'spark plug', 'koil pengapian', 'ignition coil', 'kabel busi', 'pertalite', 'pertamax'];
 
   function isFuelCompatible(text, fuel) {
@@ -1285,6 +1285,53 @@
       adv.is_pinout_verified = true;
       adv.safety_warning = appInfo.safety_warning_desc;
     }
+
+    // Pastikan 3-tier standards (Statis + Idle + Scanner) selalu terisi di mode offline
+    if ((!Array.isArray(adv.idle_standards) || adv.idle_standards.length === 0) && reqCodes.length && global.AGOS_OFFLINE_DATA && global.AGOS_OFFLINE_DATA.jb420_catalog) {
+      const catArr = global.AGOS_OFFLINE_DATA.jb420_catalog.dtc_catalog || global.AGOS_OFFLINE_DATA.jb420_catalog || [];
+      const foundCat = Array.isArray(catArr) ? catArr.find((d) => reqCodes.includes(String(d.code || '').toUpperCase())) : null;
+      if (foundCat) {
+        if (Array.isArray(foundCat.idle_standards) && foundCat.idle_standards.length) adv.idle_standards = foundCat.idle_standards.map((x) => ({ ...x }));
+        if (Array.isArray(foundCat.scanner_standards) && foundCat.scanner_standards.length) adv.scanner_standards = foundCat.scanner_standards.map((x) => ({ ...x }));
+        if (!adv.sim_circuit_key && foundCat.sim_circuit_key) adv.sim_circuit_key = String(foundCat.sim_circuit_key);
+        if (!adv.atlas_module_id && foundCat.atlas_module_id) adv.atlas_module_id = String(foundCat.atlas_module_id);
+      }
+    }
+    if (!Array.isArray(adv.idle_standards) || adv.idle_standards.length === 0) {
+      adv.idle_standards = fuel === 'EV'
+        ? [
+            { parameter: 'Tegangan Aki 12V Aux Saat Mode READY (DC-DC Aktif)', normal_range: '13.6 – 14.5 V', unit: 'V DC' },
+            { parameter: 'Tahanan Isolasi Sistem HV (Insulation Tester 500V)', normal_range: '> 10 MΩ (Wajib APD 1000V)', unit: 'MΩ' }
+          ]
+        : (fuel === 'Diesel'
+          ? [
+              { parameter: 'Tekanan Common-Rail Bahan Bakar Saat Idle Panas', normal_range: '30 – 45 MPa (300 – 450 bar)', unit: 'MPa' },
+              { parameter: 'Putaran Mesin Idle Panas & Pengisian Alternator', normal_range: '700 – 800 RPM · 13.5 – 14.5 V', unit: 'RPM / V' }
+            ]
+          : [
+              { parameter: 'Putaran Mesin Idle Tanpa Beban (Panas Kerja 80–90°C)', normal_range: '650 – 750 ± 50 RPM', unit: 'RPM' },
+              { parameter: 'Tegangan Pengisian Alternator Saat Idle', normal_range: '13.5 – 14.5 V (Stabil)', unit: 'V DC' },
+              { parameter: 'Vakum Intake Manifold / Tegangan Sensor MAP Saat Idle', normal_range: '24 – 38 kPa (~1.1 – 1.5 V)', unit: 'kPa / V' }
+            ]);
+    }
+    if (!Array.isArray(adv.scanner_standards) || adv.scanner_standards.length === 0) {
+      adv.scanner_standards = fuel === 'EV'
+        ? [
+            { parameter: 'HV BATTERY CELL VOLTAGE DELTA (Live Data BMS)', normal_range: '< 50 mV antar sel', unit: 'mV' },
+            { parameter: 'HV BATTERY SOC / SOH & SUHU PACK', normal_range: '20 – 100% · 20 – 45 °C', unit: '% / °C' }
+          ]
+        : (fuel === 'Diesel'
+          ? [
+              { parameter: 'FUEL RAIL PRESSURE ACTUAL vs TARGET (Idle)', normal_range: '30 – 45 MPa (Selisih < ±3 MPa)', unit: 'MPa' },
+              { parameter: 'INJECTOR FEEDBACK / CORRECTION VOLUME', normal_range: '–2.5 s/d +2.5 mm³/st', unit: 'mm³/st' }
+            ]
+          : [
+              { parameter: 'COOLANT TEMP (ECT · Bab 1A-34 Idle Panas)', normal_range: '80 – 100 °C', unit: '°C' },
+              { parameter: 'SHORT FT B1 (STFT) & LONG FT B1 (LTFT · Bab 1A-35)', normal_range: '–10% s/d +10% (Ambang ±20%)', unit: '%' },
+              { parameter: 'MAF & MAP Saat Idle Panas (Bab 1A-34/35)', normal_range: '1.0 – 4.0 g/s · 24 – 38 kPa', unit: 'g/s · kPa' }
+            ]);
+    }
+
     out.direct_manual_advice = adv;
     return out;
   }
