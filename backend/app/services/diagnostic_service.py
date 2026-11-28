@@ -630,6 +630,14 @@ class ManualRepairAdvice(BaseModel):
     scanner_standards: list[dict[str, str]] = []
     sim_circuit_key: str | None = None
     atlas_module_id: str | None = None
+    wiring_ref_id: str | None = None
+    oem_wiring_image: str | None = None
+    shared_with_dtcs: list[str] = []
+    wiring_cross_ref_note: str | None = None
+    atlas_photo_index: int = 0
+    connector: dict[str, Any] | None = None
+    verification_status: str = "VERIFIED_OEM"
+    manual_page_ref: str | None = None
     wiring_pinout: list[dict[str, str]]
     relearn_reset_steps: list[str]
     is_pinout_verified: bool = True
@@ -1189,63 +1197,61 @@ class WeightedDiagnosticEngine:
             is_rear_ho2s2 = bool(dtc_codes & {"P0036", "P0037", "P0038", "P0136", "P0137", "P0138", "P0140", "P0141"}) or "sensor 2" in diag_clean or "belakang" in diag_clean or "ho2s-2" in diag_clean
             return ManualRepairAdvice(
                 diagnosis_title=(
-                    "Gangguan Sensor Oksigen Belakang / HO2S-2 (Bank 1 Sensor 2 — 4-Pin)"
+                    "Gangguan Sensor Oksigen Belakang / HO2S-2 (Bank 1 Sensor 2 — 4-Pin C15)"
                     if is_rear_ho2s2
-                    else "Gangguan A/F Sensor Depan / Wideband Bank 1 Sensor 1 (6-Pin JB420)"
+                    else "Gangguan A/F Sensor Depan / Bank 1 Sensor 1 (4-Pin JB420)"
                 ),
                 system_category="Bahan Bakar",
                 group_category="Pembakaran",
-                manual_book_section="Suzuki Grand Vitara JB420 Manual Bab 1A-15 (Hal. 73) & Bab 1A-140 (A/F & HO2S Inspection)",
+                manual_book_section="Suzuki Grand Vitara JB420 Manual Vol 1 Bab 1A-54 / 1A-94 & Vol 2 Bab 9A-43 (A/F & HO2S 4-Pin)",
                 cause_summary=(
-                    "Elemen pemanas (heater) atau sel sensor HO2S-2 belakang (4-pin) putus/korslet, atau soket kabel terbakar panas knalpot."
+                    "Elemen pemanas (heater) atau sel sensor HO2S-2 belakang (4-pin C15) putus/korslet, atau soket kabel terbakar panas knalpot."
                     if is_rear_ho2s2
-                    else "Elemen pemanas (heater), sel wideband, atau resistor kalibrasi pada A/F Sensor-1 depan (6-pin pada JB420) mengalami putus/korslet atau jenuh karbon."
+                    else "Elemen pemanas (heater) atau sel sensor A/F Sensor-1 depan (4-pin 2x2: 2 Heater + 2 Sinyal A/F) mengalami putus/korslet, suplai HO2S Heater Relay hilang, atau sensor jenuh karbon."
                 ),
                 cause_items=[
                     {"badge": "Penyebab Utama #1", "title": "Elemen Heater Putus / Sensor Jenuh Karbon", "desc": "Kumparan pemanas internal sensor putus (OL) atau ujung elemen keramik tertutup jelaga tebal."},
-                    {"badge": "Penyebab #2", "title": "Soket Kendor / Kabel Meleleh Terkena Knalpot", "desc": "Isolasi kabel sensor terkelupas atau hubung singkat karena menempel pada pipa exhaust manifold panas."},
-                    {"badge": "Penyebab #3", "title": "Suplai +12V Main Relay Drop / Kebocoran Knalpot", "desc": "Suplai daya heater (+12V Main Relay BLU/BLK) terputus atau paking exhaust manifold bocor."},
+                    {"badge": "Penyebab #2", "title": "Soket 4-Pin Kendor / Kabel Meleleh Terkena Knalpot", "desc": "Isolasi kabel sensor terkelupas atau hubung singkat karena menempel pada pipa exhaust manifold panas."},
+                    {"badge": "Penyebab #3", "title": "Suplai +12V HO2S Heater Relay (#10 20A O2 HTR) Drop / Kebocoran Knalpot", "desc": "Suplai daya heater (+12V kabel PNK dari HO2S Heater Relay) terputus atau paking exhaust manifold bocor."},
                 ],
                 repair_options=[
-                    {"tag": "Opsi 1 • Utama (Ganti Sensor)", "title": f"Ganti {'HO2S-2 (Belakang, 4-Pin)' if is_rear_ho2s2 else 'A/F Sensor-1 (Depan, 6-Pin)'} Baru", "desc": "Ganti unit sensor yang putus heater/lemah menggunakan kunci soket 22 mm (torsi 44 N·m)."},
-                    {"tag": "Opsi 2 • Kelistrikan & Soket", "title": "Perbaiki Kabel Harness, Soket Sensor & Cek Suplai Main Relay", "desc": "Pastikan suplai +12V heater dari Main Relay (BLU/BLK) masuk normal dan kontrol PWM ECM tidak putus."},
+                    {"tag": "Opsi 1 • Utama (Ganti Sensor)", "title": f"Ganti {'HO2S-2 (Belakang, 4-Pin C15)' if is_rear_ho2s2 else 'A/F Sensor-1 (Depan, 4-Pin)'} Baru", "desc": "Ganti unit sensor yang putus heater/lemah menggunakan kunci soket 22 mm (torsi 44 N·m)."},
+                    {"tag": "Opsi 2 • Kelistrikan & Soket", "title": "Perbaiki Kabel Harness, Soket 4-Pin & Cek HO2S Heater Relay (#10 20A)", "desc": "Pastikan suplai +12V heater dari HO2S Heater Relay (PNK) masuk normal dan kontrol PWM ECM (C37-32/47) tidak putus."},
                     {"tag": "Opsi 3 • BBM & Knalpot", "title": "Cek Kerapatan Paking Knalpot & Kualitas BBM", "desc": "Pastikan tidak ada kebocoran gas buang sebelum sensor dan gunakan BBM sesuai oktan mesin."},
                 ],
                 sensor_standards=(
                     [
                         {"parameter": "Voltase Sinyal HO2S-2 (C37-11 RED)", "normal_range": "0.10 - 0.90 V (Idle Hangat)", "unit": "V"},
-                        {"parameter": "Suplai Heater +12V Main Relay (BLU/BLK)", "normal_range": "10.0 - 14.0 V (IG ON)", "unit": "V"},
-                        {"parameter": "Tahanan Pemanas HO2S-2 (20°C)", "normal_range": "5.0 - 15.0 Ohm", "unit": "Ohm"},
+                        {"parameter": "Suplai Heater +12V HO2S Heater Relay (PNK)", "normal_range": "10.0 - 14.0 V (IG ON)", "unit": "V"},
+                        {"parameter": "Tahanan Pemanas HO2S-2 (20°C)", "normal_range": "5.0 - 7.0 Ohm", "unit": "Ohm"},
                     ]
                     if is_rear_ho2s2
                     else [
-                        {"parameter": "A/F Signal (+) C37-38 WHT & (-) C37-37 BLK", "normal_range": "3.0-3.2 V (+) | 2.6-2.8 V (-)", "unit": "V"},
-                        {"parameter": "Adjusting Resistor C37-35 RED/YEL", "normal_range": "0.15 - 4.82 V (IG ON)", "unit": "V"},
-                        {"parameter": "Suplai Heater Main Relay (BLU/BLK) & Kontrol C37-32", "normal_range": "10.0 - 14.0 V (IG ON)", "unit": "V"},
+                        {"parameter": "Tahanan Heater A/F Sensor-1 (Pin 1–2 pada 20°C)", "normal_range": "2.3 - 4.3 Ohm (Soket 4-Pin)", "unit": "Ohm"},
+                        {"parameter": "Suplai Heater +12V HO2S Heater Relay (Pin 1 PNK)", "normal_range": "10.0 - 14.0 V (IG ON)", "unit": "V"},
+                        {"parameter": "A/F Signal (+) C37-38 WHT & (−) C37-37 BLK", "normal_range": "3.0-3.2 V (+) | 2.6-2.8 V (−)", "unit": "V"},
                     ]
                 ),
                 wiring_pinout=(
                     [
-                        {"pin": "MAIN-RLY (Pin 1)", "signal": "BLU/BLK — Suplai +12V Heater HO2S-2 (Main Relay)", "function": "Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 14)"},
-                        {"pin": "C37-47 (Pin 2)", "signal": "BLK/RED — Kontrol Heater HO2S-2 (Low-Side ECM)", "function": "Kontrol ground PWM pemanas HO2S-2 oleh ECM (10–14 V OFF, Pulsa ON)"},
-                        {"pin": "C37-11 (Pin 3)", "signal": "RED — Sinyal HO2S-2 Belakang", "function": "Sinyal sensor oksigen hilir 0.1 – 0.9 V saat idle hangat"},
-                        {"pin": "GND-ENG (Pin 4)", "signal": "BLK/YEL — Massa Sensor HO2S-2", "function": "Jalur massa sensor HO2S-2 (< 0.3 V ke bodi/mesin)"},
+                        {"pin": "C37-57 (Pin 1)", "signal": "GRN — GND", "function": "Massa Sinyal HO2S-2 Belakang (< 0.3 V / < 1 Ω ke massa)"},
+                        {"pin": "C37-11 (Pin 2)", "signal": "RED — O2 SIG", "function": "Sinyal Oksigen Hilir HO2S-2 (4.0–5.0 V bias IG ON · 0.10–0.90 V Idle Panas)"},
+                        {"pin": "C37-47 (Pin 3)", "signal": "BLK/RED — HTR-", "function": "Kontrol Heater HO2S-2 PWM Low-Side dari ECM (10–14 V IG ON · Pulsa Idle)"},
+                        {"pin": "O2 HTR RLY (Pin 4)", "signal": "PNK — HTR+", "function": "Suplai +12V Heater HO2S-2 dari HO2S Heater Relay (10–14 V IG ON)"},
                     ]
                     if is_rear_ho2s2
                     else [
-                        {"pin": "MAIN-RLY (Pin 1)", "signal": "BLU/BLK — Suplai +12V Heater A/F (Main Relay)", "function": "Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 15; bukan dari C37-32!)"},
-                        {"pin": "C37-32 (Pin 2)", "signal": "PNK/BLU — Kontrol Heater A/F (Low-Side PWM ECM)", "function": "Kontrol ground PWM pemanas A/F Sensor-1 oleh ECM (Catatan: C37-31 BLK/YEL adalah ground heater internal ECM ke bodi)"},
-                        {"pin": "C37-38 (Pin 3)", "signal": "WHT — A/F Sensor Signal (+)", "function": "Sinyal sel wideband (+) 3.0 – 3.2 V saat idle"},
-                        {"pin": "C37-37 (Pin 4)", "signal": "BLK — A/F Sensor Signal (-)", "function": "Sinyal sel wideband (-) 2.6 – 2.8 V saat idle"},
-                        {"pin": "C37-35 (Pin 5)", "signal": "RED/YEL — A/F Adjusting Resistor Signal", "function": "Sinyal resistor kalibrasi A/F 0.15 – 4.82 V (IG ON)"},
-                        {"pin": "C37-34 (Pin 6)", "signal": "RED/BLU — A/F Adjusting Resistor Ground", "function": "Massa resistor kalibrasi A/F (< 0.3 V)"},
+                        {"pin": "O2 HTR RLY (Pin 1)", "signal": "PNK — HO2S HTR+", "function": "Suplai +12V Heater A/F dari HO2S Heater Relay / Sekring #10 20A O2 HTR (10–14 V IG ON)"},
+                        {"pin": "C37-32 (Pin 2)", "signal": "PNK/BLU — HO2S HTR-", "function": "Kontrol Heater A/F Sensor-1 Low-Side PWM dari ECM (10–14 V IG ON · Pulsa saat Idle)"},
+                        {"pin": "C37-38 (Pin 3)", "signal": "WHT — A/F (+)", "function": "Sinyal Utama A/F Sensor-1 (+) ke ECM (3.0–3.2 V saat Idle Panas)"},
+                        {"pin": "C37-37 (Pin 4)", "signal": "BLK — A/F (-)", "function": "Sinyal Referensi A/F Sensor-1 (−) ke ECM (2.6–2.8 V saat Idle Panas)"},
                     ]
                 ),
                 step_by_step_repair=[
-                    "1. Periksa kabel dan soket sensor O2 di exhaust manifold dari leleh/terbakar akibat panas knalpot.",
-                    "2. Gunakan multimeter untuk mengukur tahanan heater pada 2 pin sensor O2 (normal 11-16 Ohm). Bila putus/infinite, sensor wajib ganti.",
-                    "3. Lepas sensor O2 menggunakan kunci soket berbelah 22 mm (oxygen sensor socket).",
-                    "4. Oleskan anti-seize paste pada ulir sensor baru (jangan sampai mengenai ujung tip sensor!), kencangkan dengan torsi 44 N·m.",
+                    "1. Periksa kabel dan soket 4-pin sensor O2/A-F di exhaust manifold dari leleh/terbakar akibat panas knalpot.",
+                    "2. Gunakan multimeter untuk mengukur tahanan heater pada 2 pin heater soket 4-pin sensor (A/F S1: 2.3–4.3 Ω · HO2S-2: 5–7 Ω). Bila putus/OL, sensor wajib ganti.",
+                    "3. Periksa tegangan +12V pada kabel PNK dari HO2S Heater Relay (#10 20A O2 HTR) saat IG ON dan sinyal kontrol PWM ECM (C37-32/47).",
+                    "4. Lepas sensor menggunakan kunci soket berbelah 22 mm, oleskan anti-seize tipis pada ulir sensor baru (jangan kena ujung sensor!), kencangkan torsi 44 N·m.",
                 ],
                 relearn_reset_steps=[
                     "1. Reset DTC P0131 dan reset fuel trim via scanner.",
@@ -1546,26 +1552,26 @@ class WeightedDiagnosticEngine:
             is_cmp = bool(dtc_codes & {"P0340", "P0341", "P0342", "P0343", "P0344"}) or ("cmp" in diag_clean and "ckp" not in diag_clean)
             return ManualRepairAdvice(
                 diagnosis_title=(
-                    "Malfungsi Sirkuit Sensor Posisi Poros Nok / Camshaft (CMP Sensor — 3-Pin Hall-IC)"
+                    "Malfungsi Sirkuit Sensor Posisi Poros Nok / Camshaft (CMP Sensor — 3-Pin C08)"
                     if is_cmp
-                    else "Malfungsi Sirkuit Sensor Posisi Poros Engkol / Crankshaft (CKP Sensor — 2-Pin Induktif)"
+                    else "Malfungsi Sirkuit Sensor Posisi Poros Engkol / Crankshaft (CKP Sensor — 3-Pin C20)"
                 ),
                 system_category="Pengapian",
                 group_category="Pembakaran",
-                manual_book_section="Suzuki Grand Vitara JB420 Manual Bab 1H-2 (Hal. 430) & Bab 1A-15 (CKP 2-Pin & CMP 3-Pin)",
+                manual_book_section="Suzuki Grand Vitara JB420 Manual Vol 1 Bab 1A-115 / 1A-117 & Vol 2 Bab 9A-92 (CKP C20 3-Pin & CMP C08 3-Pin)",
                 cause_summary=(
-                    "IC Hall sensor CMP (3-pin) melemah saat mesin panas atau suplai +12V Main Relay (BLU/BLK) / sinyal C37-52 (WHT/RED) terputus, memicu DTC P0340 dan sulit starter."
+                    "IC Hall sensor CMP (3-pin C08) melemah saat mesin panas atau suplai +12V Main Relay (BLU/BLK) / sinyal C37-52 (WHT/RED) terputus, memicu DTC P0340 dan sulit starter."
                     if is_cmp
-                    else "Kumparan induktif sensor CKP (2-pin + shield) melemah saat panas atau ujung magnet tertutup serbuk besi, menyebabkan sinyal C37-51 (BLU) & C37-36 (PNK) hilang (P0335) dan mesin mati mendadak."
+                    else "Kumparan induktif sensor CKP (3-pin C20: Shield BLK, PNK & BLU) melemah saat panas atau ujung magnet tertutup serbuk besi, menyebabkan sinyal C37-36 (PNK) & C37-51 (BLU) hilang (P0335) dan mesin mati mendadak."
                 ),
                 cause_items=[
-                    {"badge": "Penyebab Utama #1", "title": f"Sensor {'CMP (3-Pin Hall-IC)' if is_cmp else 'CKP (2-Pin Induktif)'} Melemah Saat Mesin Panas", "desc": "Kumparan atau IC Hall di dalam sensor putus kontak ketika suhu kerja mesin tinggi sehingga mesin mati mendadak."},
+                    {"badge": "Penyebab Utama #1", "title": f"Sensor {'CMP (3-Pin C08 Hall-IC)' if is_cmp else 'CKP (3-Pin C20 Induktif)'} Melemah Saat Mesin Panas", "desc": "Kumparan atau IC Hall di dalam sensor putus kontak ketika suhu kerja mesin tinggi sehingga mesin mati mendadak."},
                     {"badge": "Penyebab #2", "title": "Ujung Magnet Sensor Tertutup Gram Besi / Oli", "desc": "Kotoran serbuk logam menempel pada kepala sensor sehingga mengganggu pembacaan gigi reluctor."},
-                    {"badge": "Penyebab #3", "title": "Soket Kendor / Kabel Putus atau Timing Chain Melar", "desc": "Konektor sensor kemasukan rembesan oli atau posisi rantai timing (timing chain) bergeser."},
+                    {"badge": "Penyebab #3", "title": "Soket 3-Pin Kendor / Kabel Putus atau Timing Chain Melar", "desc": "Konektor sensor kemasukan rembesan oli atau posisi rantai timing (timing chain) bergeser."},
                 ],
                 repair_options=[
                     {"tag": "Opsi 1 • Utama (Ganti Sensor)", "title": f"Ganti Sensor {'CMP' if is_cmp else 'CKP'} Baru (Orisinil)", "desc": "Ganti unit sensor yang lemah beserta O-ring baru (kencangkan baut 10 mm torsi 10 N·m)."},
-                    {"tag": "Opsi 2 • Pembersihan & Soket", "title": "Bersihkan Ujung Sensor dari Gram Besi & Perbaiki Soket", "desc": f"Bersihkan kepala magnet sensor, semprot soket dengan contact cleaner, dan cek jalur {'C37-52 (WHT/RED), +12V BLU/BLK & GND BLK/YEL' if is_cmp else 'C37-51 (BLU) & C37-36 (PNK)'}."},
+                    {"tag": "Opsi 2 • Pembersihan & Soket", "title": "Bersihkan Ujung Sensor dari Gram Besi & Perbaiki Soket 3-Pin", "desc": f"Bersihkan kepala magnet sensor, semprot soket 3-pin dengan contact cleaner, dan cek jalur {'C37-52 (WHT/RED), +12V BLU/BLK & GND BLK/YEL' if is_cmp else 'Pin 1 Shield (BLK), Pin 2 C37-36 (PNK) & Pin 3 C37-51 (BLU)'}."},
                     {"tag": "Opsi 3 • Mekanis Timing", "title": "Periksa Ketepatan Timing Chain & Roda Gigi Reluctor", "desc": "Periksa tanda top timing mesin jika kode CKP/CMP tetap muncul setelah ganti sensor."},
                 ],
                 sensor_standards=(
@@ -1576,25 +1582,26 @@ class WeightedDiagnosticEngine:
                     ]
                     if is_cmp
                     else [
-                        {"parameter": "Tahanan Kumparan CKP (Pin 1–2 pada 20°C)", "normal_range": "1.6 - 2.7 kOhm (Induktif 2-Pin)", "unit": "kOhm"},
+                        {"parameter": "Tahanan Kumparan CKP C20 (Pin 2–3 pada 20°C)", "normal_range": "1.68 - 2.52 kOhm (Induktif 3-Pin)", "unit": "kOhm"},
                         {"parameter": "Sinyal AC Output CKP C37-51/36 (Saat Crank)", "normal_range": "Pulsa AC > 0.5 V AC (Simetris)", "unit": "VAC"},
-                        {"parameter": "Celah Udara (Air Gap) Ujung Sensor", "normal_range": "0.5 - 1.5 mm (Bebas serbuk besi)", "unit": "mm"},
+                        {"parameter": "Kontinuitas Pin 1 Shield (BLK) ke Massa Blok", "normal_range": "< 1.0 Ohm (Tidak short ke Pin 2/3)", "unit": "Ohm"},
                     ]
                 ),
                 wiring_pinout=(
                     [
-                        {"pin": "MAIN-RLY (Pin 1)", "signal": "BLU/BLK — Suplai +12V Sensor CMP (Main Relay)", "function": "Suplai daya 10–14 V IG ON dari Main Relay (Bab 1H-2 & 1A-15)"},
-                        {"pin": "C37-52 (Pin 2)", "signal": "WHT/RED — Sinyal Output Sensor CMP", "function": "Input pulsa kotak 0–5 V posisi poros nok ke ECM"},
-                        {"pin": "GND-ENG (Pin 3)", "signal": "BLK/YEL — Massa Sensor CMP (Blok Mesin)", "function": "Massa sensor Hall-IC CMP ke blok mesin (< 0.3 V)"},
+                        {"pin": "GND BLOK (Pin 1)", "signal": "BLK/YEL — GND", "function": "Massa Sensor Hall-Effect CMP ke Blok Mesin (< 1 Ω)"},
+                        {"pin": "C37-52 (Pin 2)", "signal": "WHT/RED — CMP SIG", "function": "Pulsa Digital Posisi Noken As (0–0.6 V ↔ 4–5 V saat Cranking/Idle)"},
+                        {"pin": "MAIN RLY (Pin 3)", "signal": "BLU/BLK — +B 12V", "function": "Suplai +12V Main Relay untuk Sensor Hall-IC CMP (10–14 V IG ON)"},
                     ]
                     if is_cmp
                     else [
-                        {"pin": "C37-51 (Pin 1)", "signal": "BLU — CKP Sensor Signal (+)", "function": "Input pulsa AC (+) poros engkol ke ECM (Induktif 2-Pin; shield BLK — Bab 1H-2 & 1A-15)"},
-                        {"pin": "C37-36 (Pin 2)", "signal": "PNK — CKP Sensor Signal (-)", "function": "Input pulsa AC (-) / return poros engkol ke ECM"},
+                        {"pin": "GND BLOK (Pin 1)", "signal": "BLK — SHIELD", "function": "Pelindung Shield Anti-Noise Elektromagnetik ke Massa Blok #3 (< 1 Ω)"},
+                        {"pin": "C37-36 (Pin 2)", "signal": "PNK — CKP (-)", "function": "Sinyal Induktif Poros Engkol CKP (−) ke ECM (Tahanan Pin 2↔3: 1.68–2.52 kΩ)"},
+                        {"pin": "C37-51 (Pin 3)", "signal": "BLU — CKP (+)", "function": "Sinyal Induktif Poros Engkol CKP (+) ke ECM (> 0.5 V AC saat Cranking)"},
                     ]
                 ),
                 step_by_step_repair=[
-                    f"1. Periksa soket {'3-pin CMP (+12V BLU/BLK, Sinyal WHT/RED, GND BLK/YEL)' if is_cmp else '2-pin CKP (BLU & PNK + kabel shield BLK)'} dari rembesan oli mesin atau kabel getas.",
+                    f"1. Periksa soket {'3-pin CMP C08 (GND BLK/YEL, Sinyal WHT/RED, +12V BLU/BLK)' if is_cmp else '3-pin CKP C20 (Pin 1 Shield BLK, Pin 2 PNK, Pin 3 BLU)'} dari rembesan oli mesin atau kabel getas.",
                     "2. Lepas baut pengikat sensor (10 mm), bersihkan ujung magnet sensor dari kotoran gram besi.",
                     "3. Ganti sensor dengan part orisinil beserta O-ring baru, kencangkan baut dengan torsi 10 N·m.",
                 ],
@@ -2030,6 +2037,30 @@ class WeightedDiagnosticEngine:
                     specialist.sim_circuit_key = str(cat_entry["sim_circuit_key"])
                 if cat_entry.get("atlas_module_id"):
                     specialist.atlas_module_id = str(cat_entry["atlas_module_id"])
+                if cat_entry.get("wiring_ref_id"):
+                    specialist.wiring_ref_id = str(cat_entry["wiring_ref_id"])
+                if cat_entry.get("oem_wiring_image"):
+                    specialist.oem_wiring_image = str(cat_entry["oem_wiring_image"])
+                if cat_entry.get("shared_with_dtcs"):
+                    specialist.shared_with_dtcs = [str(x) for x in cat_entry["shared_with_dtcs"]]
+                if cat_entry.get("wiring_cross_ref_note"):
+                    specialist.wiring_cross_ref_note = str(cat_entry["wiring_cross_ref_note"])
+                specialist.atlas_photo_index = int(cat_entry.get("atlas_photo_index") or 0)
+                if cat_entry.get("manual_page_ref"):
+                    specialist.manual_page_ref = str(cat_entry["manual_page_ref"])
+                if cat_entry.get("verification_status"):
+                    specialist.verification_status = str(cat_entry["verification_status"])
+                if cat_entry.get("connector"):
+                    specialist.connector = dict(cat_entry["connector"])
+                if cat_entry.get("wiring_pinout"):
+                    specialist.wiring_pinout = [
+                        {
+                            "pin": str(p.get("pin", "-")),
+                            "signal": str(p.get("signal", "-")),
+                            "function": str(p.get("function", "-")),
+                        }
+                        for p in cat_entry["wiring_pinout"]
+                    ]
             return specialist
 
         sys_cat, grp_cat = cls._classify_dtc_workshop_system(primary["code"], primary["system"], primary["description_id"])
@@ -2037,7 +2068,7 @@ class WeightedDiagnosticEngine:
         # 1. Prioritaskan Pinout & Warna Kabel ASLI per-DTC hasil ekstraksi halaman Buku Manual!
         pinouts: list[dict[str, str]] = []
         if cat_entry and cat_entry.get("wiring_pinout"):
-            for p_item in cat_entry["wiring_pinout"][:6]:
+            for p_item in cat_entry["wiring_pinout"][:8]:
                 pinouts.append({
                     "pin": str(p_item.get("pin", "-")),
                     "signal": str(p_item.get("signal", "-")),
@@ -2146,6 +2177,14 @@ class WeightedDiagnosticEngine:
         scanner_stds = [dict(x) for x in (cat_entry.get("scanner_standards") or [])] if cat_entry else []
         sim_key = str(cat_entry.get("sim_circuit_key")) if cat_entry and cat_entry.get("sim_circuit_key") else None
         atlas_mod = str(cat_entry.get("atlas_module_id")) if cat_entry and cat_entry.get("atlas_module_id") else None
+        wiring_ref = str(cat_entry.get("wiring_ref_id")) if cat_entry and cat_entry.get("wiring_ref_id") else None
+        oem_img = str(cat_entry.get("oem_wiring_image")) if cat_entry and cat_entry.get("oem_wiring_image") else None
+        shared_dtcs = [str(x) for x in (cat_entry.get("shared_with_dtcs") or [])] if cat_entry else []
+        cross_note = str(cat_entry.get("wiring_cross_ref_note")) if cat_entry and cat_entry.get("wiring_cross_ref_note") else None
+        atlas_pidx = int(cat_entry.get("atlas_photo_index") or 0) if cat_entry else 0
+        conn_obj = dict(cat_entry["connector"]) if cat_entry and cat_entry.get("connector") else None
+        ver_status = str(cat_entry.get("verification_status") or "VERIFIED_OEM") if cat_entry else "UNVERIFIED"
+        page_ref = str(cat_entry.get("manual_page_ref")) if cat_entry and cat_entry.get("manual_page_ref") else None
 
         return ManualRepairAdvice(
             diagnosis_title=f"DTC {dtc_str}: {title_desc}",
@@ -2160,6 +2199,14 @@ class WeightedDiagnosticEngine:
             scanner_standards=scanner_stds,
             sim_circuit_key=sim_key,
             atlas_module_id=atlas_mod,
+            wiring_ref_id=wiring_ref,
+            oem_wiring_image=oem_img,
+            shared_with_dtcs=shared_dtcs,
+            wiring_cross_ref_note=cross_note,
+            atlas_photo_index=atlas_pidx,
+            connector=conn_obj,
+            verification_status=ver_status,
+            manual_page_ref=page_ref,
             wiring_pinout=pinouts,
             step_by_step_repair=authentic_steps,
             relearn_reset_steps=[
@@ -3193,6 +3240,31 @@ class WeightedDiagnosticEngine:
                 direct_advice.sim_circuit_key = str(matched_cat_final["sim_circuit_key"])
             if not direct_advice.atlas_module_id and matched_cat_final.get("atlas_module_id"):
                 direct_advice.atlas_module_id = str(matched_cat_final["atlas_module_id"])
+            if app_info.active_pack_id == "suzuki_jb420_builtin":
+                if not direct_advice.wiring_ref_id and matched_cat_final.get("wiring_ref_id"):
+                    direct_advice.wiring_ref_id = str(matched_cat_final["wiring_ref_id"])
+                if not direct_advice.oem_wiring_image and matched_cat_final.get("oem_wiring_image"):
+                    direct_advice.oem_wiring_image = str(matched_cat_final["oem_wiring_image"])
+                if not direct_advice.shared_with_dtcs and matched_cat_final.get("shared_with_dtcs"):
+                    direct_advice.shared_with_dtcs = [str(x) for x in matched_cat_final["shared_with_dtcs"]]
+                if not direct_advice.wiring_cross_ref_note and matched_cat_final.get("wiring_cross_ref_note"):
+                    direct_advice.wiring_cross_ref_note = str(matched_cat_final["wiring_cross_ref_note"])
+                if not direct_advice.atlas_photo_index and matched_cat_final.get("atlas_photo_index"):
+                    direct_advice.atlas_photo_index = int(matched_cat_final["atlas_photo_index"])
+                if not direct_advice.manual_page_ref and matched_cat_final.get("manual_page_ref"):
+                    direct_advice.manual_page_ref = str(matched_cat_final["manual_page_ref"])
+                if matched_cat_final.get("connector"):
+                    direct_advice.connector = dict(matched_cat_final["connector"])
+                if matched_cat_final.get("wiring_pinout"):
+                    direct_advice.wiring_pinout = [
+                        {
+                            "pin": str(p.get("pin", "-")),
+                            "signal": str(p.get("signal", "-")),
+                            "function": str(p.get("function", "-")),
+                        }
+                        for p in matched_cat_final["wiring_pinout"]
+                    ]
+                direct_advice.verification_status = str(matched_cat_final.get("verification_status") or "VERIFIED_OEM")
 
         if not direct_advice.idle_standards:
             if vehicle_fuel == "EV":

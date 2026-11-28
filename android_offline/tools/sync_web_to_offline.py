@@ -138,9 +138,10 @@ def sync() -> None:
     html = html.replace('src="/static/js/jb420-wiring-atlas.js"', 'src="js/jb420-wiring-atlas.js"')
     html = html.replace('src="/static/js/jb420-cockpit-ui.js"', 'src="js/jb420-cockpit-ui.js"')
     html = html.replace('href="/wiring-viewer"', 'href="ewd_viewer.html"')
-    html = html.replace('>App v2.0<', '>v2.3.0 · JB420<')
-    html = html.replace('>v2.2.0<', '>v2.3.0 · JB420<')
-    html = html.replace('>v2.2.0 · JB420<', '>v2.3.0 · JB420<')
+    html = html.replace('>App v2.0<', '>v2.3.1 · JB420<')
+    html = html.replace('>v2.2.0<', '>v2.3.1 · JB420<')
+    html = html.replace('>v2.2.0 · JB420<', '>v2.3.1 · JB420<')
+    html = html.replace('>v2.3.0 · JB420<', '>v2.3.1 · JB420<')
     html = html.replace('href="/manifest.json"', '')
     html = html.replace(
         "<title>AGOS SMART DIAGNOSTIK by Agos Corporation — Aplikasi Bengkel AI</title>",

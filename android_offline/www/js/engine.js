@@ -475,50 +475,59 @@
     }
 
     if (
-      /\bo2\b|oksigen|oxygen|lambda/.test(diagClean) ||
-      hasAnyCode(dtcCodes, ['P0030', 'P0031', 'P0032', 'P0036', 'P0037', 'P0038', 'P0130', 'P0131', 'P0132', 'P0135', 'P0136', 'P0137', 'P0138', 'P0141'])
+      /\bo2\b|oksigen|oxygen|lambda|a\/f\s*sensor/.test(diagClean) ||
+      hasAnyCode(dtcCodes, ['P0030', 'P0031', 'P0032', 'P0036', 'P0037', 'P0038', 'P0130', 'P0131', 'P0132', 'P0133', 'P0134', 'P0135', 'P0136', 'P0137', 'P0138', 'P0140', 'P0141'])
     ) {
+      const isRearHo2s2 = hasAnyCode(dtcCodes, ['P0036', 'P0037', 'P0038', 'P0136', 'P0137', 'P0138', 'P0140', 'P0141']) || diagClean.includes('sensor 2') || diagClean.includes('belakang') || diagClean.includes('ho2s-2');
       return {
-        diagnosis_title: 'Gangguan Sensor Oksigen / Sirkuit Pemanas HO2S (Hulu & Hilir)',
+        diagnosis_title: isRearHo2s2
+          ? 'Gangguan Sensor Oksigen Belakang / HO2S-2 (Bank 1 Sensor 2 — 4-Pin C15)'
+          : 'Gangguan A/F Sensor Depan / Bank 1 Sensor 1 (4-Pin JB420)',
         system_category: 'Bahan Bakar',
         group_category: 'Pembakaran',
-        manual_book_section: 'Suzuki Grand Vitara JB420 Manual Bab 1A-140 & Toyota Manual Section 1A (Oxygen Sensor)',
-        cause_summary: 'Elemen pemanas (heater) sensor O2 putus atau ujung keramik sensor tertutup jelaga karbon, sehingga pembacaan kadar oksigen gas buang meleset dan BBM menjadi boros.',
+        manual_book_section: 'Suzuki Grand Vitara JB420 Manual Vol 1 Bab 1A-54 / 1A-94 & Vol 2 Bab 9A-43 (A/F & HO2S 4-Pin)',
+        cause_summary: isRearHo2s2
+          ? 'Elemen pemanas (heater) atau sel sensor HO2S-2 belakang (4-pin C15) putus/korslet, atau soket kabel terbakar panas knalpot.'
+          : 'Elemen pemanas (heater) atau sel sensor A/F Sensor-1 depan (4-pin 2x2: 2 Heater + 2 Sinyal A/F) mengalami putus/korslet, suplai HO2S Heater Relay hilang, atau sensor jenuh karbon.',
         cause_items: [
-          { badge: 'Penyebab Utama #1', title: 'Elemen Heater Putus / Sensor O2 Jenuh Karbon', desc: 'Kumparan pemanas internal sensor O2 putus (tahanan > 16 Ohm / ∞) atau ujung sensor tertutup jelaga tebal.' },
-          { badge: 'Penyebab #2', title: 'Soket 4-Pin Kendor / Kabel Meleleh Terkena Knalpot', desc: 'Isolasi kabel sensor O2 terkelupas atau hubung singkat karena menempel pada pipa exhaust manifold panas.' },
-          { badge: 'Penyebab #3', title: 'Kualitas Bahan Bakar Buruk / Kebocoran Paking Knalpot', desc: 'Kontaminasi aditif BBM kualitas rendah atau udara luar menyusup lewat paking knalpot yang bocor.' }
+          { badge: 'Penyebab Utama #1', title: 'Elemen Heater Putus / Sensor Jenuh Karbon', desc: 'Kumparan pemanas internal sensor putus (OL) atau ujung elemen keramik tertutup jelaga tebal.' },
+          { badge: 'Penyebab #2', title: 'Soket 4-Pin Kendor / Kabel Meleleh Terkena Knalpot', desc: 'Isolasi kabel sensor terkelupas atau hubung singkat karena menempel pada pipa exhaust manifold panas.' },
+          { badge: 'Penyebab #3', title: 'Suplai +12V HO2S Heater Relay (#10 20A O2 HTR) Drop / Kebocoran Knalpot', desc: 'Suplai daya heater (+12V kabel PNK dari HO2S Heater Relay) terputus atau paking exhaust manifold bocor.' }
         ],
         repair_options: [
-          { tag: 'Opsi 1 • Utama (Ganti Sensor)', title: 'Ganti Sensor Oksigen (HO2S) Baru', desc: 'Ganti unit sensor O2 yang putus heater/lemah menggunakan kunci soket 22 mm (torsi 44 N·m).' },
-          { tag: 'Opsi 2 • Kelistrikan & Soket', title: 'Perbaiki Kabel Harness Sensor O2, Soket 4-Pin & Sekering', desc: 'Isolasi ulang kabel yang meleleh terkena knalpot, bersihkan pin konektor, dan cek sekering heater O2.' },
-          { tag: 'Opsi 3 • BBM & Knalpot', title: 'Bersihkan Jelaga Sensor, Ganti BBM & Rapatkan Paking Knalpot', desc: 'Bersihkan ujung pelindung sensor O2, gunakan BBM sesuai oktan mesin, dan cek kerapatan exhaust manifold.' }
+          { tag: 'Opsi 1 • Utama (Ganti Sensor)', title: isRearHo2s2 ? 'Ganti HO2S-2 (Belakang, 4-Pin C15) Baru' : 'Ganti A/F Sensor-1 (Depan, 4-Pin) Baru', desc: 'Ganti unit sensor yang putus heater/lemah menggunakan kunci soket 22 mm (torsi 44 N·m).' },
+          { tag: 'Opsi 2 • Kelistrikan & Soket', title: 'Perbaiki Kabel Harness, Soket 4-Pin & Cek HO2S Heater Relay (#10 20A)', desc: 'Pastikan suplai +12V heater dari HO2S Heater Relay (PNK) masuk normal dan kontrol PWM ECM (C37-32/47) tidak putus.' },
+          { tag: 'Opsi 3 • BBM & Knalpot', title: 'Cek Kerapatan Paking Knalpot & Kualitas BBM', desc: 'Pastikan tidak ada kebocoran gas buang sebelum sensor dan gunakan BBM sesuai oktan mesin.' }
         ],
-        sensor_standards: [
-          { parameter: 'Voltase Sinyal O2 (Closed Loop)', normal_range: '0.10 - 0.90 V (berosilasi cepat)', unit: 'V' },
-          { parameter: 'Frekuensi Osilasi (pada 2.500 RPM)', normal_range: '> 1 Hz (minimal 1 kali per detik)', unit: 'Hz' },
-          { parameter: 'Tahanan Pemanas Sensor (20°C)', normal_range: '11.0 - 16.0 Ohm', unit: 'Ohm' }
-        ],
-        wiring_pinout: (hasAnyCode(dtcCodes, ['P0036', 'P0037', 'P0038', 'P0136', 'P0137', 'P0138', 'P0140', 'P0141']) || diagClean.includes('sensor 2') || diagClean.includes('belakang'))
+        sensor_standards: isRearHo2s2
           ? [
-              { pin: 'MAIN-RLY (Pin 1)', signal: 'BLU/BLK — Suplai +12V Heater HO2S-2 (Main Relay)', function: 'Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 14)' },
-              { pin: 'C37-47 (Pin 2)', signal: 'BLK/RED — Kontrol Heater HO2S-2 (Low-Side ECM)', function: 'Kontrol ground PWM pemanas HO2S-2 oleh ECM' },
-              { pin: 'C37-11 (Pin 3)', signal: 'RED — Sinyal HO2S-2 Belakang', function: 'Sinyal sensor oksigen hilir 0.1 – 0.9 V saat idle hangat' },
-              { pin: 'GND-ENG (Pin 4)', signal: 'BLK/YEL — Massa Sensor HO2S-2', function: 'Jalur massa sensor HO2S-2 (< 0.3 V ke bodi/mesin)' }
+              { parameter: 'Voltase Sinyal HO2S-2 (C37-11 RED)', normal_range: '0.10 - 0.90 V (Idle Hangat)', unit: 'V' },
+              { parameter: 'Suplai Heater +12V HO2S Heater Relay (PNK)', normal_range: '10.0 - 14.0 V (IG ON)', unit: 'V' },
+              { parameter: 'Tahanan Pemanas HO2S-2 (20°C)', normal_range: '5.0 - 7.0 Ohm', unit: 'Ohm' }
             ]
           : [
-              { pin: 'MAIN-RLY (Pin 1)', signal: 'BLU/BLK — Suplai +12V Heater A/F (Main Relay)', function: 'Suplai daya pemanas 10–14 V IG ON dari Main Relay (Bab 1A-15 Item 15)' },
-              { pin: 'C37-32 (Pin 2)', signal: 'PNK/BLU — Kontrol Heater A/F (Low-Side PWM ECM)', function: 'Kontrol ground PWM pemanas A/F Sensor-1 oleh ECM (C37-31 BLK/YEL adalah ground heater internal ECM)' },
-              { pin: 'C37-38 (Pin 3)', signal: 'WHT — A/F Sensor Signal (+)', function: 'Sinyal sel wideband (+) 3.0 – 3.2 V saat idle' },
-              { pin: 'C37-37 (Pin 4)', signal: 'BLK — A/F Sensor Signal (-)', function: 'Sinyal sel wideband (-) 2.6 – 2.8 V saat idle' },
-              { pin: 'C37-35 (Pin 5)', signal: 'RED/YEL — A/F Adjusting Resistor Signal', function: 'Sinyal resistor kalibrasi A/F 0.15 – 4.82 V' },
-              { pin: 'C37-34 (Pin 6)', signal: 'RED/BLU — A/F Adjusting Resistor Ground', function: 'Massa resistor kalibrasi A/F (< 0.3 V)' }
+              { parameter: 'Tahanan Heater A/F Sensor-1 (Pin 1–2 pada 20°C)', normal_range: '2.3 - 4.3 Ohm (Soket 4-Pin)', unit: 'Ohm' },
+              { parameter: 'Suplai Heater +12V HO2S Heater Relay (Pin 1 PNK)', normal_range: '10.0 - 14.0 V (IG ON)', unit: 'V' },
+              { parameter: 'A/F Signal (+) C37-38 WHT & (−) C37-37 BLK', normal_range: '3.0-3.2 V (+) | 2.6-2.8 V (−)', unit: 'V' }
+            ],
+        wiring_pinout: isRearHo2s2
+          ? [
+              { pin: 'C37-57 (Pin 1)', signal: 'GRN — GND', function: 'Massa Sinyal HO2S-2 Belakang (< 0.3 V / < 1 Ω ke massa)' },
+              { pin: 'C37-11 (Pin 2)', signal: 'RED — O2 SIG', function: 'Sinyal Oksigen Hilir HO2S-2 (4.0–5.0 V bias IG ON · 0.10–0.90 V Idle Panas)' },
+              { pin: 'C37-47 (Pin 3)', signal: 'BLK/RED — HTR-', function: 'Kontrol Heater HO2S-2 PWM Low-Side dari ECM (10–14 V IG ON · Pulsa Idle)' },
+              { pin: 'O2 HTR RLY (Pin 4)', signal: 'PNK — HTR+', function: 'Suplai +12V Heater HO2S-2 dari HO2S Heater Relay (10–14 V IG ON)' }
+            ]
+          : [
+              { pin: 'O2 HTR RLY (Pin 1)', signal: 'PNK — HO2S HTR+', function: 'Suplai +12V Heater A/F dari HO2S Heater Relay / Sekring #10 20A O2 HTR (10–14 V IG ON)' },
+              { pin: 'C37-32 (Pin 2)', signal: 'PNK/BLU — HO2S HTR-', function: 'Kontrol Heater A/F Sensor-1 Low-Side PWM dari ECM (10–14 V IG ON · Pulsa saat Idle)' },
+              { pin: 'C37-38 (Pin 3)', signal: 'WHT — A/F (+)', function: 'Sinyal Utama A/F Sensor-1 (+) ke ECM (3.0–3.2 V saat Idle Panas)' },
+              { pin: 'C37-37 (Pin 4)', signal: 'BLK — A/F (-)', function: 'Sinyal Referensi A/F Sensor-1 (−) ke ECM (2.6–2.8 V saat Idle Panas)' }
             ],
         step_by_step_repair: [
-          '1. Periksa kabel dan soket sensor O2 di exhaust manifold dari leleh/terbakar akibat panas knalpot.',
-          '2. Gunakan multimeter untuk mengukur tahanan heater pada 2 pin sensor O2 (normal 11-16 Ohm). Bila putus/infinite, sensor wajib ganti.',
-          '3. Lepas sensor O2 menggunakan kunci soket berbelah 22 mm (oxygen sensor socket).',
-          '4. Oleskan anti-seize paste pada ulir sensor baru (jangan sampai mengenai ujung tip sensor!), kencangkan dengan torsi 44 N·m.'
+          '1. Periksa kabel dan soket 4-pin sensor O2/A-F di exhaust manifold dari leleh/terbakar akibat panas knalpot.',
+          '2. Gunakan multimeter untuk mengukur tahanan heater pada 2 pin heater soket 4-pin sensor (A/F S1: 2.3–4.3 Ω · HO2S-2: 5–7 Ω). Bila putus/OL, sensor wajib ganti.',
+          '3. Periksa tegangan +12V pada kabel PNK dari HO2S Heater Relay (#10 20A O2 HTR) saat IG ON dan sinyal kontrol PWM ECM (C37-32/47).',
+          '4. Lepas sensor menggunakan kunci soket berbelah 22 mm, oleskan anti-seize tipis pada ulir sensor baru (jangan kena ujung sensor!), kencangkan torsi 44 N·m.'
         ],
         relearn_reset_steps: [
           '1. Reset DTC P0131 dan reset fuel trim via scanner.',
@@ -812,13 +821,14 @@
         ],
         wiring_pinout: (hasAnyCode(dtcCodes, ['P0340', 'P0341', 'P0342', 'P0343', 'P0344']) || (diagClean.includes('cmp') && !diagClean.includes('ckp')))
           ? [
-              { pin: 'MAIN-RLY (Pin 1)', signal: 'BLU/BLK — Suplai +12V Sensor CMP (Main Relay)', function: 'Suplai daya 10–14 V IG ON dari Main Relay (Bab 1H-2 & 1A-15)' },
-              { pin: 'C37-52 (Pin 2)', signal: 'WHT/RED — Sinyal Output Sensor CMP', function: 'Input pulsa kotak 0–5 V posisi poros nok ke ECM' },
-              { pin: 'GND-ENG (Pin 3)', signal: 'BLK/YEL — Massa Sensor CMP (Blok Mesin)', function: 'Massa sensor Hall-IC CMP ke blok mesin (< 0.3 V)' }
+              { pin: 'GND BLOK (Pin 1)', signal: 'BLK/YEL — GND', function: 'Massa Sensor Hall-Effect CMP ke Blok Mesin (< 1 Ω)' },
+              { pin: 'C37-52 (Pin 2)', signal: 'WHT/RED — CMP SIG', function: 'Pulsa Digital Posisi Noken As (0–0.6 V ↔ 4–5 V saat Cranking/Idle)' },
+              { pin: 'MAIN RLY (Pin 3)', signal: 'BLU/BLK — +B 12V', function: 'Suplai +12V Main Relay untuk Sensor Hall-IC CMP (10–14 V IG ON)' }
             ]
           : [
-              { pin: 'C37-51 (Pin 1)', signal: 'BLU — CKP Sensor Signal (+)', function: 'Input pulsa AC (+) poros engkol ke ECM (Induktif 2-Pin + shield BLK — Bab 1H-2 & 1A-15)' },
-              { pin: 'C37-36 (Pin 2)', signal: 'PNK — CKP Sensor Signal (-)', function: 'Input pulsa AC (-) / return poros engkol ke ECM' }
+              { pin: 'GND BLOK (Pin 1)', signal: 'BLK — SHIELD', function: 'Pelindung Shield Anti-Noise Elektromagnetik ke Massa Blok #3 (< 1 Ω)' },
+              { pin: 'C37-36 (Pin 2)', signal: 'PNK — CKP (-)', function: 'Sinyal Induktif Poros Engkol CKP (−) ke ECM (Tahanan Pin 2↔3: 1.68–2.52 kΩ)' },
+              { pin: 'C37-51 (Pin 3)', signal: 'BLU — CKP (+)', function: 'Sinyal Induktif Poros Engkol CKP (+) ke ECM (> 0.5 V AC saat Cranking)' }
             ],
         step_by_step_repair: [
           '1. Periksa soket 3-pin sensor CKP/CMP dari rembesan oli mesin atau kabel yang getas.',
@@ -1057,6 +1067,21 @@
         }
         if (catEntry.sim_circuit_key) specialist.sim_circuit_key = String(catEntry.sim_circuit_key);
         if (catEntry.atlas_module_id) specialist.atlas_module_id = String(catEntry.atlas_module_id);
+        if (catEntry.wiring_ref_id) specialist.wiring_ref_id = String(catEntry.wiring_ref_id);
+        if (catEntry.oem_wiring_image) specialist.oem_wiring_image = String(catEntry.oem_wiring_image);
+        if (Array.isArray(catEntry.shared_with_dtcs)) specialist.shared_with_dtcs = [...catEntry.shared_with_dtcs];
+        if (catEntry.wiring_cross_ref_note) specialist.wiring_cross_ref_note = String(catEntry.wiring_cross_ref_note);
+        specialist.atlas_photo_index = Number(catEntry.atlas_photo_index || 0);
+        if (catEntry.manual_page_ref) specialist.manual_page_ref = String(catEntry.manual_page_ref);
+        specialist.verification_status = String(catEntry.verification_status || 'VERIFIED_OEM');
+        if (catEntry.connector) specialist.connector = JSON.parse(JSON.stringify(catEntry.connector));
+        if (Array.isArray(catEntry.wiring_pinout) && catEntry.wiring_pinout.length > 0) {
+          specialist.wiring_pinout = catEntry.wiring_pinout.map((p) => ({
+            pin: String(p.pin || '-'),
+            signal: String(p.signal || '-'),
+            function: String(p.function || '-')
+          }));
+        }
       }
       return specialist;
     }
@@ -1065,7 +1090,7 @@
 
     let pinouts = [];
     if (catEntry && Array.isArray(catEntry.wiring_pinout) && catEntry.wiring_pinout.length > 0) {
-      pinouts = catEntry.wiring_pinout.slice(0, 6).map((p) => ({
+      pinouts = catEntry.wiring_pinout.slice(0, 8).map((p) => ({
         pin: String(p.pin || '-'),
         signal: String(p.signal || '-'),
         function: String(p.function || '-')
@@ -1161,6 +1186,14 @@
       : [];
     const simCircuitKey = (catEntry && catEntry.sim_circuit_key) ? String(catEntry.sim_circuit_key) : null;
     const atlasModuleId = (catEntry && catEntry.atlas_module_id) ? String(catEntry.atlas_module_id) : null;
+    const wiringRefId = (catEntry && catEntry.wiring_ref_id) ? String(catEntry.wiring_ref_id) : null;
+    const oemWiringImage = (catEntry && catEntry.oem_wiring_image) ? String(catEntry.oem_wiring_image) : null;
+    const sharedWithDtcs = (catEntry && Array.isArray(catEntry.shared_with_dtcs)) ? [...catEntry.shared_with_dtcs] : [];
+    const wiringCrossRefNote = (catEntry && catEntry.wiring_cross_ref_note) ? String(catEntry.wiring_cross_ref_note) : null;
+    const atlasPhotoIndex = (catEntry && catEntry.atlas_photo_index != null) ? Number(catEntry.atlas_photo_index) : 0;
+    const connectorObj = (catEntry && catEntry.connector) ? JSON.parse(JSON.stringify(catEntry.connector)) : null;
+    const verificationStatus = (catEntry && catEntry.verification_status) ? String(catEntry.verification_status) : 'UNVERIFIED';
+    const manualPageRef = (catEntry && catEntry.manual_page_ref) ? String(catEntry.manual_page_ref) : null;
 
     const titleDesc = dtcEntries.length === 1
       ? primary.description_id
@@ -1180,6 +1213,14 @@
       scanner_standards: scannerStandards,
       sim_circuit_key: simCircuitKey,
       atlas_module_id: atlasModuleId,
+      wiring_ref_id: wiringRefId,
+      oem_wiring_image: oemWiringImage,
+      shared_with_dtcs: sharedWithDtcs,
+      wiring_cross_ref_note: wiringCrossRefNote,
+      atlas_photo_index: atlasPhotoIndex,
+      connector: connectorObj,
+      verification_status: verificationStatus,
+      manual_page_ref: manualPageRef,
       wiring_pinout: pinouts,
       step_by_step_repair: authenticSteps,
       relearn_reset_steps: [
@@ -1429,6 +1470,53 @@
     const directAdvice = (topMatch && topMatch.manual_advice)
       ? { ...topMatch.manual_advice }
       : getRepairManualGuidance('Umum', null);
+    // Pastikan Shared Wiring Asset & Connector SSoT selalu terpasang pada directAdvice di mode Offline!
+    const matchedCatOffline = reqCodes.map((c) => dtcCatalogMap[String(c || '').toUpperCase()]).find(Boolean) || null;
+    if (matchedCatOffline) {
+      if (!directAdvice.idle_standards && Array.isArray(matchedCatOffline.idle_standards)) {
+        directAdvice.idle_standards = matchedCatOffline.idle_standards.map((x) => ({ ...x }));
+      }
+      if (!directAdvice.scanner_standards && Array.isArray(matchedCatOffline.scanner_standards)) {
+        directAdvice.scanner_standards = matchedCatOffline.scanner_standards.map((x) => ({ ...x }));
+      }
+      if (!directAdvice.sim_circuit_key && matchedCatOffline.sim_circuit_key) {
+        directAdvice.sim_circuit_key = String(matchedCatOffline.sim_circuit_key);
+      }
+      if (!directAdvice.atlas_module_id && matchedCatOffline.atlas_module_id) {
+        directAdvice.atlas_module_id = String(matchedCatOffline.atlas_module_id);
+      }
+      if (!directAdvice.wiring_ref_id && matchedCatOffline.wiring_ref_id) {
+        directAdvice.wiring_ref_id = String(matchedCatOffline.wiring_ref_id);
+      }
+      if (!directAdvice.oem_wiring_image && matchedCatOffline.oem_wiring_image) {
+        directAdvice.oem_wiring_image = String(matchedCatOffline.oem_wiring_image);
+      }
+      if ((!directAdvice.shared_with_dtcs || !directAdvice.shared_with_dtcs.length) && Array.isArray(matchedCatOffline.shared_with_dtcs)) {
+        directAdvice.shared_with_dtcs = [...matchedCatOffline.shared_with_dtcs];
+      }
+      if (!directAdvice.wiring_cross_ref_note && matchedCatOffline.wiring_cross_ref_note) {
+        directAdvice.wiring_cross_ref_note = String(matchedCatOffline.wiring_cross_ref_note);
+      }
+      if (directAdvice.atlas_photo_index == null && matchedCatOffline.atlas_photo_index != null) {
+        directAdvice.atlas_photo_index = Number(matchedCatOffline.atlas_photo_index);
+      }
+      if (!directAdvice.manual_page_ref && matchedCatOffline.manual_page_ref) {
+        directAdvice.manual_page_ref = String(matchedCatOffline.manual_page_ref);
+      }
+      if (matchedCatOffline.connector) {
+        directAdvice.connector = JSON.parse(JSON.stringify(matchedCatOffline.connector));
+      }
+      if (Array.isArray(matchedCatOffline.wiring_pinout) && matchedCatOffline.wiring_pinout.length > 0) {
+        directAdvice.wiring_pinout = matchedCatOffline.wiring_pinout.map((p) => ({
+          pin: String(p.pin || '-'),
+          signal: String(p.signal || '-'),
+          function: String(p.function || '-')
+        }));
+      }
+      directAdvice.verification_status = String(matchedCatOffline.verification_status || 'VERIFIED_OEM');
+      directAdvice.is_pinout_verified = true;
+      directAdvice.active_pack_id = 'suzuki_jb420_builtin';
+    }
     if (!directAdvice.customer_summary) {
       directAdvice.customer_summary = buildOfflineCustomerSummary(directAdvice, req, reqCodes);
     }

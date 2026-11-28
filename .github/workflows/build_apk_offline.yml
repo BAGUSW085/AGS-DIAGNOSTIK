@@ -24,10 +24,11 @@ jobs:
       - name: Install Python Build Helper (pydantic & pillow)
         run: python3 -m pip install --quiet pydantic pillow
 
-      - name: Export Offline JSON Data, Sync Web & Bundle Local FontAwesome
+      - name: Export Offline JSON Data, Sync Web, QA Gate & Bundle Local FontAwesome
         run: |
           python3 android_offline/tools/export_data.py
           python3 android_offline/tools/sync_web_to_offline.py
+          python3 scripts/validate_dtc_data.py
           mkdir -p android_offline/www/css android_offline/www/webfonts
           FA="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1"
           curl -sSL "$FA/css/all.min.css" -o android_offline/www/css/fontawesome.min.css
@@ -78,16 +79,16 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: agos-diagnostik-offline-apk-v2.3.0
+          name: agos-diagnostik-offline-apk-v2.3.1
           path: android_offline/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
       - name: Publish APK to GitHub Release (Direct Download)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.3.0-offline
-          name: "AGOS Smart Diagnostik v2.3.0 — APK Android 100% True Offline (Dark Cockpit JB420 · Zoom Mekanik Senior · 207 DTC 3-Tingkat)"
-          body: "APK Android Full Offline v2.3.0 (Skripsi Dark Cockpit 3-Pilar Suzuki Grand Vitara JB420): 100% True Offline tanpa CDN/Internet (FIX total bug layar putih offline!), Zoom + Pinch-to-Zoom 2 Jari + Layar Penuh untuk Diagram Wiring, Penampang Soket Fisik & 57 Foto Wiring Asli OEM HD, Mode Teks Besar (A+) ramah mekanik senior, Format Sub-Bab terstruktur rapi untuk langkah SOP panjang, 207 Kode DTC JB420 lengkap 3-Tingkat Standar Pengukuran (Statis · Saat Idle · Nilai Scanner OBD-II), Simulasi Alur Sirkuit Terpadu + Mini-Oscilloscope + Uji Putus Kabel, serta Weighted CBR & SheetJS Excel offline."
+          tag_name: v2.3.1-offline
+          name: "AGOS Smart Diagnostik v2.3.1 — APK Android 100% True Offline (61 Foto Wiring OEM HD · Data-Driven 4-Pin A/F · QA Gate 207 DTC)"
+          body: "APK Android Full Offline v2.3.1 (Skripsi Dark Cockpit 3-Pilar Suzuki Grand Vitara JB420): 100% True Offline tanpa CDN/Internet, Shared Wiring Asset Registry (36 aset bersama · 61 Foto Wiring Asli OEM HD anti text-only untuk P0101/P0106/P0111/P0116/P0403/P0030/P0137/P0420/P0462), Simulasi Soket 100% Data-Driven sesuai jumlah pin & layout OEM (P0030 A/F Sensor-1 4-Pin 2x2, CKP C20 3-Pin, Knock C26 1-Pin, EGR C10 6-Pin 2x3, Pedal APP E68 6-Pin, ELD C38 3-Pin, Relay Starter 4-Pin 2x2), Pratinjau Foto Wiring OEM Inline + Zoom Layar Penuh ramah mekanik senior, serta lulus 100% QA Gate otomatis (scripts/validate_dtc_data.py)."
           files: android_offline/AGOS-Smart-Diagnostik-Offline.apk
           prerelease: false
         env:

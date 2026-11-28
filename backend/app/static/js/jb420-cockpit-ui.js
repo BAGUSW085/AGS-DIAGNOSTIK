@@ -1326,13 +1326,14 @@
     renderActiveModuleStage();
   };
 
-  window.selectJb420Module = function (modId, forceVisualMode = '') {
+  window.selectJb420Module = function (modId, forceVisualMode = '', forcePhotoIdx = 0) {
     const atlas = getAtlas();
     const found = atlas.find(m => m.id === modId);
     if (!found) return;
     activeModuleId = found.id;
     activeCategory = found.category;
-    activePhotoIdx = 0;
+    const maxPIdx = Math.max(0, (found.photos ? found.photos.length : 1) - 1);
+    activePhotoIdx = Math.min(maxPIdx, Math.max(0, Number(forcePhotoIdx) || 0));
     activeStageIdx = -1;
     faultStageIdx = 0;
     simRunMode = 'live';

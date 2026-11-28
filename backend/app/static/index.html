@@ -1008,23 +1008,27 @@
               <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                 <select id="sim-circuit-select" onchange="changeSimCircuit(this.value)" class="w-full sm:w-auto min-w-0 max-w-full bg-slate-950 text-white border border-slate-700 rounded-lg px-2.5 py-2 text-xs font-semibold focus:border-brand-500 focus:outline-none truncate">
                   <option value="auto">Otomatis Sesuai Hasil Diagnosa Ini</option>
-                  <option value="egr_6w">Katup EGR Stepper Motor JB420 (6-Pin: +12V BLU/BLK · C37-03/04/05/06)</option>
-                  <option value="evap_2w">Katup EVAP Canister Purge JB420 (2-Pin: +12V BLU/BLK · C37-13)</option>
-                  <option value="imt_2w">IMT Vacuum Solenoid Valve JB420 (2-Pin: +12V BLU/BLK · C37-33)</option>
-                  <option value="coil_4w">Koil Pengapian COP JB420 (3-Pin: +12V IG COIL · Trigger ECM · GND)</option>
-                  <option value="af_6w">A/F Sensor-1 Depan JB420 (6-Pin Wideband: Main Relay + PWM + Sel)</option>
-                  <option value="o2_4w">Sensor O2 Belakang HO2S-2 JB420 (4-Pin: Main Relay + Heater + Sinyal)</option>
-                  <option value="ckp_2w">Sensor CKP JB420 (2-Pin Induktif: C37-51 GRN · C37-36 PNK)</option>
-                  <option value="cmp_3w">Sensor CMP JB420 (3-Pin Hall-IC: Main Relay · C37-52 · GND)</option>
-                  <option value="ect_2w">Sensor Suhu ECT JB420 (2-Pin: C37-24 · C37-57)</option>
-                  <option value="map_3w">Sensor MAP Vakum JB420 (3-Pin: +5V · Sinyal · GND)</option>
-                  <option value="maf_5w">Sensor MAF + IAT JB420 (5-Pin: Main Relay + MAF + IAT)</option>
-                  <option value="etc_6w">Throttle Body ETC JB420 (6-Pin: 2 Motor DC + 4 TPS Dual)</option>
-                  <option value="fan_4w">Relay Kipas Radiator JB420 (3 Relay: +12V IG1 · E23-46/47/48)</option>
-                  <option value="knock_2w">Knock Sensor JB420 (2-Pin Piezo: C37-56 WHT · Shield GND)</option>
-                  <option value="gen_elc">Generator &amp; Sensor Beban ELC JB420 (C37-08/28/09 · +5V)</option>
-                  <option value="starter_rly">Relay Starter Control JB420 (C37-22 BLK/YEL · +12V ST SIG)</option>
-                  <option value="can_2w">Jaringan CAN Bus JB420 (E23-04 CAN-H · E23-19 CAN-L · 60 Ω)</option>
+                  <option value="af_4w">A/F Sensor-1 Depan JB420 (4-Pin 2x2: O2 HTR RLY PNK · C37-32/38/37)</option>
+                  <option value="o2_4w">Sensor O2 Belakang HO2S-2 JB420 C15 (4-Pin 2x2: O2 HTR RLY · C37-47/11/57)</option>
+                  <option value="maf_5w">Sensor MAF + IAT JB420 C13 (5-Pin: Main Relay + MAF + IAT)</option>
+                  <option value="map_3w">Sensor MAP Vakum JB420 C12 (3-Pin: +5V · Sinyal · GND)</option>
+                  <option value="ect_2w">Sensor Suhu ECT JB420 C09 (2-Pin: C37-24 PPL/YEL · C37-57)</option>
+                  <option value="coil_4w">Koil Pengapian COP JB420 C40–C43 (3-Pin: +12V IG COIL · Trigger ECM · GND)</option>
+                  <option value="ckp_3w">Sensor CKP JB420 C20 (3-Pin: Shield BLK · C37-36 PNK · C37-51 BLU)</option>
+                  <option value="cmp_3w">Sensor CMP JB420 C08 (3-Pin Hall-IC: GND · C37-52 · Main Relay)</option>
+                  <option value="knock_1w">Knock Sensor JB420 C26 (1-Pin Piezo: C37-56 WHT + Massa Bodi Baut)</option>
+                  <option value="egr_6w">Katup EGR Stepper Motor JB420 C10 (6-Pin 2x3: +12V BLU/BLK · C37-03..06)</option>
+                  <option value="evap_2w">Katup EVAP Canister Purge JB420 C14 (2-Pin: +12V BLU/BLK · C37-13)</option>
+                  <option value="imt_2w">IMT Vacuum Solenoid Valve JB420 C46 (2-Pin: +12V BLU/BLK · C37-33)</option>
+                  <option value="etc_6w">Throttle Body ETC JB420 C11 (6-Pin: 2 Motor DC + 4 TPS Dual)</option>
+                  <option value="app_6w">Sensor Pedal Gas APP JB420 E68 (6-Pin: Dual APP Main &amp; Sub E23-51..56)</option>
+                  <option value="fan_4w">Relay Kipas Radiator JB420 E29–E31 (4 Jalur: +12V IG2 · E23-46/47/48)</option>
+                  <option value="starter_4w">Relay Starter Control JB420 (4-Pin 2x2: C37-22 · Range SW · ST Fuse)</option>
+                  <option value="gen_2w">Generator Control JB420 (2-Pin: C37-08 FR · C37-28 Ctrl)</option>
+                  <option value="eld_3w">Electric Load Current Sensor JB420 C38 (3-Pin: C37-09/57/14)</option>
+                  <option value="brake_4w">Switch Lampu Rem JB420 E67 (4-Pin 2x2: E23-20/08 · #38/#35)</option>
+                  <option value="acpress_3w">Sensor Tekanan A/C JB420 E04 (3-Pin: C37-57/12/14)</option>
+                  <option value="can_2w">Jaringan CAN Bus JB420 (2-Pin: E23-04 CAN-H · E23-19 CAN-L · 60 Ω)</option>
                 </select>
 
                 <button type="button" id="sim-btn-oem-photo" onclick="openActiveDiagOemPhoto()" class="w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-bold border border-amber-400/60 bg-amber-500/20 hover:bg-amber-500/35 text-amber-300 transition text-center shrink-0 active:scale-95 flex items-center justify-center gap-1.5">
@@ -1037,6 +1041,17 @@
               </div>
             </div>
 
+            <!-- FR-05 SAFETY FALLBACK BANNER (TAMPIL OTOMATIS JIKA DATA WIRING / PINOUT UNVERIFIED ATAU MISMATCH) -->
+            <div id="sim-unverified-banner" class="hidden rounded-xl border-2 border-amber-500/70 bg-amber-950/50 p-3.5 text-xs text-amber-100 space-y-1.5 shadow-lg">
+              <div class="font-extrabold text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                <span id="sim-unverified-title">Data Wiring / Pinout OEM Belum Terverifikasi</span>
+              </div>
+              <p id="sim-unverified-desc" class="leading-relaxed text-amber-100/90">
+                Sistem memblokir gambar soket perkiraan demi mencegah salah colok probe. Silakan rujuk Buku Pedoman Servis Resmi atau buka Atlas Wiring OEM Pilar 3.
+              </p>
+            </div>
+
             <!-- PEMILIH SILINDER KOIL (TAMPIL OTOMATIS KHUSUS SIRKUIT KOIL COP) -->
             <div id="sim-cyl-switcher" class="hidden flex flex-wrap items-center gap-1.5 bg-slate-950/70 border border-slate-800 rounded-lg px-2.5 py-2 text-xs"></div>
 
@@ -1044,7 +1059,7 @@
             <div id="sim-step-buttons" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
 
             <!-- DIAGRAM SKEMATIK WIRING DINAMIS + PENAMPANG SOKET & DIGITAL MULTIMETER -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
+            <div id="sim-main-grid" class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
 
               <!-- SKEMATIK SVG DINAMIS (8 KOLOM — BISA DI-ZOOM & PINCH-TO-ZOOM DI HP) -->
               <div class="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-between">
@@ -1128,6 +1143,34 @@
                 </div>
               </div>
 
+            </div>
+
+            <!-- FR-01: PRATINJAU FOTO DIAGRAM WIRING ASLI OEM INLINE (SHARED WIRING ASSET REGISTRY) -->
+            <div id="diag-oem-wiring-card" class="hidden rounded-xl bg-slate-950/95 border border-amber-500/40 p-3 space-y-2.5 shadow-lg">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                <div class="space-y-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-amber-300 font-mono text-[10px] font-extrabold shrink-0">FOTO WIRING ASLI OEM</span>
+                    <span id="diag-oem-wiring-ref-badge" class="px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-400/40 text-cyan-200 font-mono text-[10px] font-bold truncate"></span>
+                  </div>
+                  <div id="diag-oem-wiring-crossref" class="text-xs text-slate-200 font-medium leading-snug"></div>
+                  <div id="diag-oem-wiring-pageref" class="text-[11px] font-mono text-slate-400"></div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button type="button" onclick="openDiagInlineOemPhotoFullscreen()" class="px-2.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold flex items-center gap-1 shadow active:scale-95">
+                    <i class="fa-solid fa-expand"></i>
+                    <span>Perbesar HD</span>
+                  </button>
+                  <button type="button" onclick="openActiveDiagOemPhoto()" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-300 text-[11px] font-bold flex items-center gap-1 active:scale-95">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Atlas Pilar 3</span>
+                  </button>
+                </div>
+              </div>
+              <div id="diag-oem-wiring-img-wrap" onclick="openDiagInlineOemPhotoFullscreen()" class="cursor-zoom-in rounded-xl bg-white border border-slate-700 overflow-hidden max-h-[340px] flex items-center justify-center p-1.5 hover:border-cyan-400 transition" title="Ketuk untuk melihat foto diagram wiring OEM resolusi penuh">
+                <img id="diag-oem-wiring-img" src="" alt="Diagram Wiring Asli OEM Suzuki Grand Vitara JB420" class="w-full h-auto max-h-[324px] object-contain rounded" />
+              </div>
+              <div id="diag-oem-wiring-fallback" class="hidden rounded-lg bg-amber-950/50 border border-amber-500/60 p-2.5 text-xs text-amber-200"></div>
             </div>
           </div>
 
@@ -6572,25 +6615,25 @@
     const WIRING_CIRCUITS = {
       coil_4w: buildOemCoilCircuit('suzuki_jb420_builtin', 1),
 
-      af_6w: {
-        badge: 'SOKET 6-PIN (6 KABEL WIDEBAND)',
-        connectorLabel: '6-Pin Soket A/F Sensor-1 JB420',
-        ecmHeader: 'MAIN RLY · ECM JB420 (C37)',
-        sensorHeader: 'SOKET A/F SENSOR-1 (6-WIRE)',
+      af_4w: {
+        badge: 'SOKET 4-PIN (2x2 · A/F SENSOR-1)',
+        connectorLabel: '4-Pin (2x2) Soket A/F Sensor-1 Upstream JB420',
+        connectorLayout: '2x2',
+        pinCount: 4,
+        ecmHeader: 'O2 HTR RLY · ECM JB420 (C37)',
+        sensorHeader: 'SOKET A/F SENSOR-1 (4-PIN · 2x2)',
         sensorTitle: 'A/F SENSOR-1',
-        sensorSub: '6-Pin Wideband',
+        sensorSub: '4-Pin (2 Heater + 2 Sinyal)',
         wires: [
-          { sourceType: 'power', ecmPin: 'MAIN RLY', sensorPin: 'Pin 1', ecmFunc: 'Main Relay +12V', label: 'BLU/BLK (+12V Heater Main Relay)', color: '#ef4444' },
+          { sourceType: 'power', ecmPin: 'O2 HTR RLY', sensorPin: 'Pin 1', ecmFunc: 'O2 HTR RLY +12V', label: 'PNK (+12V Heater · #10 20A O2 HTR)', color: '#ec4899' },
           { sourceType: 'ecm', ecmPin: 'C37-32', sensorPin: 'Pin 2', ecmFunc: 'Heater PWM (-)', label: 'PNK/BLU (Kontrol Heater Low-Side)', color: '#f59e0b' },
-          { sourceType: 'ecm', ecmPin: 'C37-38', sensorPin: 'Pin 3', ecmFunc: 'A/F Signal (+)', label: 'WHT (Sinyal A/F + 3.0-3.2V)', color: '#e2e8f0' },
-          { sourceType: 'ecm', ecmPin: 'C37-37', sensorPin: 'Pin 4', ecmFunc: 'A/F Signal (-)', label: 'BLK (Sinyal A/F - 2.6-2.8V)', color: '#38bdf8' },
-          { sourceType: 'ecm', ecmPin: 'C37-35', sensorPin: 'Pin 5', ecmFunc: 'Adj. Resistor +', label: 'RED/YEL (Adj. Res 0.15-4.82V)', color: '#fb7185' },
-          { sourceType: 'ecm', ecmPin: 'C37-34', sensorPin: 'Pin 6', ecmFunc: 'Adj. Ground', label: 'RED/BLU (Massa Adj. <0.3V)', color: '#10b981' }
+          { sourceType: 'ecm', ecmPin: 'C37-38', sensorPin: 'Pin 3', ecmFunc: 'A/F Signal (+)', label: 'WHT (Sinyal A/F + 3.0–3.2V)', color: '#e2e8f0' },
+          { sourceType: 'ecm', ecmPin: 'C37-37', sensorPin: 'Pin 4', ecmFunc: 'A/F Signal (-)', label: 'BLK (Sinyal A/F − 2.6–2.8V)', color: '#38bdf8' }
         ],
         steps: [
           {
             title: '1. Tahanan Heater (Pin 1–2)',
-            sub: 'Pin 1 (BLU/BLK) & Pin 2 (PNK/BLU)',
+            sub: 'Pin 1 (PNK) & Pin 2 (PNK/BLU)',
             activeWires: [0, 1],
             faultWire: 1,
             posSide: 'sensor', posWire: 0,
@@ -6598,279 +6641,286 @@
             mode: 'OHMMETER (Ω)',
             probePosLabel: 'Merah(+): Pin 1 Sensor (HTR+)',
             probeNegLabel: 'Hitam(-): Pin 2 Sensor (HTR-)',
-            normalVal: '2.8 Ω',
-            faultVal: 'OL / PUTUS (P0031)',
-            spec: 'Standar JB420 Bab 1A-15: 2.0 – 15.0 Ω (20°C)',
-            instruction: 'Langkah 1: Lepas soket 6-pin A/F Sensor-1. Ukur tahanan elemen pemanas antara Pin 1 dan Pin 2 pada sisi sensor. (Catatan: C37-31 BLK/YEL adalah ground heater internal ECM ke bodi).',
-            normalVerdict: 'Elemen pemanas A/F Sensor-1 utuh. Lanjut periksa suplai +12V Main Relay pada Pin 1.',
-            faultVerdict: 'Elemen heater A/F Sensor-1 putus (OL -> P0031)! Ganti unit A/F Sensor-1.'
+            normalVal: '3.1 Ω',
+            faultVal: 'OL / PUTUS (P0030/P0031)',
+            spec: 'Standar JB420 Bab 1A-54: 2.3 – 4.3 Ω pada 20°C (Soket 4-Pin)',
+            instruction: 'Langkah 1: Kunci kontak OFF, lepas soket 4-pin (2x2) A/F Sensor-1. Ukur tahanan elemen pemanas antara Pin 1 dan Pin 2 sisi sensor.',
+            normalVerdict: 'Elemen pemanas A/F Sensor-1 utuh (3.1 Ω). Lanjut periksa suplai +12V dari HO2S Heater Relay di Pin 1.',
+            faultVerdict: 'Elemen heater A/F Sensor-1 putus (OL -> pemicu P0030/P0031)! Ganti unit A/F Sensor-1 (4-Pin).'
           },
           {
-            title: '2. Suplai +12V Main Relay (Pin 1)',
-            sub: 'Pin 1 (BLU/BLK) → Massa Bodi',
+            title: '2. Suplai +12V O2 HTR Relay (Pin 1)',
+            sub: 'Pin 1 (PNK) → Massa Bodi',
             activeWires: [0],
             faultWire: 0,
             posSide: 'sensor', posWire: 0,
             negSide: 'chassis_gnd', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): Pin 1 (BLU/BLK Main Rly)',
+            probePosLabel: 'Merah(+): Pin 1 (PNK O2 HTR RLY)',
             probeNegLabel: 'Hitam(-): Massa Bodi / Mesin',
             normalVal: '12.45 V',
-            faultVal: '0.00 V (MAIN RELAY/FUSE)',
-            spec: 'Standar JB420 Bab 1A-15: 10.0 – 14.0 V (IG ON)',
-            instruction: 'Langkah 2: Kunci kontak ON. Ukur tegangan suplai heater pada Pin 1 (BLU/BLK dari Main Relay) terhadap Massa Bodi — suplai +12V bukan dari C37-32.',
-            normalVerdict: 'Suplai +12.45V dari Main Relay masuk normal ke Pin 1 soket A/F Sensor-1.',
-            faultVerdict: 'Tegangan 0V di Pin 1! Cek Main Relay, sekering FI/Main, atau kabel BLU/BLK putus.'
+            faultVal: '0.00 V (SEKRING #10 / RELAY)',
+            spec: 'Standar JB420 Bab 1A-54: 10.0 – 14.0 V (IG ON)',
+            instruction: 'Langkah 2: Kunci kontak ON. Ukur tegangan suplai heater pada Pin 1 (PNK dari HO2S Heater Relay / Sekring #10 20A O2 HTR) terhadap Massa Bodi.',
+            normalVerdict: 'Suplai +12.45V dari HO2S Heater Relay masuk normal ke Pin 1 soket 4-pin A/F Sensor-1.',
+            faultVerdict: 'Tegangan 0V di Pin 1! Cek Sekring #10 (20A O2 HTR), HO2S Heater Relay, atau kabel PNK putus.'
           },
           {
-            title: '3. Sinyal Sel A/F (C37-38/37)',
-            sub: 'C37-38 (WHT) & C37-37 (BLK)',
+            title: '3. Kontrol PWM Heater (C37-32)',
+            sub: 'Pin 2 (PNK/BLU) → Massa (IG ON)',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'chassis_gnd', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-32 (PNK/BLU)',
+            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
+            normalVal: '12.4V IG ON · Pulsa Idle',
+            faultVal: '0.00 V / SHORT (P0031/P0032)',
+            spec: 'Standar JB420 Bab 1A-54: 10–14V (IG ON) · Pulsa Duty 20–80% saat Idle',
+            instruction: 'Langkah 3: Soket terpasang, back-probe C37-32 (PNK/BLU) terhadap massa saat IG ON (10–14V) lalu hidupkan mesin (berubah menjadi pulsa PWM).',
+            normalVerdict: 'Jalur kontrol PWM heater A/F Sensor-1 (C37-32 PNK/BLU) normal.',
+            faultVerdict: 'Kabel PNK/BLU putus/korslet ke massa (P0031) atau korslet ke +12V (P0032)!'
+          },
+          {
+            title: '4. Sinyal Sel A/F (C37-38/37)',
+            sub: 'Pin 3 (WHT) & Pin 4 (BLK)',
             activeWires: [2, 3],
             faultWire: 2,
             posSide: 'ecm', posWire: 2,
             negSide: 'ecm', negWire: 3,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-38 (WHT +)',
-            probeNegLabel: 'Hitam(-): C37-37 (BLK -)',
+            probePosLabel: 'Merah(+): C37-38 (WHT A/F+)',
+            probeNegLabel: 'Hitam(-): C37-37 (BLK A/F-)',
             normalVal: '3.10 V / 2.70 V',
             faultVal: '0.01 V (LOW P0131)',
-            spec: 'Standar JB420: C37-38 (3.0–3.2V) & C37-37 (2.6–2.8V)',
-            instruction: 'Langkah 3: Mesin hidup suhu kerja (>80°C). Ukur sinyal sel wideband pada C37-38 (WHT) dan C37-37 (BLK).',
-            normalVerdict: 'Sinyal wideband A/F Sensor-1 pada C37-38/37 bekerja akurat.',
-            faultVerdict: 'Sinyal A/F macet/hilang (P0131)! Cek kabel WHT/BLK atau ganti A/F Sensor-1.'
-          },
-          {
-            title: '4. Adj. Resistor (C37-35/34)',
-            sub: 'C37-35 (RED/YEL) → C37-34',
-            activeWires: [4, 5],
-            faultWire: 4,
-            posSide: 'ecm', posWire: 4,
-            negSide: 'ecm', negWire: 5,
-            mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-35 (RED/YEL)',
-            probeNegLabel: 'Hitam(-): C37-34 (RED/BLU)',
-            normalVal: '2.45 V',
-            faultVal: '0.00 V / 5.00 V (OPEN)',
-            spec: 'Standar JB420 Bab 1A-15: 0.15 – 4.82 V (IG ON)',
-            instruction: 'Langkah 4: Kunci kontak ON, ukur tegangan kalibrasi Adjusting Resistor antara C37-35 (RED/YEL) dan C37-34 (RED/BLU).',
-            normalVerdict: 'Jalur resistor kalibrasi A/F (Pin 5–6) tersambung normal sesuai spesifikasi.',
-            faultVerdict: 'Jalur resistor kalibrasi C37-35/34 putus atau pin soket 6-pin A/F korosi.'
+            spec: 'Standar JB420 Bab 1A-94: C37-38 (3.0–3.2V) & C37-37 (2.6–2.8V)',
+            instruction: 'Langkah 4: Mesin hidup suhu kerja (>80°C). Ukur sinyal sel A/F pada Pin 3 / C37-38 (WHT) dan Pin 4 / C37-37 (BLK).',
+            normalVerdict: 'Sinyal A/F Sensor-1 pada C37-38/37 bekerja akurat sesuai campuran stoikiometri.',
+            faultVerdict: 'Sinyal A/F macet/hilang (P0131–P0134)! Cek kabel WHT/BLK atau ganti A/F Sensor-1 (4-Pin).'
           }
         ]
       },
 
       o2_4w: {
-        badge: 'SOKET 4-PIN (HO2S-2 BELAKANG)',
-        connectorLabel: '4-Pin Soket HO2S-2 JB420',
-        ecmHeader: 'MAIN RLY · ECM (C37) · GND',
-        sensorHeader: 'SOKET HO2S-2 BELAKANG (4-WIRE)',
-        sensorTitle: 'HO2S-2 O2',
-        sensorSub: '4 Kabel (Sensor 2 Hilir)',
+        badge: 'SOKET 4-PIN (2x2 · HO2S-2 C15)',
+        connectorLabel: '4-Pin (2x2) Soket HO2S-2 Belakang C15 JB420',
+        connectorLayout: '2x2',
+        pinCount: 4,
+        ecmHeader: 'O2 HTR RLY · ECM (C37) · GND',
+        sensorHeader: 'SOKET HO2S-2 C15 (4-PIN · 2x2)',
+        sensorTitle: 'HO2S-2 C15',
+        sensorSub: '4-Pin (Sensor 2 Hilir)',
         wires: [
-          { sourceType: 'power', ecmPin: 'MAIN RLY', sensorPin: 'Pin 1', ecmFunc: 'Main Relay +12V', label: 'BLU/BLK (+12V Heater Main Relay)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-47', sensorPin: 'Pin 2', ecmFunc: 'Heater PWM (-)', label: 'BLK/RED (Kontrol Heater HO2S-2)', color: '#f59e0b' },
-          { sourceType: 'ecm', ecmPin: 'C37-11', sensorPin: 'Pin 3', ecmFunc: 'Sinyal HO2S-2', label: 'RED (Sinyal O2 Hilir 0.1-0.9V)', color: '#38bdf8' },
-          { sourceType: 'ground', ecmPin: 'GND BLOK', sensorPin: 'Pin 4', ecmFunc: 'Massa Sensor', label: 'BLK/YEL (Massa HO2S-2 <0.3V)', color: '#10b981' }
+          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'Pin 1', ecmFunc: 'Massa Sensor', label: 'GRN (Massa HO2S-2 < 0.3V)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'C37-11', sensorPin: 'Pin 2', ecmFunc: 'Sinyal HO2S-2', label: 'RED (Sinyal O2 Hilir 0.1–0.9V)', color: '#38bdf8' },
+          { sourceType: 'ecm', ecmPin: 'C37-47', sensorPin: 'Pin 3', ecmFunc: 'Heater PWM (-)', label: 'BLK/RED (Kontrol Heater HO2S-2)', color: '#f59e0b' },
+          { sourceType: 'power', ecmPin: 'O2 HTR RLY', sensorPin: 'Pin 4', ecmFunc: 'O2 HTR RLY +12V', label: 'PNK (+12V Heater O2 HTR Relay)', color: '#ec4899' }
         ],
         steps: [
           {
-            title: '1. Tahanan Heater (Pin 1–2)',
-            sub: 'Pin 1 (HTR+) & Pin 2 (HTR-)',
-            activeWires: [0, 1],
-            faultWire: 1,
-            posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 1,
+            title: '1. Tahanan Heater (Pin 3–4)',
+            sub: 'Pin 4 (HTR+) & Pin 3 (HTR-)',
+            activeWires: [2, 3],
+            faultWire: 2,
+            posSide: 'sensor', posWire: 3,
+            negSide: 'sensor', negWire: 2,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): Pin 1 Sensor (HTR+)',
-            probeNegLabel: 'Hitam(-): Pin 2 Sensor (HTR-)',
-            normalVal: '6.4 Ω',
+            probePosLabel: 'Merah(+): Pin 4 Sensor (HTR+)',
+            probeNegLabel: 'Hitam(-): Pin 3 Sensor (HTR-)',
+            normalVal: '6.2 Ω',
             faultVal: 'OL / PUTUS (P0037/P0141)',
-            spec: 'Standar JB420 Bab 1A-15 Item 14: 5.0 – 15.0 Ω (20°C)',
-            instruction: 'Langkah 1: Lepas soket 4-pin HO2S-2 (belakang katalisator). Ukur tahanan elemen pemanas antara Pin 1 dan Pin 2 sensor.',
-            normalVerdict: 'Elemen heater HO2S-2 utuh (6.4 Ω). Lanjut cek suplai +12V Main Relay di Pin 1.',
-            faultVerdict: 'Elemen pemanas HO2S-2 putus (OL -> pemicu P0037/P0141)! Ganti sensor HO2S-2.'
+            spec: 'Standar JB420 Bab 1A-59: 5.0 – 7.0 Ω pada 20°C (C15 4-Pin)',
+            instruction: 'Langkah 1: Lepas soket 4-pin C15 HO2S-2 (belakang katalisator). Ukur tahanan elemen pemanas antara Pin 4 dan Pin 3 sisi sensor.',
+            normalVerdict: 'Elemen heater HO2S-2 utuh (6.2 Ω). Lanjut cek suplai +12V HO2S Heater Relay di Pin 4.',
+            faultVerdict: 'Elemen pemanas HO2S-2 putus (OL -> pemicu P0037)! Ganti sensor HO2S-2.'
           },
           {
-            title: '2. Suplai +12V Heater (Pin 1–4)',
-            sub: 'Pin 1 (BLU/BLK) → Pin 4 GND',
+            title: '2. Suplai +12V Heater (Pin 4)',
+            sub: 'Pin 4 (PNK) → Massa Pin 1',
             activeWires: [0, 3],
-            faultWire: 0,
-            posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 3,
+            faultWire: 3,
+            posSide: 'sensor', posWire: 3,
+            negSide: 'sensor', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): Pin 1 (BLU/BLK Main Rly)',
-            probeNegLabel: 'Hitam(-): Pin 4 (BLK/YEL GND)',
+            probePosLabel: 'Merah(+): Pin 4 (PNK O2 HTR RLY)',
+            probeNegLabel: 'Hitam(-): Pin 1 (GRN GND)',
             normalVal: '12.45 V',
             faultVal: '0.00 V (SUPLAI PUTUS)',
-            spec: 'Standar JB420: 10.0 – 14.0 V (IG ON)',
-            instruction: 'Langkah 2: Kunci kontak ON. Ukur tegangan +12V antara Pin 1 (BLU/BLK dari Main Relay) dan Pin 4 (BLK/YEL Massa).',
-            normalVerdict: 'Suplai +12.45V Main Relay dan ground HO2S-2 masuk normal.',
-            faultVerdict: 'Tegangan 0V! Periksa Main Relay atau kabel BLU/BLK menuju soket HO2S-2.'
+            spec: 'Standar JB420 Bab 1A-59: 10.0 – 14.0 V (IG ON)',
+            instruction: 'Langkah 2: Kunci kontak ON. Ukur tegangan +12V antara Pin 4 (PNK dari HO2S Heater Relay) dan Pin 1 (GRN Massa).',
+            normalVerdict: 'Suplai +12.45V HO2S Heater Relay dan ground C15 normal.',
+            faultVerdict: 'Tegangan 0V! Periksa Sekring #10 (20A O2 HTR), HO2S Heater Relay, atau kabel PNK.'
           },
           {
             title: '3. Sinyal HO2S-2 (C37-11)',
-            sub: 'C37-11 (RED) → Massa Pin 4',
-            activeWires: [2, 3],
-            faultWire: 2,
-            posSide: 'ecm', posWire: 2,
-            negSide: 'ground', negWire: 3,
+            sub: 'Pin 2 (RED) → Massa Pin 1',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'ground', negWire: 0,
             mode: 'DC VOLT (V)',
             probePosLabel: 'Merah(+): C37-11 (RED Sinyal)',
-            probeNegLabel: 'Hitam(-): Massa Mesin (GND)',
+            probeNegLabel: 'Hitam(-): C37-57 (GRN GND)',
             normalVal: '0.62 V (Stabil)',
-            faultVal: '0.01 V (STUCK P0136/P0137)',
-            spec: 'Standar JB420: 0.10 – 0.90 V saat mesin panas',
-            instruction: 'Langkah 3: Mesin hidup suhu kerja (>80°C). Ukur tegangan sinyal HO2S-2 pada C37-11 (RED) terhadap massa.',
+            faultVal: '0.01 V (STUCK P0137)',
+            spec: 'Standar JB420 Bab 1A-97: 0.10 – 0.90 V saat mesin panas',
+            instruction: 'Langkah 3: Mesin hidup suhu kerja (>80°C). Ukur tegangan sinyal HO2S-2 pada Pin 2 / C37-11 (RED) terhadap massa.',
             normalVerdict: 'Sinyal HO2S-2 belakang (C37-11 RED) membaca kondisi katalisator dengan normal.',
-            faultVerdict: 'Sinyal HO2S-2 mati/drop (P0136/P0137)! Cek kabel RED leleh knalpot atau ganti HO2S-2.'
+            faultVerdict: 'Sinyal HO2S-2 mati/drop (P0137/P0138/P0140)! Cek kabel RED leleh knalpot atau ganti HO2S-2.'
           },
           {
-            title: '4. Kontinuitas Massa (Pin 4)',
-            sub: 'Pin 4 (BLK/YEL) → Massa Mesin',
-            activeWires: [3],
-            faultWire: 3,
-            posSide: 'sensor', posWire: 3,
-            negSide: 'ground', negWire: 3,
+            title: '4. Kontinuitas Massa (Pin 1)',
+            sub: 'Pin 1 (GRN) → C37-57 ECM',
+            activeWires: [0],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'ground', negWire: 0,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): Pin 4 Soket HO2S-2',
-            probeNegLabel: 'Hitam(-): Massa Blok Mesin',
+            probePosLabel: 'Merah(+): Pin 1 Soket C15',
+            probeNegLabel: 'Hitam(-): Massa / C37-57',
             normalVal: '0.2 Ω',
             faultVal: 'OL (MASSA PUTUS)',
             spec: 'Standar JB420: < 1.0 Ω (< 0.3 V drop)',
-            instruction: 'Langkah 4: Kunci kontak OFF, ukur kontinuitas kabel massa Pin 4 (BLK/YEL) ke blok mesin.',
-            normalVerdict: 'Jalur massa HO2S-2 Pin 4 (BLK/YEL) tersambung rapat.',
-            faultVerdict: 'Jalur ground HO2S-2 putus! Perbaiki kabel BLK/YEL atau konektor.'
+            instruction: 'Langkah 4: Kunci kontak OFF, ukur kontinuitas kabel massa Pin 1 (GRN) menuju C37-57 ECM.',
+            normalVerdict: 'Jalur massa HO2S-2 Pin 1 (GRN) tersambung rapat.',
+            faultVerdict: 'Jalur ground HO2S-2 putus! Perbaiki kabel GRN atau konektor C15.'
           }
         ]
       },
 
-      ckp_2w: {
-        badge: 'SOKET 2-PIN (INDUKTIF + SHIELD)',
-        connectorLabel: '2-Pin Soket CKP JB420',
-        ecmHeader: 'MODUL ECM JB420 (C37)',
-        sensorHeader: 'SOKET SENSOR CKP (2-WIRE)',
-        sensorTitle: 'CKP SENSOR',
-        sensorSub: '2 Kabel Induktif (+ Shield)',
+      ckp_3w: {
+        badge: 'SOKET 3-PIN (1x3 · CKP C20)',
+        connectorLabel: '3-Pin (1x3) Soket CKP C20 JB420 (J20A)',
+        connectorLayout: '1x3',
+        pinCount: 3,
+        ecmHeader: 'GND BLOK · ECM JB420 (C37)',
+        sensorHeader: 'SOKET SENSOR CKP C20 (3-PIN)',
+        sensorTitle: 'CKP C20',
+        sensorSub: '3-Pin (Shield + Induktif)',
         wires: [
-          { sourceType: 'ecm', ecmPin: 'C37-51', sensorPin: 'Pin 1', ecmFunc: 'CKP Signal (+)', label: 'BLU (Sinyal CKP + Induktif)', color: '#38bdf8' },
-          { sourceType: 'ecm', ecmPin: 'C37-36', sensorPin: 'Pin 2', ecmFunc: 'CKP Signal (-)', label: 'PNK (Sinyal CKP - Return)', color: '#f472b6' }
+          { sourceType: 'ground', ecmPin: 'GND BLOK', sensorPin: 'Pin 1', ecmFunc: 'Shield Massa', label: 'BLK (Pelindung Shield ke Blok #3)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'C37-36', sensorPin: 'Pin 2', ecmFunc: 'CKP Signal (-)', label: 'PNK (Sinyal Induktif CKP −)', color: '#f472b6' },
+          { sourceType: 'ecm', ecmPin: 'C37-51', sensorPin: 'Pin 3', ecmFunc: 'CKP Signal (+)', label: 'BLU (Sinyal Induktif CKP +)', color: '#38bdf8' }
         ],
         steps: [
           {
-            title: '1. Tahanan Kumparan CKP (Pin 1–2)',
-            sub: 'Pin 1 & Pin 2 Sensor (20°C)',
-            activeWires: [0, 1],
-            faultWire: 0,
-            posSide: 'sensor', posWire: 0,
+            title: '1. Tahanan Kumparan CKP (Pin 2–3)',
+            sub: 'Pin 2 (PNK) & Pin 3 (BLU)',
+            activeWires: [1, 2],
+            faultWire: 2,
+            posSide: 'sensor', posWire: 2,
             negSide: 'sensor', negWire: 1,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): Terminal 1 CKP',
-            probeNegLabel: 'Hitam(-): Terminal 2 CKP',
-            normalVal: '2.15 kΩ',
+            probePosLabel: 'Merah(+): Pin 3 Sensor C20',
+            probeNegLabel: 'Hitam(-): Pin 2 Sensor C20',
+            normalVal: '2.10 kΩ',
             faultVal: 'OL / PUTUS (P0335)',
-            spec: 'Standar JB420 Bab 1H-2: 1.6 – 2.7 kΩ (20°C)',
-            instruction: 'Langkah 1: Lepas soket 2-pin CKP (kabel BLU & PNK + shield BLK). Ukur tahanan kumparan induktif langsung pada 2 pin sensor.',
-            normalVerdict: 'Kumparan induktif sensor CKP sehat (2.15 kΩ). Pastikan tidak ada serbuk besi di ujung magnet.',
+            spec: 'Standar JB420 Bab 1A-115: 1.68 – 2.52 kΩ pada 20°C (C20 3-Pin)',
+            instruction: 'Langkah 1: Lepas soket 3-pin C20 CKP. Ukur tahanan kumparan induktif antara Pin 2 dan Pin 3 langsung pada bodi sensor.',
+            normalVerdict: 'Kumparan induktif sensor CKP sehat (2.10 kΩ). Pastikan tidak ada serbuk besi di ujung magnet.',
             faultVerdict: 'Kumparan CKP putus (OL -> P0335)! Mesin tidak akan bisa hidup/mati mendadak saat panas.'
           },
           {
-            title: '2. Kontinuitas Kabel C37-51 (BLU)',
-            sub: 'C37-51 ECM → Pin 1 CKP',
-            activeWires: [0],
+            title: '2. Kontinuitas Shield (Pin 1) & Kabel',
+            sub: 'Pin 1 (BLK) → Massa Blok #3',
+            activeWires: [0, 2],
             faultWire: 0,
-            posSide: 'ecm', posWire: 0,
-            negSide: 'sensor', negWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'ground', negWire: 0,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): C37-51 ECM',
-            probeNegLabel: 'Hitam(-): Pin 1 Soket (BLU)',
-            normalVal: '0.3 Ω',
-            faultVal: 'OL (KABEL BLU PUTUS)',
-            spec: 'Standar Manual: < 1.0 Ω (Bebas short ke shield BLK)',
-            instruction: 'Langkah 2: Kunci kontak OFF, ukur kontinuitas kabel BLU dari Pin 1 soket CKP menuju terminal ECM C37-51.',
-            normalVerdict: 'Jalur kabel sinyal CKP (+) C37-51 BLU tersambung sempurna ke ECM.',
-            faultVerdict: 'Kabel CKP (+) BLU putus atau soket korosi!'
+            probePosLabel: 'Merah(+): Pin 1 Soket C20 (BLK)',
+            probeNegLabel: 'Hitam(-): Massa Blok Mesin',
+            normalVal: '0.2 Ω',
+            faultVal: 'OL (SHIELD PUTUS / NOISE)',
+            spec: 'Standar Manual Vol 2 9A-45: < 1.0 Ω (Tidak boleh short ke Pin 2/3)',
+            instruction: 'Langkah 2: Kunci kontak OFF, ukur kontinuitas kabel Shield Pin 1 (BLK) ke massa blok #3 dan pastikan Pin 2/3 bebas korslet ke shield.',
+            normalVerdict: 'Jalur shield anti-noise C20 Pin 1 (BLK) terhubung rapat ke massa blok.',
+            faultVerdict: 'Shield putus atau korslet dengan kabel sinyal CKP!'
           },
           {
             title: '3. Sinyal AC Saat Crank (C37-51/36)',
-            sub: 'C37-51 (BLU) ↔ C37-36 (PNK)',
-            activeWires: [0, 1],
+            sub: 'Pin 3 (BLU) ↔ Pin 2 (PNK)',
+            activeWires: [1, 2],
             faultWire: 1,
-            posSide: 'ecm', posWire: 0,
+            posSide: 'ecm', posWire: 2,
             negSide: 'ecm', negWire: 1,
             mode: 'AC VOLT (VAC)',
-            probePosLabel: 'Merah(+): C37-51 (BLU +)',
-            probeNegLabel: 'Hitam(-): C37-36 (PNK -)',
+            probePosLabel: 'Merah(+): C37-51 (BLU Pin 3)',
+            probeNegLabel: 'Hitam(-): C37-36 (PNK Pin 2)',
             normalVal: '1.20 VAC (Crank)',
             faultVal: '0.00 VAC (HILANG SINYAL)',
-            spec: 'Standar JB420: > 0.5 VAC saat starter berputar',
-            instruction: 'Langkah 3: Pasang soket CKP, set multimeter ke AC Volt, starter mesin dan ukur tegangan bolak-balik antara C37-51 dan C37-36.',
+            spec: 'Standar JB420 Bab 1A-115: > 0.5 VAC saat starter berputar',
+            instruction: 'Langkah 3: Pasang soket 3-pin C20, set multimeter ke AC Volt, starter mesin dan ukur tegangan AC antara C37-51 (BLU) dan C37-36 (PNK).',
             normalVerdict: 'Sensor CKP membangkitkan sinyal AC 1.20 VAC normal saat mesin diputar starter.',
-            faultVerdict: 'Tidak ada sinyal AC! Cek celah udara sensor (0.5–1.5 mm), kabel PNK C37-36, atau ganti CKP.'
+            faultVerdict: 'Tidak ada sinyal AC! Cek celah udara sensor, kabel BLU/PNK, atau ganti sensor CKP.'
           }
         ]
       },
 
       cmp_3w: {
-        badge: 'SOKET 3-PIN (HALL-IC CMP)',
-        connectorLabel: '3-Pin Soket CMP JB420',
-        ecmHeader: 'MAIN RLY · ECM (C37) · GND',
-        sensorHeader: 'SOKET SENSOR CMP (3-WIRE)',
-        sensorTitle: 'CMP SENSOR',
-        sensorSub: '3 Kabel (Hall-IC Noken As)',
+        badge: 'SOKET 3-PIN (1x3 · CMP C08)',
+        connectorLabel: '3-Pin (1x3) Soket CMP C08 JB420',
+        connectorLayout: '1x3',
+        pinCount: 3,
+        ecmHeader: 'GND BLOK · ECM (C37) · MAIN RLY',
+        sensorHeader: 'SOKET SENSOR CMP C08 (3-PIN)',
+        sensorTitle: 'CMP C08',
+        sensorSub: '3-Pin (Hall-IC Noken As)',
         wires: [
-          { sourceType: 'power', ecmPin: 'MAIN RLY', sensorPin: 'Pin 1', ecmFunc: 'Main Relay +12V', label: 'BLU/BLK (+12V Main Relay)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-52', sensorPin: 'Pin 2', ecmFunc: 'CMP Signal Out', label: 'WHT/RED (Sinyal Pulsa 0-5V)', color: '#38bdf8' },
-          { sourceType: 'ground', ecmPin: 'GND BLOK', sensorPin: 'Pin 3', ecmFunc: 'Massa Mesin', label: 'BLK/YEL (Massa CMP <0.3V)', color: '#10b981' }
+          { sourceType: 'ground', ecmPin: 'GND BLOK', sensorPin: 'Pin 1', ecmFunc: 'Massa Mesin', label: 'BLK/YEL (Massa CMP < 0.3V)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'C37-52', sensorPin: 'Pin 2', ecmFunc: 'CMP Signal Out', label: 'WHT/RED (Sinyal Pulsa 0–5V)', color: '#38bdf8' },
+          { sourceType: 'power', ecmPin: 'MAIN RLY', sensorPin: 'Pin 3', ecmFunc: 'Main Relay +12V', label: 'BLU/BLK (+12V Main Relay)', color: '#ef4444' }
         ],
         steps: [
           {
-            title: '1. Suplai +12V CMP (Pin 1–3)',
-            sub: 'Pin 1 (BLU/BLK) → Pin 3 GND',
+            title: '1. Suplai +12V CMP (Pin 3–1)',
+            sub: 'Pin 3 (BLU/BLK) → Pin 1 GND',
             activeWires: [0, 2],
-            faultWire: 0,
-            posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 2,
+            faultWire: 2,
+            posSide: 'sensor', posWire: 2,
+            negSide: 'sensor', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): Pin 1 (BLU/BLK +12V)',
-            probeNegLabel: 'Hitam(-): Pin 3 (BLK/YEL GND)',
+            probePosLabel: 'Merah(+): Pin 3 (BLU/BLK +12V)',
+            probeNegLabel: 'Hitam(-): Pin 1 (BLK/YEL GND)',
             normalVal: '12.40 V',
             faultVal: '0.00 V (OPEN)',
-            spec: 'Standar JB420 Bab 1H-2: 10.0 – 14.0 V (IG ON)',
-            instruction: 'Langkah 1: Lepas soket 3-pin CMP, kunci kontak ON. Ukur tegangan suplai +12V antara Pin 1 (BLU/BLK) dan Pin 3 (BLK/YEL).',
-            normalVerdict: 'Suplai +12.4V dari Main Relay dan ground CMP Pin 3 normal.',
+            spec: 'Standar JB420 Bab 1A-117: 10.0 – 14.0 V (IG ON)',
+            instruction: 'Langkah 1: Lepas soket 3-pin C08 CMP, kunci kontak ON. Ukur tegangan suplai +12V antara Pin 3 (BLU/BLK) dan Pin 1 (BLK/YEL).',
+            normalVerdict: 'Suplai +12.4V dari Main Relay (Pin 3) dan ground CMP (Pin 1) normal.',
             faultVerdict: 'Suplai +12V CMP hilang! Cek Main Relay atau kabel BLU/BLK putus.'
           },
           {
-            title: '2. Kontinuitas Massa (Pin 3)',
-            sub: 'Pin 3 (BLK/YEL) → Blok Mesin',
-            activeWires: [2],
-            faultWire: 2,
-            posSide: 'sensor', posWire: 2,
-            negSide: 'ground', negWire: 2,
+            title: '2. Kontinuitas Massa (Pin 1)',
+            sub: 'Pin 1 (BLK/YEL) → Blok Mesin',
+            activeWires: [0],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'ground', negWire: 0,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): Pin 3 Soket CMP',
+            probePosLabel: 'Merah(+): Pin 1 Soket C08',
             probeNegLabel: 'Hitam(-): Massa Blok Mesin',
             normalVal: '0.2 Ω',
             faultVal: 'OL (MASSA PUTUS)',
             spec: 'Standar Manual: < 1.0 Ω',
-            instruction: 'Langkah 2: Kunci kontak OFF, ukur tahanan kabel massa Pin 3 (BLK/YEL) terhadap massa blok mesin.',
-            normalVerdict: 'Ground sensor CMP tersambung rapat (0.2 Ω).',
+            instruction: 'Langkah 2: Kunci kontak OFF, ukur tahanan kabel massa Pin 1 (BLK/YEL) terhadap massa blok mesin.',
+            normalVerdict: 'Ground sensor CMP Pin 1 tersambung rapat (0.2 Ω).',
             faultVerdict: 'Kabel massa BLK/YEL putus! IC Hall CMP tidak bisa menghasilkan pulsa.'
           },
           {
             title: '3. Pulsa Sinyal CMP (C37-52)',
-            sub: 'C37-52 (WHT/RED) → Massa',
-            activeWires: [1, 2],
+            sub: 'Pin 2 (WHT/RED) → Massa Pin 1',
+            activeWires: [0, 1],
             faultWire: 1,
             posSide: 'ecm', posWire: 1,
-            negSide: 'ground', negWire: 2,
+            negSide: 'ground', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-52 (WHT/RED)',
-            probeNegLabel: 'Hitam(-): Massa Mesin (GND)',
+            probePosLabel: 'Merah(+): C37-52 (WHT/RED Pin 2)',
+            probeNegLabel: 'Hitam(-): Massa Mesin (Pin 1)',
             normalVal: 'Pulsa 0 – 5 V',
             faultVal: '0.00 V / STUCK (P0340)',
             spec: 'Standar JB420: Pulsa gelombang kotak 0–5V saat Crank/Idle',
-            instruction: 'Langkah 3: Pasang soket CMP, back-probe C37-52 (WHT/RED) terhadap massa saat crank/idle.',
+            instruction: 'Langkah 3: Pasang soket C08 CMP, back-probe Pin 2 / C37-52 (WHT/RED) terhadap massa saat crank/idle.',
             normalVerdict: 'Sinyal pulsa posisi camshaft C37-52 normal.',
             faultVerdict: 'Sinyal CMP hilang (P0340)! Ganti sensor CMP Hall-IC atau cek rantai timing.'
           }
@@ -6878,48 +6928,50 @@
       },
 
       ect_2w: {
-        badge: 'SOKET 2-PIN (2 KABEL)',
-        connectorLabel: '2-Pin Soket ECT JB420',
-        ecmHeader: 'MODUL ECM JB420 (C37)',
-        sensorHeader: 'SOKET SENSOR ECT (2-WIRE)',
-        sensorTitle: 'ECT SENSOR',
-        sensorSub: '2 Kabel (Thermistor NTC)',
+        badge: 'SOKET 2-PIN (1x2 · ECT C09)',
+        connectorLabel: '2-Pin (1x2) Soket ECT C09 JB420',
+        connectorLayout: '1x2',
+        pinCount: 2,
+        ecmHeader: 'MODUL ECM JB420 (C37-57 / 24)',
+        sensorHeader: 'SOKET SENSOR ECT C09 (2-PIN)',
+        sensorTitle: 'ECT C09',
+        sensorSub: '2-Pin (Thermistor NTC)',
         wires: [
-          { sourceType: 'ecm', ecmPin: 'C37-24', sensorPin: 'Pin 1', ecmFunc: 'Pull-Up +5V & ADC', label: 'PPL/YEL (Sinyal Suhu ECT)', color: '#a855f7' },
-          { sourceType: 'ecm', ecmPin: 'C37-57', sensorPin: 'Pin 2', ecmFunc: 'Massa Sensor ECM', label: 'GRY/GRN (Massa Sensor <0.3V)', color: '#10b981' }
+          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'Pin 1', ecmFunc: 'Massa Sensor ECM', label: 'GRY/GRN (Massa Sensor < 0.3V)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'C37-24', sensorPin: 'Pin 2', ecmFunc: 'Pull-Up +5V & ADC', label: 'PPL/YEL (Sinyal Suhu ECT)', color: '#a855f7' }
         ],
         steps: [
           {
-            title: '1. Tegangan Pull-Up +5V (Pin 1–2)',
-            sub: 'Pin 1 (C37-24) → Pin 2 Massa',
+            title: '1. Tegangan Pull-Up +5V (Pin 2–1)',
+            sub: 'Pin 2 (C37-24) → Pin 1 Massa',
             activeWires: [0, 1],
-            faultWire: 0,
-            posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 1,
+            faultWire: 1,
+            posSide: 'sensor', posWire: 1,
+            negSide: 'sensor', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): Pin 1 (C37-24)',
-            probeNegLabel: 'Hitam(-): Pin 2 (C37-57)',
+            probePosLabel: 'Merah(+): Pin 2 (C37-24 PPL/YEL)',
+            probeNegLabel: 'Hitam(-): Pin 1 (C37-57 GRY/GRN)',
             normalVal: '4.98 V',
             faultVal: '0.00 V (OPEN)',
-            spec: 'Standar JB420 Bab 1A-262: 4.8 – 5.2 V (Soket Dilepas)',
-            instruction: 'Langkah 1: Lepas soket 2-pin ECT, kunci kontak ON. Ukur tegangan antara Pin 1 (PPL/YEL → C37-24) dan Pin 2 (GRY/GRN → C37-57).',
+            spec: 'Standar JB420 Bab 1A-81: 4.8 – 5.2 V (Soket Dilepas)',
+            instruction: 'Langkah 1: Lepas soket 2-pin C09 ECT, kunci kontak ON. Ukur tegangan antara Pin 2 (PPL/YEL → C37-24) dan Pin 1 (GRY/GRN → C37-57).',
             normalVerdict: 'Kedua jalur kabel ECT (C37-24 PPL/YEL & C37-57 GRY/GRN) tersambung sempurna ke ECM.',
             faultVerdict: 'Tegangan 0V! Salah satu dari 2 kabel ECT (C37-24 atau C37-57) putus.'
           },
           {
-            title: '2. Tahanan Komponen ECT',
-            sub: 'Pin 1 & Pin 2 Sensor (80°C)',
+            title: '2. Tahanan Komponen ECT (Pin 2–1)',
+            sub: 'Pin 2 ↔ Pin 1 Sensor (80°C)',
             activeWires: [0, 1],
-            faultWire: 0,
-            posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 1,
+            faultWire: 1,
+            posSide: 'sensor', posWire: 1,
+            negSide: 'sensor', negWire: 0,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): Terminal 1 ECT',
-            probeNegLabel: 'Hitam(-): Terminal 2 ECT',
+            probePosLabel: 'Merah(+): Terminal 2 ECT',
+            probeNegLabel: 'Hitam(-): Terminal 1 ECT',
             normalVal: '295 Ω (80°C)',
             faultVal: 'OL (PUTUS / P0118)',
             spec: 'Standar JB420: ~2.45 kΩ (20°C) | ~290 Ω (80°C)',
-            instruction: 'Langkah 2: Ukur resistansi langsung pada 2 terminal komponen sensor ECT saat mesin suhu kerja (~80°C).',
+            instruction: 'Langkah 2: Ukur resistansi langsung pada 2 terminal sensor ECT C09 saat mesin suhu kerja (~80°C).',
             normalVerdict: 'Thermistor NTC sensor ECT sehat (295 Ω pada 80°C).',
             faultVerdict: 'Thermistor ECT putus (OL)! ECU membaca -40°C sehingga kipas menyala terus & bensin boros.'
           },
@@ -6927,172 +6979,178 @@
             title: '3. Tegangan Kerja Saat Panas',
             sub: 'Back-probe C37-24 & C37-57',
             activeWires: [0, 1],
-            faultWire: 1,
-            posSide: 'ecm', posWire: 0,
-            negSide: 'ecm', negWire: 1,
+            faultWire: 0,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'ground', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-24 ECM',
-            probeNegLabel: 'Hitam(-): C37-57 ECM',
+            probePosLabel: 'Merah(+): C37-24 (Pin 2 PPL/YEL)',
+            probeNegLabel: 'Hitam(-): C37-57 (Pin 1 GRY/GRN)',
             normalVal: '0.52 V (@95°C)',
             faultVal: '4.98 V (MASSA PUTUS)',
             spec: 'Standar JB420: 1.38–1.72V @50°C | 0.40–0.53V @100°C',
-            instruction: 'Langkah 3: Pasang soket 2-pin ECT, mesin hidup panas (~90°C). Ukur tegangan antara C37-24 (PPL/YEL) dan C37-57 (GRY/GRN).',
+            instruction: 'Langkah 3: Pasang soket 2-pin C09 ECT, mesin hidup panas (~90°C). Ukur tegangan antara C37-24 (PPL/YEL) dan C37-57 (GRY/GRN).',
             normalVerdict: 'Tegangan turun ke 0.52V sesuai suhu kerja mesin JB420.',
-            faultVerdict: 'Tegangan tertahan di 4.98V karena jalur kabel massa Pin 2 (GRY/GRN → C37-57) putus!'
+            faultVerdict: 'Tegangan tertahan di 4.98V karena jalur kabel massa Pin 1 (GRY/GRN → C37-57) putus!'
           }
         ]
       },
 
       map_3w: {
-        badge: 'SOKET 3-PIN (3 KABEL)',
-        connectorLabel: '3-Pin Soket MAP JB420',
-        ecmHeader: 'MODUL ECM JB420 (C37)',
-        sensorHeader: 'SOKET MAP SENSOR (3-WIRE)',
-        sensorTitle: 'MAP SENSOR',
-        sensorSub: '3 Kabel (Piezo Vakum)',
+        badge: 'SOKET 3-PIN (1x3 · MAP C12)',
+        connectorLabel: '3-Pin (1x3) Soket MAP C12 JB420',
+        connectorLayout: '1x3',
+        pinCount: 3,
+        ecmHeader: 'MODUL ECM JB420 (C37-55 / 57 / 14)',
+        sensorHeader: 'SOKET MAP C12 (3-PIN)',
+        sensorTitle: 'MAP C12',
+        sensorSub: '3-Pin (Piezo Vakum)',
         wires: [
-          { sourceType: 'ecm', ecmPin: 'C37-14', sensorPin: 'Pin 1', ecmFunc: 'Regulator +5V', label: 'GRY/RED (+5V Reference)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-55', sensorPin: 'Pin 2', ecmFunc: 'ADC MAP Input', label: 'RED/WHT (Sinyal Output ~1.2V)', color: '#38bdf8' },
-          { sourceType: 'ecm', ecmPin: 'C37-57', sensorPin: 'Pin 3', ecmFunc: 'Massa Sensor ECM', label: 'GRY/GRN (Sensor Ground)', color: '#10b981' }
+          { sourceType: 'ecm', ecmPin: 'C37-55', sensorPin: 'Pin 1', ecmFunc: 'ADC MAP Input', label: 'RED/WHT (Sinyal Output ~1.2V)', color: '#38bdf8' },
+          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'Pin 2', ecmFunc: 'Massa Sensor ECM', label: 'GRY/GRN (Sensor Ground < 0.3V)', color: '#10b981' },
+          { sourceType: 'power', ecmPin: 'C37-14', sensorPin: 'Pin 3', ecmFunc: 'Regulator +5V', label: 'GRY/RED (+5V Reference)', color: '#ef4444' }
         ],
         steps: [
           {
-            title: '1. Cek Referensi +5V (Pin 1–3)',
-            sub: 'Pin 1 (C37-14) → Pin 3 Massa',
-            activeWires: [0, 2],
-            faultWire: 0,
-            posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 2,
+            title: '1. Cek Referensi +5V (Pin 3–2)',
+            sub: 'Pin 3 (C37-14) → Pin 2 Massa',
+            activeWires: [1, 2],
+            faultWire: 2,
+            posSide: 'sensor', posWire: 2,
+            negSide: 'sensor', negWire: 1,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): Pin 1 (C37-14)',
-            probeNegLabel: 'Hitam(-): Pin 3 (C37-57)',
+            probePosLabel: 'Merah(+): Pin 3 (C37-14 GRY/RED)',
+            probeNegLabel: 'Hitam(-): Pin 2 (C37-57 GRY/GRN)',
             normalVal: '5.01 V',
             faultVal: '0.00 V (OPEN)',
-            spec: 'Standar JB420 Bab 1A-15: 4.8 – 5.2 V (Kontak ON)',
-            instruction: 'Langkah 1: Kunci kontak ON. Ukur tegangan referensi +5V antara Pin 1 (GRY/RED) dan Pin 3 (GRY/GRN) pada soket 3-pin MAP.',
-            normalVerdict: 'Tegangan referensi 5.01V dan jalur ground Pin 3 normal.',
-            faultVerdict: 'Tegangan 0V! Jalur kabel +5V (C37-14) putus.'
+            spec: 'Standar JB420 Bab 1A-68: 4.5 – 5.5 V (Kontak ON)',
+            instruction: 'Langkah 1: Kunci kontak ON. Ukur tegangan referensi +5V antara Pin 3 (GRY/RED → C37-14) dan Pin 2 (GRY/GRN → C37-57) pada soket 3-pin MAP C12.',
+            normalVerdict: 'Tegangan referensi 5.01V (Pin 3) dan jalur ground (Pin 2) normal.',
+            faultVerdict: 'Tegangan 0V! Jalur kabel +5V Pin 3 (C37-14) putus atau short.'
           },
           {
-            title: '2. Kontinuitas Massa (Pin 3)',
-            sub: 'C37-57 ECM → Pin 3 MAP',
-            activeWires: [2],
-            faultWire: 2,
-            posSide: 'ecm', posWire: 2,
-            negSide: 'sensor', negWire: 2,
+            title: '2. Kontinuitas Massa (Pin 2)',
+            sub: 'C37-57 ECM → Pin 2 MAP C12',
+            activeWires: [1],
+            faultWire: 1,
+            posSide: 'ground', posWire: 1,
+            negSide: 'sensor', negWire: 1,
             mode: 'OHMMETER (Ω)',
             probePosLabel: 'Merah(+): C37-57 ECM',
-            probeNegLabel: 'Hitam(-): Pin 3 Soket',
+            probeNegLabel: 'Hitam(-): Pin 2 Soket C12 (GRY/GRN)',
             normalVal: '0.2 Ω',
             faultVal: 'OL (PUTUS)',
-            spec: 'Standar Manual: < 0.5 Ω',
-            instruction: 'Langkah 2: Kunci kontak OFF. Ukur kontinuitas kabel massa Pin 3 (GRY/GRN) ke C37-57 ECM.',
-            normalVerdict: 'Jalur ground sensor utuh (0.2 Ω).',
-            faultVerdict: 'Kabel ground Pin 3 putus (OL)!'
+            spec: 'Standar Manual: < 3.0 Ω (< 0.3 V drop)',
+            instruction: 'Langkah 2: Kunci kontak OFF. Ukur kontinuitas kabel massa Pin 2 (GRY/GRN) menuju C37-57 ECM.',
+            normalVerdict: 'Jalur ground sensor MAP Pin 2 utuh (0.2 Ω).',
+            faultVerdict: 'Kabel ground Pin 2 putus (OL) — pemicu DTC P0108!'
           },
           {
-            title: '3. Sinyal Output Idle (Pin 2)',
-            sub: 'C37-55 (Pin 2) → C37-57 Massa',
-            activeWires: [1, 2],
-            faultWire: 1,
-            posSide: 'ecm', posWire: 1,
-            negSide: 'ecm', negWire: 2,
+            title: '3. Sinyal Output Idle (Pin 1)',
+            sub: 'Pin 1 (C37-55) → Pin 2 Massa',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'ground', negWire: 1,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-55 (Pin 2)',
-            probeNegLabel: 'Hitam(-): C37-57 (Pin 3)',
+            probePosLabel: 'Merah(+): C37-55 (Pin 1 RED/WHT)',
+            probeNegLabel: 'Hitam(-): C37-57 (Pin 2 GRY/GRN)',
             normalVal: '1.22 V',
-            faultVal: '4.90 V (BOCOR VAKUM)',
-            spec: 'Standar Manual: ~1.2V (Idle) | ~3.9V (KOEO/WOT)',
-            instruction: 'Langkah 3: Mesin hidup idle (~750 RPM). Ukur tegangan sinyal output MAP pada C37-55 terhadap C37-57.',
-            normalVerdict: 'Tegangan 1.22V sesuai kevakuman normal intake (~35 kPa).',
-            faultVerdict: 'Tegangan tinggi 4.90V! Selang vakum intake bocor atau sensor MAP rusak.'
+            faultVal: '4.90 V (BOCOR VAKUM / P0106)',
+            spec: 'Standar JB420 Bab 1A-68: 1.1–1.5V (Idle) | 3.8–4.2V (KOEO)',
+            instruction: 'Langkah 3: Mesin hidup idle (~750 RPM). Ukur tegangan sinyal output MAP pada Pin 1 / C37-55 (RED/WHT) terhadap Pin 2 / C37-57.',
+            normalVerdict: 'Tegangan 1.22V sesuai kevakuman normal intake (~32 kPa).',
+            faultVerdict: 'Tegangan tinggi 4.90V! Selang vakum intake bocor, lubang MAP tersumbat, atau sensor MAP rusak.'
           }
         ]
       },
 
       maf_5w: {
-        badge: 'SOKET 5-PIN (5 KABEL)',
-        connectorLabel: '5-Pin MAF + IAT JB420',
+        badge: 'SOKET 5-PIN (1x5 · MAF & IAT C13)',
+        connectorLabel: '5-Pin (1x5) MAF + IAT C13 JB420',
+        connectorLayout: '1x5',
+        pinCount: 5,
         ecmHeader: 'MAIN RLY · ECM JB420 (C37)',
-        sensorHeader: 'SOKET MAF + IAT (5-WIRE)',
+        sensorHeader: 'SOKET MAF + IAT C13 (5-PIN)',
         sensorTitle: 'MAF + IAT',
-        sensorSub: '5 Kabel (3 MAF + 2 IAT)',
+        sensorSub: '5-Pin (3 MAF + 2 IAT)',
         wires: [
           { sourceType: 'power', ecmPin: 'MAIN RLY', sensorPin: 'Pin 1', ecmFunc: 'Main Relay +12V', label: 'BLU/BLK (+12V Daya MAF)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-26', sensorPin: 'Pin 2', ecmFunc: 'ADC Sinyal MAF', label: 'RED (Output MAF 1.3-1.8V)', color: '#38bdf8' },
-          { sourceType: 'ecm', ecmPin: 'C37-27', sensorPin: 'Pin 3', ecmFunc: 'Massa MAF ECM', label: 'BLU (Ground MAF <0.3V)', color: '#10b981' },
-          { sourceType: 'ecm', ecmPin: 'C37-25', sensorPin: 'Pin 4', ecmFunc: 'Sinyal Suhu IAT', label: 'LT GRN (Sinyal IAT 1.3-3.6V)', color: '#f59e0b' },
-          { sourceType: 'ecm', ecmPin: 'C37-57', sensorPin: 'Pin 5', ecmFunc: 'Massa Sensor IAT', label: 'GRY/GRN (Ground IAT <0.3V)', color: '#14b8a6' }
+          { sourceType: 'ground', ecmPin: 'C37-27', sensorPin: 'Pin 2', ecmFunc: 'Massa MAF ECM', label: 'BLU (Ground MAF < 0.3V)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'C37-26', sensorPin: 'Pin 3', ecmFunc: 'ADC Sinyal MAF', label: 'RED (Output MAF 1.3–1.8V)', color: '#38bdf8' },
+          { sourceType: 'ecm', ecmPin: 'C37-25', sensorPin: 'Pin 4', ecmFunc: 'Sinyal Suhu IAT', label: 'LT GRN (Sinyal IAT 1.3–3.6V)', color: '#f59e0b' },
+          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'Pin 5', ecmFunc: 'Massa Sensor IAT', label: 'GRY/GRN (Ground IAT < 0.3V)', color: '#14b8a6' }
         ],
         steps: [
           {
-            title: '1. Suplai +12V & Massa MAF (Pin 1–3)',
-            sub: 'Pin 1 (BLU/BLK) & C37-27',
-            activeWires: [0, 2],
+            title: '1. Suplai +12V & Massa MAF (Pin 1–2)',
+            sub: 'Pin 1 (BLU/BLK) → Pin 2 (C37-27)',
+            activeWires: [0, 1],
             faultWire: 0,
             posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 2,
+            negSide: 'sensor', negWire: 1,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): Pin 1 (BLU/BLK)',
-            probeNegLabel: 'Hitam(-): Pin 3 (C37-27 BLU)',
+            probePosLabel: 'Merah(+): Pin 1 (BLU/BLK +12V)',
+            probeNegLabel: 'Hitam(-): Pin 2 (C37-27 BLU GND)',
             normalVal: '12.50 V',
             faultVal: '0.00 V (OPEN)',
-            spec: 'Standar JB420 Bab 1A-260: 10.0 – 14.0 V (IG ON)',
-            instruction: 'Langkah 1: Kunci kontak ON. Ukur daya +12V antara Pin 1 (BLU/BLK dari Main Relay) dan Pin 3 (BLU → C37-27) pada soket 5-pin MAF.',
-            normalVerdict: 'Suplai +12.5V Main Relay dan ground khusus MAF C37-27 normal.',
-            faultVerdict: 'Tegangan 0V! Jalur suplai Main Relay BLU/BLK atau ground MAF C37-27 putus.'
+            spec: 'Standar JB420 Bab 1A-62: 10.0 – 14.0 V (IG ON)',
+            instruction: 'Langkah 1: Kunci kontak ON. Ukur daya +12V antara Pin 1 (BLU/BLK dari Main Relay) dan Pin 2 (BLU → C37-27 Massa MAF) pada soket 5-pin C13.',
+            normalVerdict: 'Suplai +12.5V Main Relay (Pin 1) dan ground khusus MAF C37-27 (Pin 2) normal.',
+            faultVerdict: 'Tegangan 0V! Jalur suplai Main Relay BLU/BLK (Pin 1) atau ground MAF C37-27 (Pin 2) putus.'
           },
           {
-            title: '2. Sinyal Aliran Udara MAF (C37-26)',
-            sub: 'C37-26 (RED) → C37-27 (BLU)',
+            title: '2. Sinyal Aliran Udara MAF (Pin 3)',
+            sub: 'Pin 3 C37-26 (RED) → Pin 2 (BLU)',
             activeWires: [1, 2],
-            faultWire: 1,
-            posSide: 'ecm', posWire: 1,
-            negSide: 'ecm', negWire: 2,
+            faultWire: 2,
+            posSide: 'ecm', posWire: 2,
+            negSide: 'ground', negWire: 1,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-26 (RED)',
-            probeNegLabel: 'Hitam(-): C37-27 (BLU)',
+            probePosLabel: 'Merah(+): C37-26 (Pin 3 RED)',
+            probeNegLabel: 'Hitam(-): C37-27 (Pin 2 BLU)',
             normalVal: '1.52 V (Idle)',
             faultVal: '0.35 V (KOTOR P0101)',
-            spec: 'Standar JB420: 0.5–1.0V (KOEO) | 1.3–1.8V (Idle)',
-            instruction: 'Langkah 2: Mesin hidup idle hangat. Ukur tegangan sinyal MAF pada C37-26 (RED) terhadap C37-27 (BLU).',
-            normalVerdict: 'Sinyal MAF 1.52V akurat sesuai Bab 1A Hal. 260 dan naik responsif saat digas.',
+            spec: 'Standar JB420 Bab 1A-62: 0.5–1.0V (KOEO) | 1.3–1.8V (Idle)',
+            instruction: 'Langkah 2: Mesin hidup idle hangat. Ukur tegangan sinyal MAF pada Pin 3 / C37-26 (RED) terhadap Pin 2 / C37-27 (BLU).',
+            normalVerdict: 'Sinyal MAF 1.52V akurat sesuai Bab 1A-62 dan naik responsif saat digas.',
             faultVerdict: 'Tegangan drop 0.35V (P0101)! Bersihkan kawat Hot-Wire MAF dengan MAF Cleaner atau cek kabel C37-26.'
           },
           {
-            title: '3. Sirkuit Suhu Udara IAT (C37-25/57)',
-            sub: 'C37-25 (LT GRN) & C37-57',
+            title: '3. Sirkuit Suhu Udara IAT (Pin 4–5)',
+            sub: 'Pin 4 C37-25 (LT GRN) & Pin 5',
             activeWires: [3, 4],
             faultWire: 3,
             posSide: 'ecm', posWire: 3,
-            negSide: 'ecm', negWire: 4,
+            negSide: 'ground', negWire: 4,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-25 (LT GRN)',
-            probeNegLabel: 'Hitam(-): C37-57 (GRY/GRN)',
+            probePosLabel: 'Merah(+): C37-25 (Pin 4 LT GRN)',
+            probeNegLabel: 'Hitam(-): C37-57 (Pin 5 GRY/GRN)',
             normalVal: '1.48 V (@40°C)',
             faultVal: '4.98 V (IAT PUTUS)',
-            spec: 'Standar JB420: 1.32–1.65V (@40°C) | 0.46–0.60V (@80°C)',
-            instruction: 'Langkah 3: Kunci kontak ON. Ukur tegangan sensor suhu udara masuk (IAT) pada C37-25 (LT GRN) & C37-57 (GRY/GRN).',
-            normalVerdict: 'Sirkuit IAT pada C37-25 & C37-57 membaca suhu udara intake dengan akurat.',
+            spec: 'Standar JB420 Bab 1A-74: 1.32–1.65V (@40°C) | 0.46–0.60V (@80°C)',
+            instruction: 'Langkah 3: Kunci kontak ON. Ukur tegangan sensor suhu udara masuk (IAT) pada Pin 4 / C37-25 (LT GRN) terhadap Pin 5 / C37-57 (GRY/GRN).',
+            normalVerdict: 'Sirkuit IAT pada Pin 4 & Pin 5 membaca suhu udara intake dengan akurat.',
             faultVerdict: 'Tegangan macet 4.98V (Open Circuit)! Thermistor IAT di dalam unit MAF putus.'
           }
         ]
       },
 
       etc_6w: {
-        badge: 'SOKET 6-PIN (6 KABEL)',
-        connectorLabel: '6-Pin Throttle ETC JB420',
+        badge: 'SOKET 6-PIN (1x6 · THROTTLE ETC C11)',
+        connectorLabel: '6-Pin (1x6) Throttle ETC C11 JB420',
+        connectorLayout: '1x6',
+        pinCount: 6,
         ecmHeader: 'MODUL ECM JB420 (C37)',
-        sensorHeader: 'SOKET THROTTLE BODY (6-WIRE)',
-        sensorTitle: 'THROTTLE ETC',
-        sensorSub: '6 Kabel (2 Motor + 4 TPS)',
+        sensorHeader: 'SOKET THROTTLE C11 (6-PIN)',
+        sensorTitle: 'THROTTLE C11',
+        sensorSub: '6-Pin (2 Motor + 4 Dual TPS)',
         wires: [
-          { sourceType: 'ecm', ecmPin: 'C37-44', sensorPin: 'Pin 1', ecmFunc: 'Motor Driver (+)', label: 'BLU/RED (Motor Aktuator +)', color: '#38bdf8' },
-          { sourceType: 'ecm', ecmPin: 'C37-45', sensorPin: 'Pin 2', ecmFunc: 'Motor Driver (-)', label: 'BLU/YEL (Motor Aktuator -)', color: '#f59e0b' },
-          { sourceType: 'ecm', ecmPin: 'C37-53', sensorPin: 'Pin 3', ecmFunc: 'Suplai +5V TPS', label: 'WHT (+5V Source 4.5-5.5V)', color: '#e2e8f0' },
-          { sourceType: 'ecm', ecmPin: 'C37-54', sensorPin: 'Pin 4', ecmFunc: 'TPS Main Signal', label: 'BLK (TPS Main 0.72-1.04V Idle)', color: '#a855f7' },
-          { sourceType: 'ecm', ecmPin: 'C37-40', sensorPin: 'Pin 5', ecmFunc: 'TPS Sub Signal', label: 'RED (TPS Sub 1.60-1.91V Idle)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-41', sensorPin: 'Pin 6', ecmFunc: 'Massa TPS ECM', label: 'GRN (Ground TPS <0.3V)', color: '#10b981' }
+          { sourceType: 'ecm', ecmPin: 'C37-44', sensorPin: 'Pin 1', ecmFunc: 'Motor Driver (-)', label: 'BLU/RED (Motor Aktuator −)', color: '#38bdf8' },
+          { sourceType: 'ecm', ecmPin: 'C37-45', sensorPin: 'Pin 2', ecmFunc: 'Motor Driver (+)', label: 'BLU/YEL (Motor Aktuator +)', color: '#f59e0b' },
+          { sourceType: 'ground', ecmPin: 'C37-41', sensorPin: 'Pin 3', ecmFunc: 'Massa TPS ECM', label: 'GRN (Ground TPS < 0.3V)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'C37-40', sensorPin: 'Pin 4', ecmFunc: 'TPS Sub Signal', label: 'RED (TPS Sub 1.60–1.91V Idle)', color: '#ef4444' },
+          { sourceType: 'power', ecmPin: 'C37-53', sensorPin: 'Pin 5', ecmFunc: 'Suplai +5V TPS', label: 'WHT (+5V Source 4.5–5.5V)', color: '#e2e8f0' },
+          { sourceType: 'ecm', ecmPin: 'C37-54', sensorPin: 'Pin 6', ecmFunc: 'TPS Main Signal', label: 'BLK (TPS Main 0.72–1.04V Idle)', color: '#a855f7' }
         ],
         steps: [
           {
@@ -7107,59 +7165,59 @@
             probeNegLabel: 'Hitam(-): Pin 2 (C37-45)',
             normalVal: '2.1 Ω',
             faultVal: 'OL (MOTOR PUTUS)',
-            spec: 'Standar JB420 Bab 1A: 0.5 – 10.0 Ω (20°C)',
-            instruction: 'Langkah 1: Lepas soket 6-pin Throttle Body. Ukur resistansi motor aktuator antara Pin 1 (C37-44) dan Pin 2 (C37-45).',
+            spec: 'Standar JB420 Bab 1A-88: 0.5 – 10.0 Ω (20°C)',
+            instruction: 'Langkah 1: Lepas soket 6-pin Throttle Body C11. Ukur resistansi motor aktuator antara Pin 1 (C37-44) dan Pin 2 (C37-45).',
             normalVerdict: 'Kumparan motor DC penggerak katup throttle normal (2.1 Ω).',
             faultVerdict: 'Kumparan motor throttle putus! Katup tidak bisa membuka/menutup.'
           },
           {
-            title: '2. Tegangan Ref +5V TPS (C37-53/41)',
-            sub: 'C37-53 (WHT) & C37-41 (GRN)',
-            activeWires: [2, 5],
-            faultWire: 2,
-            posSide: 'ecm', posWire: 2,
-            negSide: 'ecm', negWire: 5,
+            title: '2. Tegangan Ref +5V TPS (Pin 5–3)',
+            sub: 'Pin 5 C37-53 (WHT) → Pin 3 (GRN)',
+            activeWires: [2, 4],
+            faultWire: 4,
+            posSide: 'sensor', posWire: 4,
+            negSide: 'sensor', negWire: 2,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-53 (WHT +5V)',
-            probeNegLabel: 'Hitam(-): C37-41 (GRN GND)',
+            probePosLabel: 'Merah(+): Pin 5 (C37-53 WHT +5V)',
+            probeNegLabel: 'Hitam(-): Pin 3 (C37-41 GRN GND)',
             normalVal: '5.00 V',
             faultVal: '0.00 V (OPEN)',
-            spec: 'Standar JB420 Bab 1A-261: 4.5 – 5.5 V (IG ON)',
-            instruction: 'Langkah 2: Kunci kontak ON. Ukur tegangan referensi +5V TPS antara C37-53 (WHT) dan C37-41 (GRN).',
-            normalVerdict: 'Suplai +5.00V (C37-53) dan ground TPS (C37-41) normal.',
+            spec: 'Standar JB420 Bab 1A-88: 4.5 – 5.5 V (IG ON)',
+            instruction: 'Langkah 2: Kunci kontak ON. Ukur tegangan referensi +5V TPS antara Pin 5 (C37-53 WHT) dan Pin 3 (C37-41 GRN).',
+            normalVerdict: 'Suplai +5.00V (Pin 5) dan ground TPS (Pin 3) normal.',
             faultVerdict: 'Tegangan 0V! Jalur referensi C37-53 atau massa TPS C37-41 terputus.'
           },
           {
-            title: '3. Sinyal TPS Main (C37-54)',
-            sub: 'C37-54 (BLK) → C37-41 (GRN)',
-            activeWires: [3, 5],
-            faultWire: 3,
-            posSide: 'ecm', posWire: 3,
-            negSide: 'ecm', negWire: 5,
+            title: '3. Sinyal TPS Main (Pin 6)',
+            sub: 'Pin 6 C37-54 (BLK) → Pin 3 (GRN)',
+            activeWires: [2, 5],
+            faultWire: 5,
+            posSide: 'ecm', posWire: 5,
+            negSide: 'ground', negWire: 2,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-54 (TPS Main)',
-            probeNegLabel: 'Hitam(-): C37-41 (GND)',
+            probePosLabel: 'Merah(+): C37-54 (Pin 6 TPS Main)',
+            probeNegLabel: 'Hitam(-): C37-41 (Pin 3 GND)',
             normalVal: '0.86 V (Idle)',
             faultVal: '1.45 V (RPM TINGGI P0507)',
             spec: 'Standar JB420: 0.72–1.04V (Idle) -> 3.67–4.25V (WOT)',
-            instruction: 'Langkah 3: Soket terpasang, kontak ON. Ukur sinyal TPS Main pada C37-54 (BLK) terhadap C37-41 (GRN).',
-            normalVerdict: 'Tegangan TPS Main di posisi idle (0.86V) sesuai standar Bab 1A Hal. 261.',
+            instruction: 'Langkah 3: Soket terpasang, kontak ON. Ukur sinyal TPS Main pada Pin 6 / C37-54 (BLK) terhadap Pin 3 / C37-41 (GRN).',
+            normalVerdict: 'Tegangan TPS Main di posisi idle (0.86V) sesuai standar Bab 1A-88.',
             faultVerdict: 'Tegangan TPS Main melenceng! Katup throttle terganjal kerak karbon atau perlu Idle Relearn.'
           },
           {
-            title: '4. Sinyal TPS Sub (C37-40)',
-            sub: 'C37-40 (RED) → C37-41 (GRN)',
-            activeWires: [4, 5],
-            faultWire: 4,
-            posSide: 'ecm', posWire: 4,
-            negSide: 'ecm', negWire: 5,
+            title: '4. Sinyal TPS Sub (Pin 4)',
+            sub: 'Pin 4 C37-40 (RED) → Pin 3 (GRN)',
+            activeWires: [2, 3],
+            faultWire: 3,
+            posSide: 'ecm', posWire: 3,
+            negSide: 'ground', negWire: 2,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-40 (TPS Sub)',
-            probeNegLabel: 'Hitam(-): C37-41 (GND)',
+            probePosLabel: 'Merah(+): C37-40 (Pin 4 TPS Sub)',
+            probeNegLabel: 'Hitam(-): C37-41 (Pin 3 GND)',
             normalVal: '1.75 V (Idle)',
             faultVal: '0.00 V (PUTUS / P2135)',
             spec: 'Standar JB420: 1.60–1.91V (Idle) -> 3.88–4.45V (WOT)',
-            instruction: 'Langkah 4: Ukur sinyal pembanding TPS Sub pada C37-40 (RED) terhadap C37-41 (GRN).',
+            instruction: 'Langkah 4: Ukur sinyal pembanding TPS Sub pada Pin 4 / C37-40 (RED) terhadap Pin 3 / C37-41 (GRN).',
             normalVerdict: 'Sinyal redundansi TPS Sub (1.75V) sinkron dengan TPS Main (0.86V) sesuai spesifikasi JB420.',
             faultVerdict: 'Sinyal TPS Sub hilang/selisih sehingga mobil masuk mode Limp-Home (P2135).'
           }
@@ -7252,19 +7310,21 @@
       },
 
       egr_6w: {
-        badge: 'SOKET 6-PIN · KATUP EGR (STEPPER MOTOR)',
-        connectorLabel: '6-Pin Soket Katup EGR Stepper JB420 (J20A)',
-        ecmHeader: 'MAIN RLY (E23) · ECM JB420 (C37)',
-        sensorHeader: 'KATUP EGR STEPPER (6-PIN)',
-        sensorTitle: 'EGR VALVE',
+        badge: 'SOKET 6-PIN (2x3 · KATUP EGR C10)',
+        connectorLabel: '6-Pin (2x3) Soket Katup EGR Stepper C10 JB420 (J20A)',
+        connectorLayout: '2x3',
+        pinCount: 6,
+        ecmHeader: 'MAIN RLY · ECM JB420 (C37)',
+        sensorHeader: 'KATUP EGR C10 (6-PIN · 2x3)',
+        sensorTitle: 'EGR C10',
         sensorSub: '4 Kumparan Stepper + 2 Suplai +12V',
         wires: [
-          { sourceType: 'ecm', ecmPin: 'C37-05', sensorPin: 'Pin 1', ecmFunc: 'EGR Coil 1', label: 'YEL/BLK (Stepper Coil 1 · 10–14V / Pulsa)', color: '#facc15' },
-          { sourceType: 'power', ecmPin: 'E23-01', sensorPin: 'Pin 2', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Suplai Coil 1 & 2)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-06', sensorPin: 'Pin 3', ecmFunc: 'EGR Coil 2', label: 'YEL/RED (Stepper Coil 2 · 10–14V / Pulsa)', color: '#f97316' },
-          { sourceType: 'ecm', ecmPin: 'C37-03', sensorPin: 'Pin 4', ecmFunc: 'EGR Coil 3', label: 'YEL/GRN (Stepper Coil 3 · 10–14V / Pulsa)', color: '#22c55e' },
-          { sourceType: 'power', ecmPin: 'E23-16', sensorPin: 'Pin 5', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Suplai Coil 3 & 4)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-04', sensorPin: 'Pin 6', ecmFunc: 'EGR Coil 4', label: 'YEL (Stepper Coil 4 · 10–14V / Pulsa)', color: '#38bdf8' }
+          { sourceType: 'ecm', ecmPin: 'C37-06', sensorPin: 'Pin 1', ecmFunc: 'EGR Coil 2', label: 'YEL/RED (Stepper Coil 2 · 20–31 Ω)', color: '#f97316' },
+          { sourceType: 'power', ecmPin: 'MAIN RLY', sensorPin: 'Pin 2', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Suplai Coil 1 & 2)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-05', sensorPin: 'Pin 3', ecmFunc: 'EGR Coil 1', label: 'YEL/BLK (Stepper Coil 1 · 20–31 Ω)', color: '#facc15' },
+          { sourceType: 'ecm', ecmPin: 'C37-03', sensorPin: 'Pin 4', ecmFunc: 'EGR Coil 3', label: 'YEL/GRN (Stepper Coil 3 · 20–31 Ω)', color: '#22c55e' },
+          { sourceType: 'power', ecmPin: 'MAIN RLY', sensorPin: 'Pin 5', ecmFunc: 'Main Rly +12V', label: 'BLU/BLK (+12V Suplai Coil 3 & 4)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'C37-04', sensorPin: 'Pin 6', ecmFunc: 'EGR Coil 4', label: 'YEL (Stepper Coil 4 · 20–31 Ω)', color: '#38bdf8' }
         ],
         steps: [
           {
@@ -7470,153 +7530,453 @@
         ]
       },
 
-      knock_2w: {
-        badge: 'SOKET 2-PIN · KNOCK SENSOR (PIEZO)',
-        connectorLabel: '2-Pin Soket Knock Sensor JB420 (J20A)',
-        ecmHeader: 'ECM JB420 (C37) · SHIELD GND',
-        sensorHeader: 'KNOCK SENSOR (2-PIN)',
-        sensorTitle: 'KNOCK SENSOR',
-        sensorSub: 'Piezo 500–620 kΩ (P0327/P0328)',
+      knock_1w: {
+        badge: 'SOKET 1-PIN (1x1 · KNOCK C26)',
+        connectorLabel: '1-Pin Soket Knock Sensor C26 + Massa Bodi Baut (23 N·m)',
+        connectorLayout: '1x1',
+        pinCount: 1,
+        ecmHeader: 'ECM JB420 (C37-56) · MASSA BLOK',
+        sensorHeader: 'KNOCK C26 (1-PIN)',
+        sensorTitle: 'KNOCK C26',
+        sensorSub: '1-Pin Piezo + Baut Massa',
         wires: [
-          { sourceType: 'ecm', ecmPin: 'C37-56', sensorPin: 'Pin 1', ecmFunc: 'Knock Signal', label: 'WHT (Sinyal Piezo · 2–3V Bias IG ON)', color: '#e2e8f0' },
-          { sourceType: 'ground', ecmPin: 'C37-58', sensorPin: 'Shield', ecmFunc: 'Massa Shield', label: 'SHIELD / BLK/YEL (Pelindung Massa)', color: '#10b981' }
+          { sourceType: 'ecm', ecmPin: 'C37-56', sensorPin: 'Pin 1', ecmFunc: 'Knock Signal', label: 'WHT (Sinyal Piezo · 2–3V Bias · Massa via Baut Blok)', color: '#e2e8f0' }
         ],
         steps: [
           {
             title: '1. Tegangan Bias C37-56 (IG ON)',
-            sub: 'C37-56 (WHT) → Massa (2–3 V)',
-            activeWires: [0, 1],
+            sub: 'Pin 1 (WHT) → Massa Blok (2–3 V)',
+            activeWires: [0],
             faultWire: 0,
             posSide: 'ecm', posWire: 0,
-            negSide: 'ground', negWire: 1,
+            negSide: 'chassis_gnd', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-56 (WHT)',
-            probeNegLabel: 'Hitam(-): Massa ECM (C37-58)',
+            probePosLabel: 'Merah(+): C37-56 (WHT Pin 1)',
+            probeNegLabel: 'Hitam(-): Massa Blok Mesin (GND)',
             normalVal: '2.50 V',
             faultVal: '0.00 V / 5.00 V (P0327/P0328)',
-            spec: 'Bab 1A-204: 2.0 – 3.0 V DC (IG ON & Idle)',
-            instruction: 'Langkah 1: Kunci kontak ON, ukur tegangan bias ECM pada C37-56 (WHT) terhadap massa C37-58.',
+            spec: 'Bab 1A-113 & 1A-204: 2.0 – 3.0 V DC (IG ON & Idle)',
+            instruction: 'Langkah 1: Kunci kontak ON, ukur tegangan bias ECM pada C37-56 (WHT) terhadap massa blok mesin.',
             normalVerdict: 'Tegangan bias sirkuit Knock Sensor ECM normal (2.50 V).',
-            faultVerdict: 'Tegangan bias hilang (0V) atau terlalu tinggi (5V)! Cek kabel WHT korslet shield atau sensor putus.'
+            faultVerdict: 'Tegangan bias hilang (0V -> P0327) atau terlalu tinggi (5V -> P0328)! Cek kabel WHT atau sensor.'
           },
           {
-            title: '2. Tahanan Internal Piezo (500–620 kΩ)',
-            sub: 'Pin 1 ↔ Pin 2 / Bodi Sensor',
-            activeWires: [0, 1],
+            title: '2. Tahanan Piezo Pin 1 ↔ Bodi Sensor',
+            sub: 'Pin 1 ↔ Bodi Baut (500–620 kΩ)',
+            activeWires: [0],
             faultWire: 0,
             posSide: 'sensor', posWire: 0,
-            negSide: 'sensor', negWire: 1,
+            negSide: 'chassis_gnd', negWire: 0,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): Terminal 1 Knock Sensor',
-            probeNegLabel: 'Hitam(-): Terminal 2 / Bodi Sensor',
+            probePosLabel: 'Merah(+): Pin 1 Soket C26',
+            probeNegLabel: 'Hitam(-): Bodi Logam Sensor Knock',
             normalVal: '560 kΩ',
             faultVal: 'OL / < 100 kΩ (SENSOR RUSAK)',
-            spec: 'Standar JB420 Bab 1C: 500 – 620 kΩ @ 20°C (Torsi baut 23 N·m)',
-            instruction: 'Langkah 2: Kunci kontak OFF, lepas soket knock sensor. Ukur tahanan internal elemen piezo (500–620 kΩ) dan cek kekencangan baut 23 N·m.',
-            normalVerdict: 'Elemen piezo Knock Sensor sehat (560 kΩ).',
+            spec: 'Standar JB420 Bab 1A-113: 500 – 620 kΩ @ 20°C (Torsi baut 23 N·m)',
+            instruction: 'Langkah 2: Kunci kontak OFF, lepas soket 1-pin C26. Ukur tahanan internal piezo antara Pin 1 dan bodi logam sensor (massa melalui baut blok 23 N·m).',
+            normalVerdict: 'Elemen piezo Knock Sensor 1-pin sehat (560 kΩ).',
             faultVerdict: 'Knock Sensor rusak/retak internal! Ganti sensor dan kencangkan tepat 23 N·m.'
           }
         ]
       },
 
-      gen_elc: {
-        badge: 'SIRKUIT GENERATOR & SENSOR BEBAN ELC',
-        connectorLabel: 'Alternator (C37-08/28) & ELC Sensor (C37-09)',
-        ecmHeader: 'ECM JB420 (C37) · +5V REF',
-        sensorHeader: 'ALTERNATOR & ELC',
-        sensorTitle: 'GEN / ELC',
-        sensorSub: 'P0620/P0625/P0626 · P1501/P1502',
+      gen_2w: {
+        badge: 'SOKET 2-PIN (1x2 · GENERATOR CTRL)',
+        connectorLabel: '2-Pin Kontrol Generator ECM (C37-08 FR & C37-28 C)',
+        connectorLayout: '1x2',
+        pinCount: 2,
+        ecmHeader: 'ECM JB420 (C37-08 / C37-28)',
+        sensorHeader: 'KONTROL GENERATOR (2-PIN)',
+        sensorTitle: 'GENERATOR',
+        sensorSub: 'P0620 / P0625 / P0626',
         wires: [
-          { sourceType: 'ecm', ecmPin: 'C37-08', sensorPin: 'FR/Field', ecmFunc: 'Field Monitor', label: 'BRN/BLK (Monitor Field · 10–14V / Pulsa)', color: '#d97706' },
-          { sourceType: 'ecm', ecmPin: 'C37-28', sensorPin: 'C/Ctrl', ecmFunc: 'Gen Control', label: 'BRN/BLK (Kontrol Pengisian · Pulsa 5–7V)', color: '#f59e0b' },
-          { sourceType: 'ecm', ecmPin: 'C37-14', sensorPin: 'ELC +5V', ecmFunc: 'Ref +5V', label: 'GRY/RED (+5V Ref ELC Sensor)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-09', sensorPin: 'ELC Sig', ecmFunc: 'ELC Signal', label: 'BLU (0.5–1.0V IG ON · 1.3–2.4V Beban)', color: '#38bdf8' },
-          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'ELC GND', ecmFunc: 'Sensor GND', label: 'GRY/GRN (Massa Sensor < 0.3V)', color: '#10b981' }
+          { sourceType: 'ecm', ecmPin: 'C37-08', sensorPin: 'Pin 1', ecmFunc: 'GEN FR Monitor', label: 'BRN/BLK (Monitor Field · 10–14V / Pulsa)', color: '#d97706' },
+          { sourceType: 'ecm', ecmPin: 'C37-28', sensorPin: 'Pin 2', ecmFunc: 'GEN C Control', label: 'BRN/BLK (Kontrol Regulasi · Pulsa 5–7V)', color: '#f59e0b' }
         ],
         steps: [
           {
-            title: '1. Tegangan Pengisian Aki (Idle)',
-            sub: 'Aki B+ ↔ Massa (13.5–14.5 V)',
+            title: '1. Tegangan Pengisian & Monitor FR',
+            sub: 'C37-08 (BRN/BLK) & Aki B+ (Idle)',
+            activeWires: [0],
+            faultWire: 0,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'chassis_gnd', negWire: 0,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-08 (GEN FR) / Aki B+',
+            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
+            normalVal: '14.15 V (Idle)',
+            faultVal: '11.80 V (TIDAK MENGISI)',
+            spec: 'Bab 1A-148 & 9A-40: 13.5–14.5 V Idle · Field Duty 10–50%',
+            instruction: 'Langkah 1: Hidupkan mesin idle panas, ukur tegangan aki & sinyal monitor field C37-08 (BRN/BLK). Cek V-belt & IC regulator bila < 13.2V.',
+            normalVerdict: 'Alternator mengisi stabil (14.15 V) dan monitor field C37-08 bekerja normal.',
+            faultVerdict: 'Alternator tidak mengisi atau IC regulator/carbon brush aus! Servis alternator & cek kabel C37-08/28.'
+          },
+          {
+            title: '2. Sinyal Kontrol ECM C37-28 (GEN C)',
+            sub: 'C37-28 (BRN/BLK) → Massa',
+            activeWires: [1],
+            faultWire: 1,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'chassis_gnd', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-28 (GEN C)',
+            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
+            normalVal: 'Pulsa 0–0.6V ↔ 5–7V',
+            faultVal: '0.00 V / STUCK (P0625/P0626)',
+            spec: 'Bab 1A-148: Pulsa Regulasi Pengisian ECM ↔ IC Regulator',
+            instruction: 'Langkah 2: Ukur sinyal kontrol C37-28 saat mesin idle sambil menyalakan beban lampu + AC.',
+            normalVerdict: 'Jalur kontrol regulasi alternator C37-28 bekerja presisi.',
+            faultVerdict: 'Kabel C37-28 putus/korslet atau IC regulator alternator rusak!'
+          }
+        ]
+      },
+
+      eld_3w: {
+        badge: 'SOKET 3-PIN (1x3 · ELD SENSOR C38)',
+        connectorLabel: '3-Pin (1x3) Electric Load Current Sensor C38 JB420',
+        connectorLayout: '1x3',
+        pinCount: 3,
+        ecmHeader: 'ECM JB420 (C37-09 / 57 / 14)',
+        sensorHeader: 'SENSOR ELD C38 (3-PIN)',
+        sensorTitle: 'ELD C38',
+        sensorSub: 'P1501 / P1502 (3-Pin)',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'C37-09', sensorPin: 'Pin 1', ecmFunc: 'ELD Signal', label: 'BLU (0.5–1.0V IG ON · 1.3–2.4V Beban)', color: '#38bdf8' },
+          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'Pin 2', ecmFunc: 'Sensor GND', label: 'GRY/GRN (Massa Sensor < 0.3V)', color: '#10b981' },
+          { sourceType: 'power', ecmPin: 'C37-14', sensorPin: 'Pin 3', ecmFunc: 'Vref +5V', label: 'GRY/RED (+5V Ref Bersama ECM)', color: '#ef4444' }
+        ],
+        steps: [
+          {
+            title: '1. Referensi +5V ELD (Pin 3–2)',
+            sub: 'C37-14 (GRY/RED) → C37-57',
+            activeWires: [1, 2],
+            faultWire: 2,
+            posSide: 'sensor', posWire: 2,
+            negSide: 'sensor', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): Pin 3 C38 (GRY/RED +5V)',
+            probeNegLabel: 'Hitam(-): Pin 2 C38 (GRY/GRN GND)',
+            normalVal: '5.01 V',
+            faultVal: '0.00 V (VREF HILANG)',
+            spec: 'Bab 1A-154: 4.5 – 5.5 V DC (IG ON)',
+            instruction: 'Langkah 1: Kunci kontak ON, ukur tegangan referensi +5V pada Pin 3 (GRY/RED) terhadap Pin 2 (GRY/GRN) soket 3-pin C38.',
+            normalVerdict: 'Tegangan referensi +5V C37-14 dan massa C37-57 pada soket C38 normal.',
+            faultVerdict: 'Tegangan +5V hilang! Cek kabel GRY/RED atau sensor lain yang short pada jalur Vref +5V.'
+          },
+          {
+            title: '2. Sinyal Arus Beban ELD (Pin 1–2)',
+            sub: 'C37-09 (BLU) → C37-57 (IG ON / Beban)',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'ground', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-09 (BLU Pin 1)',
+            probeNegLabel: 'Hitam(-): C37-57 (GRY/GRN Pin 2)',
+            normalVal: '0.75 V IG ON · 1.95 V Beban HI',
+            faultVal: '0.00 V / 5.00 V (P1501/P1502)',
+            spec: 'Bab 1A-154 & 1A-200: 0.5–1.0V IG ON · 1.8–2.4V Lampu+Blower HI',
+            instruction: 'Langkah 2: Ukur sinyal ELD pada C37-09 saat IG ON lalu hidupkan mesin 2.000 RPM dengan lampu besar & blower HI menyala.',
+            normalVerdict: 'Sensor Electric Load Current C38 (3-pin) merespons beban listrik secara akurat.',
+            faultVerdict: 'Sinyal ELD drop < 0.2V (P1501) atau mentok > 4.8V (P1502)! Cek kabel BLU atau ganti sensor ELD C38.'
+          }
+        ]
+      },
+
+      starter_4w: {
+        badge: 'SOKET 4-PIN (2x2 · RELAY STARTER)',
+        connectorLabel: '4-Pin (2x2) Relay Starting Motor Control JB420',
+        connectorLayout: '2x2',
+        pinCount: 4,
+        ecmHeader: 'FUSE ST · ECM (C37-22) · TR SW',
+        sensorHeader: 'RELAY STARTER (4-PIN · 2x2)',
+        sensorTitle: 'STARTER RLY',
+        sensorSub: 'P0616 / P0617 (4-Pin Relay)',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'C37-22', sensorPin: 'Pin 1', ecmFunc: 'Coil + / ST SIG', label: 'BLK/YEL (0–1V IG ON · 8–14V Posisi ST)', color: '#f59e0b' },
+          { sourceType: 'ground', ecmPin: 'TR SW P/N', sensorPin: 'Pin 2', ecmFunc: 'Coil - (P/N)', label: 'BLK/RED (Massa Range Switch P/N / M/T)', color: '#10b981' },
+          { sourceType: 'power', ecmPin: 'FUSE ST', sensorPin: 'Pin 3', ecmFunc: 'Switch +12V', label: 'WHT/RED (+12V Daya Utama Sekring ST)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'STARTER', sensorPin: 'Pin 4', ecmFunc: 'Out Term. 50', label: 'BLK/YEL (Output ke Solenoid Starter ≥9.5V)', color: '#38bdf8' }
+        ],
+        steps: [
+          {
+            title: '1. Standby & Crank C37-22 (Pin 1)',
+            sub: 'C37-22 (BLK/YEL) → Massa',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'ground', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-22 / Pin 1 (BLK/YEL)',
+            probeNegLabel: 'Hitam(-): Massa Bodi',
+            normalVal: '0.10 V IG ON · 10.8 V Crank',
+            faultVal: '12.4 V STUCK (P0617) / 0V (P0616)',
+            spec: 'Bab 1A-145 & 9A-39: 0–1 V (IG ON) · 8–14 V (Kunci Posisi ST)',
+            instruction: 'Langkah 1: Kunci kontak ON (mesin mati), ukur C37-22 (0–1V). Lalu putar kunci ke ST (tuas P/N): harus naik ke 8–14V.',
+            normalVerdict: 'Sirkuit perintah Relay Starter C37-22 bekerja sesuai posisi kunci kontak.',
+            faultVerdict: 'Tegangan abnormal! Cek Relay Starter 4-pin, Range Switch P/N, atau kabel BLK/YEL.'
+          },
+          {
+            title: '2. Tahanan Koil Relay (Pin 1–2)',
+            sub: 'Pin 1 ↔ Pin 2 (60–120 Ω)',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'sensor', negWire: 1,
+            mode: 'OHMMETER (Ω)',
+            probePosLabel: 'Merah(+): Pin 1 Koil Relay',
+            probeNegLabel: 'Hitam(-): Pin 2 Koil Relay',
+            normalVal: '85.0 Ω',
+            faultVal: 'OL / PUTUS (P0616)',
+            spec: 'Standar Relay OEM 4-Pin: 60 – 120 Ω @ 20°C',
+            instruction: 'Langkah 2: Cabut Relay Starting Motor Control 4-pin, ukur tahanan koil (Pin 1↔2) dan pastikan Pin 3↔4 kontinyu saat koil diberi +12V.',
+            normalVerdict: 'Kumparan dan kontak daya Relay Starter 4-pin sehat (85.0 Ω).',
+            faultVerdict: 'Koil/kontak Relay Starter putus! Ganti Relay Starting Motor Control.'
+          },
+          {
+            title: '3. Daya Utama & Output Terminal 50',
+            sub: 'Pin 3 (WHT/RED) & Pin 4 (Out 50)',
+            activeWires: [2, 3],
+            faultWire: 2,
+            posSide: 'sensor', posWire: 2,
+            negSide: 'chassis_gnd', negWire: 2,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): Pin 3 (+B) / Pin 4 (Out 50)',
+            probeNegLabel: 'Hitam(-): Massa Bodi',
+            normalVal: '12.4 V (+B) · 10.2 V (Out 50)',
+            faultVal: '0.00 V (SEKRING ST PUTUS)',
+            spec: 'Vol 2 Bab 9A-39: +12V konstan di Pin 3 · ≥ 9.5V di Pin 4 saat Crank',
+            instruction: 'Langkah 3: Pastikan Pin 3 (WHT/RED) menerima +12V dari sekring starter dan Pin 4 mengeluarkan ≥ 9.5V ke solenoid starter saat di-start.',
+            normalVerdict: 'Jalur daya utama starter & solenoid terminal 50 utuh.',
+            faultVerdict: 'Daya utama hilang! Periksa sekring ST dan kabel tebal dari aki.'
+          }
+        ]
+      },
+
+      app_6w: {
+        badge: 'SOKET 6-PIN (1x6 · PEDAL GAS APP E68)',
+        connectorLabel: '6-Pin (1x6) Sensor Pedal Gas APP E68 JB420',
+        connectorLayout: '1x6',
+        pinCount: 6,
+        ecmHeader: 'ECM JB420 (E23-51 s/d E23-56)',
+        sensorHeader: 'PEDAL GAS APP E68 (6-PIN)',
+        sensorTitle: 'APP E68',
+        sensorSub: 'Dual Hall Sensor (Main & Sub)',
+        wires: [
+          { sourceType: 'power', ecmPin: 'E23-53', sensorPin: 'Pin 1', ecmFunc: 'APP Sub +5V', label: 'ORN/BLU (+5V Ref APP Sub)', color: '#f97316' },
+          { sourceType: 'power', ecmPin: 'E23-56', sensorPin: 'Pin 2', ecmFunc: 'APP Main +5V', label: 'WHT (+5V Ref APP Main)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'E23-55', sensorPin: 'Pin 3', ecmFunc: 'APP Main Sig', label: 'WHT/BLU (0.65–0.82V → 3.5–4.3V)', color: '#38bdf8' },
+          { sourceType: 'ground', ecmPin: 'E23-54', sensorPin: 'Pin 4', ecmFunc: 'APP Main GND', label: 'ORN (Massa APP Main < 0.3V)', color: '#10b981' },
+          { sourceType: 'ground', ecmPin: 'E23-51', sensorPin: 'Pin 5', ecmFunc: 'APP Sub GND', label: 'BLU/YEL (Massa APP Sub < 0.3V)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'E23-52', sensorPin: 'Pin 6', ecmFunc: 'APP Sub Sig', label: 'BLU/GRN (0.30–0.44V → 1.75–2.15V)', color: '#22c55e' }
+        ],
+        steps: [
+          {
+            title: '1. Suplai +5V Main & Sub (Pin 2 & 1)',
+            sub: 'E23-56 (WHT) & E23-53 (ORN/BLU)',
+            activeWires: [0, 1, 3, 4],
+            faultWire: 1,
+            posSide: 'sensor', posWire: 1,
+            negSide: 'sensor', negWire: 3,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): Pin 2 (Main) / Pin 1 (Sub +5V)',
+            probeNegLabel: 'Hitam(-): Pin 4 (Main) / Pin 5 (Sub GND)',
+            normalVal: '5.00 V (Kedua Jalur)',
+            faultVal: '0.00 V (VREF PUTUS)',
+            spec: 'Bab 1A-181: 4.5 – 5.5 V DC pada Main (E23-56) & Sub (E23-53)',
+            instruction: 'Langkah 1: Kunci kontak ON, ukur tegangan referensi +5V pada Pin 2↔4 (APP Main) dan Pin 1↔5 (APP Sub) di soket 6-pin pedal gas E68.',
+            normalVerdict: 'Suplai +5V & massa kedua jalur sensor pedal gas APP E68 normal.',
+            faultVerdict: 'Suplai +5V atau ground pedal gas terputus! Cek konektor E68 dan jalur ke E23 ECM.'
+          },
+          {
+            title: '2. Sinyal APP Main (E23-55 · Pin 3)',
+            sub: 'Lepas: 0.72V → Injak Penuh: 3.9V',
+            activeWires: [2, 3],
+            faultWire: 2,
+            posSide: 'ecm', posWire: 2,
+            negSide: 'ground', negWire: 3,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): E23-55 (WHT/BLU Pin 3)',
+            probeNegLabel: 'Hitam(-): E23-54 (ORN Pin 4)',
+            normalVal: '0.74 V → 3.95 V (Halus)',
+            faultVal: '0.00 V / LOMPAT (P2122/P2123)',
+            spec: 'Bab 1A-181: 0.65–0.82V (Lepas) → 3.5–4.3V (Injak Penuh)',
+            instruction: 'Langkah 2: Kunci kontak ON, injak pedal gas perlahan dari 0% ke 100% sambil pantau tegangan E23-55 — harus naik mulus tanpa putus.',
+            normalVerdict: 'Sinyal APP Main E23-55 naik linear sesuai injakan pedal.',
+            faultVerdict: 'Sinyal APP Main drop/mentok (P2122/P2123)! Cek kabel WHT/BLU atau ganti Pedal Gas Assy E68.'
+          },
+          {
+            title: '3. Korelasi APP Sub (E23-52 · Pin 6)',
+            sub: 'APP Sub ≈ ½ Tegangan APP Main',
+            activeWires: [4, 5],
+            faultWire: 5,
+            posSide: 'ecm', posWire: 5,
+            negSide: 'ground', negWire: 4,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): E23-52 (BLU/GRN Pin 6)',
+            probeNegLabel: 'Hitam(-): E23-51 (BLU/YEL Pin 5)',
+            normalVal: '0.37 V → 1.98 V (Rasio 1:2)',
+            faultVal: 'TIDAK SINKRON (P2127/P2138)',
+            spec: 'Bab 1A-181: 0.30–0.44V (Lepas) → 1.75–2.15V (Penuh · ~50% Main)',
+            instruction: 'Langkah 3: Ukur sinyal APP Sub E23-52 sambil menginjak pedal — nilainya harus selalu sekitar setengah dari APP Main.',
+            normalVerdict: 'Korelasi Dual APP Main & Sub sempurna (bebas P2138 Limp Mode).',
+            faultVerdict: 'APP Sub menyimpang/tidak sinkron (P2127/P2128/P2138)! Ganti unit Pedal Gas E68.'
+          }
+        ]
+      },
+
+      brake_4w: {
+        badge: 'SOKET 4-PIN (2x2 · SWITCH REM E67)',
+        connectorLabel: '4-Pin (2x2) Switch Lampu Rem E67 JB420',
+        connectorLayout: '2x2',
+        pinCount: 4,
+        ecmHeader: 'FUSE #38/#35 · ECM (E23-20/08)',
+        sensorHeader: 'SWITCH REM E67 (4-PIN · 2x2)',
+        sensorTitle: 'BRAKE E67',
+        sensorSub: 'P0504 (Kontak A & B Berlawanan)',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'E23-20', sensorPin: 'Pin 1', ecmFunc: 'Stop Signal A', label: 'GRN/WHT (0V Lepas → 12V Injak Rem)', color: '#22c55e' },
+          { sourceType: 'power', ecmPin: 'FUSE #38', sensorPin: 'Pin 2', ecmFunc: '15A STOP +B', label: 'GRN (+12V Sekring #38 STOP)', color: '#ef4444' },
+          { sourceType: 'ecm', ecmPin: 'E23-08', sensorPin: 'Pin 3', ecmFunc: 'Cruise Sig B', label: 'YEL/GRN (12V Lepas → 0V Injak Rem)', color: '#facc15' },
+          { sourceType: 'power', ecmPin: 'FUSE #35', sensorPin: 'Pin 4', ecmFunc: '10A CRUISE IG', label: 'BLU/BLK (+12V Sekring #35 IG ON)', color: '#38bdf8' }
+        ],
+        steps: [
+          {
+            title: '1. Kontak A Lampu Rem (E23-20)',
+            sub: 'Pin 1 (GRN/WHT) Lepas vs Injak',
             activeWires: [0, 1],
             faultWire: 0,
             posSide: 'ecm', posWire: 0,
             negSide: 'chassis_gnd', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-08 / Terminal B+ Aki',
-            probeNegLabel: 'Hitam(-): Massa Bodi (GND)',
-            normalVal: '14.15 V (Idle)',
-            faultVal: '11.80 V (TIDAK MENGISI)',
-            spec: 'Bab 1A-35 & 1A-199: 13.5–14.5 V Idle · Field Duty 10–50%',
-            instruction: 'Langkah 1: Hidupkan mesin idle panas, ukur tegangan aki & sinyal monitor C37-08 (BRN/BLK). Cek V-belt & IC regulator bila < 13.2V.',
-            normalVerdict: 'Alternator mengisi stabil (14.15 V) dan monitor field C37-08 bekerja normal.',
-            faultVerdict: 'Alternator tidak mengisi atau IC regulator/sikat arang aus! Servis alternator & cek kabel C37-08/28.'
+            probePosLabel: 'Merah(+): E23-20 (GRN/WHT Pin 1)',
+            probeNegLabel: 'Hitam(-): Massa Bodi',
+            normalVal: '0.0V Lepas → 12.4V Injak',
+            faultVal: 'STUCK 0V / 12V (P0504)',
+            spec: 'Bab 1A-139: 0–1V Pedal Dilepas · 10–14V Pedal Rem Diinjak',
+            instruction: 'Langkah 1: Kunci kontak ON, ukur E23-20 saat pedal rem dilepas (0V) dan saat diinjak (12V). Cek sekring #38 (15A STOP) bila 0V terus.',
+            normalVerdict: 'Kontak A Switch Rem E67 & lampu rem bekerja normal.',
+            faultVerdict: 'Kontak A macet/putus atau sekring #38 putus!'
           },
           {
-            title: '2. Sinyal Sensor Beban ELC (C37-09)',
-            sub: 'C37-09 (BLU) → C37-57 (GRY/GRN)',
-            activeWires: [2, 3, 4],
-            faultWire: 3,
-            posSide: 'ecm', posWire: 3,
-            negSide: 'ground', negWire: 4,
+            title: '2. Kontak B Cruise/ECM (E23-08)',
+            sub: 'Pin 3 (YEL/GRN) Kebalikan Kontak A',
+            activeWires: [2, 3],
+            faultWire: 2,
+            posSide: 'ecm', posWire: 2,
+            negSide: 'chassis_gnd', negWire: 2,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-09 (BLU ELC Signal)',
-            probeNegLabel: 'Hitam(-): C37-57 (GRY/GRN GND)',
-            normalVal: '0.75 V IG ON · 1.95 V Beban HI',
-            faultVal: '0.00 V / 5.00 V (P1501/P1502)',
-            spec: 'Bab 1A-200: 0.5–1.0V (IG ON) · 1.8–2.4V (2000 RPM Lampu+Blower HI)',
-            instruction: 'Langkah 2: Ukur +5V di C37-14 dan sinyal ELC di C37-09 saat IG ON (0.5–1.0V) lalu nyalakan lampu besar + blower HI pada 2.000 RPM (1.8–2.4V).',
-            normalVerdict: 'Sensor arus beban listrik (ELC) & referensi +5V C37-14 bekerja presisi.',
-            faultVerdict: 'Sensor ELC atau kabel GRY/RED (+5V) / BLU putus/korslet (pemicu P1501/P1502)!'
+            probePosLabel: 'Merah(+): E23-08 (YEL/GRN Pin 3)',
+            probeNegLabel: 'Hitam(-): Massa Bodi',
+            normalVal: '12.4V Lepas → 0.0V Injak',
+            faultVal: 'TIDAK BERLAWANAN (P0504)',
+            spec: 'Bab 1A-139: 10–14V Dilepas · 0–1V Diinjak (Harus berlawanan Kontak A!)',
+            instruction: 'Langkah 2: Ukur E23-08 saat pedal dilepas (12V) dan diinjak (0V). Setelan posisi switch yang meleset membuat A & B berubah tidak serempak (P0504).',
+            normalVerdict: 'Korelasi Kontak A & B Switch Rem E67 sinkron sempurna.',
+            faultVerdict: 'Setel ulang ketinggian Switch Rem E67, cek sekring #35, atau ganti Switch Rem 4-pin!'
           }
         ]
       },
 
-      starter_rly: {
-        badge: 'SIRKUIT RELAY STARTER CONTROL',
-        connectorLabel: 'Relay Starter & ECM C37-22 (JB420)',
-        ecmHeader: 'FUSE ST SIG · ECM (C37-22) · GND',
-        sensorHeader: 'RELAY STARTER CONTROL',
-        sensorTitle: 'STARTER RLY',
-        sensorSub: 'P0616 / P0617 (C37-22 BLK/YEL)',
+      acpress_3w: {
+        badge: 'SOKET 3-PIN (1x3 · A/C PRESSURE E04)',
+        connectorLabel: '3-Pin (1x3) Sensor Tekanan Freon A/C E04 JB420',
+        connectorLayout: '1x3',
+        pinCount: 3,
+        ecmHeader: 'ECM JB420 (C37-57 / 12 / 14)',
+        sensorHeader: 'A/C PRESSURE E04 (3-PIN)',
+        sensorTitle: 'ACP E04',
+        sensorSub: 'P0532 / P0533 (3-Pin)',
         wires: [
-          { sourceType: 'power', ecmPin: 'ST SIG', sensorPin: 'Pin 30+', ecmFunc: 'Suplai +12V', label: 'BLK/WHT (+12V Sekering STR MOT/ST SIG)', color: '#ef4444' },
-          { sourceType: 'ecm', ecmPin: 'C37-22', sensorPin: 'Pin 85', ecmFunc: 'Starter Ctrl', label: 'BLK/YEL (0–1V IG ON · 8–14V Posisi ST)', color: '#f59e0b' },
-          { sourceType: 'ground', ecmPin: 'GND BODI', sensorPin: 'Pin 86', ecmFunc: 'Massa Koil', label: 'BLK (Massa Koil Relay Starter)', color: '#10b981' }
+          { sourceType: 'ground', ecmPin: 'C37-57', sensorPin: 'Pin 1', ecmFunc: 'Sensor GND', label: 'GRY/GRN (Massa Sensor < 0.3V)', color: '#10b981' },
+          { sourceType: 'ecm', ecmPin: 'C37-12', sensorPin: 'Pin 2', ecmFunc: 'ACP Signal', label: 'GRY/BLK (1.4V AC OFF · 2.2V AC ON)', color: '#38bdf8' },
+          { sourceType: 'power', ecmPin: 'C37-14', sensorPin: 'Pin 3', ecmFunc: 'Vref +5V', label: 'GRY/RED (+5V Ref Bersama ECM)', color: '#ef4444' }
         ],
         steps: [
           {
-            title: '1. Standby C37-22 (IG ON: 0–1 V)',
-            sub: 'C37-22 (BLK/YEL) → Massa (IG ON)',
-            activeWires: [1, 2],
-            faultWire: 1,
-            posSide: 'ecm', posWire: 1,
-            negSide: 'ground', negWire: 2,
+            title: '1. Suplai Vref +5V (Pin 3–1)',
+            sub: 'C37-14 (GRY/RED) → C37-57',
+            activeWires: [0, 2],
+            faultWire: 2,
+            posSide: 'sensor', posWire: 2,
+            negSide: 'sensor', negWire: 0,
             mode: 'DC VOLT (V)',
-            probePosLabel: 'Merah(+): C37-22 (BLK/YEL)',
-            probeNegLabel: 'Hitam(-): Massa Bodi',
-            normalVal: '0.10 V (IG ON)',
-            faultVal: '12.4 V (SHORT POWER P0617)',
-            spec: 'Bab 1A-201: 0 – 1 V (IG ON) · 8 – 14 V (Kunci Posisi ST)',
-            instruction: 'Langkah 1: Kunci kontak ON (mesin mati), ukur C37-22 (normal 0–1V). Lalu putar ke posisi ST (cranking): harus naik ke 8–14V.',
-            normalVerdict: 'Sirkuit perintah Relay Starter C37-22 (BLK/YEL) bekerja sesuai posisi kunci kontak.',
-            faultVerdict: 'Tegangan abnormal! Cek Relay Starter, sekering ST SIG, atau kabel BLK/YEL putus/korslet.'
+            probePosLabel: 'Merah(+): Pin 3 E04 (GRY/RED +5V)',
+            probeNegLabel: 'Hitam(-): Pin 1 E04 (GRY/GRN GND)',
+            normalVal: '5.01 V',
+            faultVal: '0.00 V (VREF HILANG)',
+            spec: 'Bab 1A-141: 4.5 – 5.5 V DC (IG ON)',
+            instruction: 'Langkah 1: Kunci kontak ON, ukur +5V pada Pin 3 (GRY/RED) terhadap Pin 1 (GRY/GRN) soket 3-pin E04 di pipa tekanan tinggi A/C.',
+            normalVerdict: 'Tegangan referensi +5V dan massa soket E04 normal.',
+            faultVerdict: 'Suplai +5V hilang! Cek kabel GRY/RED menuju C37-14 ECM.'
           },
           {
-            title: '2. Tahanan Koil Relay Starter (85–86)',
-            sub: 'Pin 85 ↔ Pin 86 (60–120 Ω)',
-            activeWires: [1, 2],
+            title: '2. Sinyal Tekanan Freon (C37-12)',
+            sub: 'Pin 2 (GRY/BLK) AC OFF vs ON',
+            activeWires: [0, 1],
             faultWire: 1,
-            posSide: 'sensor', posWire: 1,
-            negSide: 'sensor', negWire: 2,
+            posSide: 'ecm', posWire: 1,
+            negSide: 'ground', negWire: 0,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): C37-12 (GRY/BLK Pin 2)',
+            probeNegLabel: 'Hitam(-): C37-57 (GRY/GRN Pin 1)',
+            normalVal: '1.45 V (OFF) · 2.25 V (ON)',
+            faultVal: '0.05 V (P0532) / 4.95 V (P0533)',
+            spec: 'Bab 1A-141: 1.38–1.52V AC OFF · 2.15–2.38V AC ON (Freon Cukup)',
+            instruction: 'Langkah 2: Ukur tegangan sinyal C37-12 saat AC OFF lalu nyalakan AC. Tegangan < 0.2V bisa menandakan freon kosong atau kabel short massa.',
+            normalVerdict: 'Tekanan freon A/C dan sensor tekanan E04 bekerja akurat.',
+            faultVerdict: 'Sinyal abnormal (P0532/P0533)! Cek isi tekanan freon A/C, kabel GRY/BLK, atau ganti sensor E04.'
+          }
+        ]
+      },
+
+      fuel_level_2w: {
+        badge: 'SOKET 2-PIN (1x2 · FUEL LEVEL SENSOR)',
+        connectorLabel: '2-Pin (1x2) Fuel Level Sensor Main/Sub JB420 (1A-129)',
+        connectorLayout: '1x2',
+        pinCount: 2,
+        ecmHeader: 'ECM JB420 (E23-24) · MASSA TANGKI',
+        sensorHeader: 'FUEL LEVEL SENSOR (2-PIN)',
+        sensorTitle: 'FUEL LEVEL',
+        sensorSub: 'P0462 / P0463 (Main + Sub Seri)',
+        wires: [
+          { sourceType: 'ecm', ecmPin: 'E23-24', sensorPin: 'Pin 1', ecmFunc: 'Fuel Level Sig', label: 'YEL/RED (Sinyal Pelampung BBM ke E23-24)', color: '#eab308' },
+          { sourceType: 'ground', ecmPin: 'GND BODI', sensorPin: 'Pin 2', ecmFunc: 'Sub/Massa Tangki', label: 'YEL/GRN → Sub Sensor → BLK/YEL Massa', color: '#10b981' }
+        ],
+        steps: [
+          {
+            title: '1. Tegangan Sinyal E23-24 (IG ON)',
+            sub: 'E23-24 (YEL/RED) → Massa Bodi',
+            activeWires: [0, 1],
+            faultWire: 0,
+            posSide: 'ecm', posWire: 0,
+            negSide: 'ground', negWire: 1,
+            mode: 'DC VOLT (V)',
+            probePosLabel: 'Merah(+): E23-24 (YEL/RED Pin 1)',
+            probeNegLabel: 'Hitam(-): Massa Bodi (BLK/YEL)',
+            normalVal: '2.45 V (½ Tangki)',
+            faultVal: '0.02 V (P0462) / 11.8 V (P0463)',
+            spec: 'Vol 1 Bab 1A-129: Berubah halus sesuai tinggi pelampung (Short GND → P0462 · Open → P0463)',
+            instruction: 'Langkah 1: Kunci kontak ON, ukur tegangan E23-24 (YEL/RED) terhadap massa. Tegangan terlalu rendah memicu P0462; tegangan terlalu tinggi/putus memicu P0463.',
+            normalVerdict: 'Tegangan sinyal pelampung bahan bakar E23-24 sesuai kapasitas tangki.',
+            faultVerdict: 'Sinyal pelampung drop ke massa (P0462) atau sirkuit terbuka/putus (P0463)!'
+          },
+          {
+            title: '2. Tahanan Pelampung Main & Sub Seri',
+            sub: 'Pin 1 (YEL/RED) ↔ Pin 2 (Massa)',
+            activeWires: [0, 1],
+            faultWire: 1,
+            posSide: 'sensor', posWire: 0,
+            negSide: 'sensor', negWire: 1,
             mode: 'OHMMETER (Ω)',
-            probePosLabel: 'Merah(+): Pin 85 Relay Starter',
-            probeNegLabel: 'Hitam(-): Pin 86 Relay Starter',
-            normalVal: '85.0 Ω',
-            faultVal: 'OL / PUTUS (P0616)',
-            spec: 'Standar Relay OEM: 60 – 120 Ω @ 20°C',
-            instruction: 'Langkah 2: Cabut Relay Starting Motor Control, ukur tahanan kumparan (Pin 85–86) dan uji klik dengan +12V.',
-            normalVerdict: 'Kumparan Relay Starter sehat (85.0 Ω).',
-            faultVerdict: 'Koil Relay Starter putus! Ganti Relay Starting Motor Control.'
+            probePosLabel: 'Merah(+): Pin 1 Pelampung (YEL/RED)',
+            probeNegLabel: 'Hitam(-): Pin 2 / BLK/YEL Massa',
+            normalVal: '45 Ω (Penuh) – 280 Ω (Kosong)',
+            faultVal: 'OL (LILITAN PUTUS) / 0 Ω (SHORT)',
+            spec: 'Vol 1 Bab 1A-129: Resistansi berubah mulus tanpa loncatan saat pelampung digerakkan',
+            instruction: 'Langkah 2: Kunci kontak OFF, lepas soket modul tangki & ukur tahanan gabungan Main + Sub Fuel Level Sensor.',
+            normalVerdict: 'Resistor geser Main & Sub Fuel Level Sensor utuh.',
+            faultVerdict: 'Pelampung bahan bakar aus/putus atau kabel YEL/GRN / BLK/YEL tangki korosi!'
           }
         ]
       },
@@ -7933,7 +8293,7 @@
       // Lengkapi sumber +12V pabrik untuk O2 Heater / Cooling Fan Toyota jika daftar pinout hanya berisi sisi ECM
       const hasPower = wires.some(w => w.sourceType === 'power');
       const allLabels = wires.map(w => `${w.ecmPin} ${w.sensorPin} ${w.label} ${w.rawFunc}`).join(' ').toUpperCase();
-      if (!hasPower && (detectedKind === 'o2_4w' || detectedKind === 'af_6w') && /HA1A|HT1A|HT1B|OXH1|HEATER|PEMANAS/.test(allLabels)) {
+      if (!hasPower && (detectedKind === 'o2_4w' || detectedKind === 'af_4w') && /HA1A|HT1A|HT1B|OXH1|HEATER|PEMANAS/.test(allLabels)) {
         wires.unshift({
           sourceType: 'power',
           ecmPin: 'EFI RLY',
@@ -7955,7 +8315,7 @@
         });
       }
 
-      return wires.slice(0, 6);
+      return wires.slice(0, 8);
     }
 
     function buildDynamicCircuitFromPinout(advice, appInfo, detectedKind) {
@@ -8002,23 +8362,28 @@
       ].filter(Boolean).join(' · ');
 
       const kindNames = {
-        coil_4w: { header: 'SOKET KOIL PENGAPIAN', title: 'KOIL COP', sub: `${wires.length} Jalur Resmi ${engCode || vehicleTag}` },
-        egr_6w: { header: 'SOKET KATUP EGR (6-PIN)', title: 'KATUP EGR', sub: `${wires.length} Jalur Stepper ${engCode || vehicleTag}` },
-        evap_2w: { header: 'SOKET KATUP EVAP PURGE', title: 'EVAP PURGE', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
-        imt_2w: { header: 'SOKET SOLENOID IMT', title: 'IMT VALVE', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
-        knock_2w: { header: 'SOKET KNOCK SENSOR', title: 'KNOCK SENSOR', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
-        gen_elc: { header: 'ALTERNATOR & ELC', title: 'GEN / ELC', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
-        starter_rly: { header: 'RELAY STARTER CONTROL', title: 'STARTER RLY', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        coil_4w: { header: 'SOKET KOIL PENGAPIAN (3-PIN)', title: 'KOIL COP', sub: `${wires.length} Jalur Resmi ${engCode || vehicleTag}` },
+        egr_6w: { header: 'SOKET KATUP EGR C10 (6-PIN)', title: 'KATUP EGR', sub: `${wires.length} Jalur Stepper ${engCode || vehicleTag}` },
+        evap_2w: { header: 'SOKET KATUP EVAP C14 (2-PIN)', title: 'EVAP PURGE', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        imt_2w: { header: 'SOKET SOLENOID IMT C46 (2-PIN)', title: 'IMT VALVE', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        knock_1w: { header: 'SOKET KNOCK C26 (1-PIN)', title: 'KNOCK C26', sub: `1-Pin Piezo + Baut Massa` },
+        gen_2w: { header: 'KONTROL GENERATOR (2-PIN)', title: 'GENERATOR', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        eld_3w: { header: 'SENSOR ELD C38 (3-PIN)', title: 'ELD C38', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        starter_4w: { header: 'RELAY STARTER (4-PIN)', title: 'STARTER RLY', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        app_6w: { header: 'PEDAL GAS APP E68 (6-PIN)', title: 'APP E68', sub: `${wires.length} Jalur Dual APP` },
+        brake_4w: { header: 'SWITCH REM E67 (4-PIN)', title: 'BRAKE E67', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        acpress_3w: { header: 'A/C PRESSURE E04 (3-PIN)', title: 'ACP E04', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        fuel_level_2w: { header: 'FUEL LEVEL SENSOR (2-PIN)', title: 'FUEL LEVEL', sub: `${wires.length} Jalur Main/Sub` },
         can_2w: { header: 'JARINGAN CAN BUS', title: 'CAN BUS', sub: `${wires.length} Jalur Twisted Pair` },
-        map_3w: { header: 'SOKET SENSOR MAP', title: 'SENSOR MAP', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
-        ect_2w: { header: 'SOKET SENSOR ECT', title: 'SENSOR ECT', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
-        etc_6w: { header: 'SOKET THROTTLE ETC', title: 'THROTTLE ETC', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
-        af_6w: { header: 'SOKET A/F SENSOR-1', title: 'A/F SENSOR-1', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
-        o2_4w: { header: 'SOKET SENSOR HO2S', title: 'SENSOR HO2S', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
-        ckp_2w: { header: 'SOKET SENSOR CKP', title: 'SENSOR CKP', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
-        cmp_3w: { header: 'SOKET SENSOR CMP', title: 'SENSOR CMP', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        map_3w: { header: 'SOKET SENSOR MAP C12', title: 'SENSOR MAP', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        ect_2w: { header: 'SOKET SENSOR ECT C09', title: 'SENSOR ECT', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        etc_6w: { header: 'SOKET THROTTLE ETC C11', title: 'THROTTLE ETC', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        af_4w: { header: 'SOKET A/F SENSOR-1 (4-PIN)', title: 'A/F SENSOR-1', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        o2_4w: { header: 'SOKET HO2S-2 C15 (4-PIN)', title: 'HO2S-2 C15', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
+        ckp_3w: { header: 'SOKET SENSOR CKP C20 (3-PIN)', title: 'CKP C20', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
+        cmp_3w: { header: 'SOKET SENSOR CMP C08 (3-PIN)', title: 'CMP C08', sub: `${wires.length} Kabel (${engCode || vehicleTag})` },
         fan_4w: { header: 'RELAY KIPAS RADIATOR', title: 'RELAY KIPAS', sub: `${wires.length} Jalur (${engCode || vehicleTag})` },
-        maf_5w: { header: 'SOKET SENSOR MAF/IAT', title: 'MAF / IAT', sub: `${wires.length} Jalur (${engCode || vehicleTag})` }
+        maf_5w: { header: 'SOKET SENSOR MAF/IAT C13', title: 'MAF / IAT', sub: `${wires.length} Jalur (${engCode || vehicleTag})` }
       };
       const cleanCompName = String(advice.diagnosis_title || 'KOMPONEN')
         .replace(/^DTC\s+[A-Z0-9,\s]+:\s*/i, '')
@@ -8085,6 +8450,209 @@
       return m ? parseInt(m[1], 10) : 1;
     }
 
+    function resolveOemImgUrl(relPath) {
+      if (!relPath) return '';
+      if (/^(https?:|data:|\/static\/)/i.test(relPath)) return relPath;
+      if (window.location.protocol === 'file:' || typeof window.offlineFetch === 'function') {
+        return relPath;
+      }
+      return `/static/${relPath}`;
+    }
+
+    function renderDiagInlineOemWiring(advice) {
+      const card = document.getElementById('diag-oem-wiring-card');
+      if (!card) return;
+      if (!advice) {
+        card.classList.add('hidden');
+        return;
+      }
+      const imgPath = advice.oem_wiring_image ? String(advice.oem_wiring_image).trim() : '';
+      const isUnverified = String(advice.verification_status || '').toUpperCase() === 'UNVERIFIED';
+      const refBadge = document.getElementById('diag-oem-wiring-ref-badge');
+      const crossRef = document.getElementById('diag-oem-wiring-crossref');
+      const pageRef = document.getElementById('diag-oem-wiring-pageref');
+      const imgWrap = document.getElementById('diag-oem-wiring-img-wrap');
+      const imgEl = document.getElementById('diag-oem-wiring-img');
+      const fbEl = document.getElementById('diag-oem-wiring-fallback');
+
+      if (!imgPath && !isUnverified) {
+        card.classList.add('hidden');
+        return;
+      }
+
+      card.classList.remove('hidden');
+      if (refBadge) {
+        const sharedCnt = Array.isArray(advice.shared_with_dtcs) ? advice.shared_with_dtcs.length : 0;
+        refBadge.textContent = advice.wiring_ref_id
+          ? `${advice.wiring_ref_id}${sharedCnt > 1 ? ` · Shared ${sharedCnt} DTC` : ''}`
+          : 'REF. MANUAL OEM';
+      }
+      if (crossRef) {
+        crossRef.textContent = advice.wiring_cross_ref_note || advice.manual_book_section || 'Diagram wiring resmi Buku Manual Suzuki Grand Vitara JB420';
+      }
+      if (pageRef) {
+        pageRef.textContent = advice.manual_page_ref ? `Sumber Resmi: ${advice.manual_page_ref}` : '';
+      }
+
+      if (imgPath && !isUnverified) {
+        if (imgEl) {
+          imgEl.src = resolveOemImgUrl(imgPath);
+          imgEl.alt = advice.wiring_cross_ref_note || advice.diagnosis_title || 'Diagram Wiring OEM';
+        }
+        if (imgWrap) imgWrap.classList.remove('hidden');
+        if (fbEl) fbEl.classList.add('hidden');
+      } else {
+        if (imgWrap) imgWrap.classList.add('hidden');
+        if (fbEl) {
+          fbEl.classList.remove('hidden');
+          fbEl.textContent = `Data Wiring OEM belum terverifikasi untuk kode ini. Rujuk langsung Buku Pedoman Servis (${advice.manual_page_ref || advice.manual_book_section || 'Vol 1 / Vol 2'}).`;
+        }
+      }
+    }
+
+    function openDiagInlineOemPhotoFullscreen() {
+      const adv = window.__lastActiveDiagAdvice || {};
+      if (!adv.oem_wiring_image) {
+        openActiveDiagOemPhoto();
+        return;
+      }
+      const modal = document.getElementById('modal-jb420-photo-fullscreen');
+      const img = document.getElementById('fs-jb420-photo-img');
+      const title = document.getElementById('fs-jb420-photo-title');
+      const src = document.getElementById('fs-jb420-photo-source');
+      const wrap = document.getElementById('fs-jb420-photo-wrap');
+      const lbl = document.getElementById('fs-jb420-zoom-label');
+      if (img) {
+        img.src = resolveOemImgUrl(adv.oem_wiring_image);
+        img.style.width = '100%';
+        img.style.filter = 'none';
+      }
+      if (wrap) {
+        wrap.classList.remove('bg-[#071124]');
+        wrap.classList.add('bg-white');
+      }
+      if (title) title.textContent = adv.wiring_cross_ref_note || adv.diagnosis_title || 'Foto Diagram Wiring Asli OEM';
+      if (src) src.textContent = `Sumber Resmi: Buku Manual Suzuki Grand Vitara JB420 — ${adv.manual_page_ref || adv.manual_book_section || ''}`;
+      if (lbl) lbl.textContent = '100%';
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function buildCircuitFromVerifiedConnector(advice, appInfo, baseKey) {
+      const conn = advice && advice.connector;
+      if (!conn || typeof conn !== 'object') return null;
+
+      // FR-02 HARD RUNTIME ASSERTION: pin_count WAJIB === pins.length & nomor pin 1..pin_count unik tanpa duplikat!
+      const pinCount = Number(conn.pin_count);
+      const pinsArr = Array.isArray(conn.pins) ? conn.pins : [];
+      const pinNums = pinsArr.map(p => Number(p && p.pin));
+      const uniquePinSet = new Set(pinNums);
+      const allPinsInRange = pinNums.every(n => Number.isInteger(n) && n >= 1 && n <= pinCount);
+      if (!Number.isInteger(pinCount) || pinCount < 1 || pinCount > 8 || pinsArr.length !== pinCount || uniquePinSet.size !== pinCount || !allPinsInRange) {
+        return {
+          unverifiedFallback: true,
+          badge: '⚠️ VERIFIKASI GAGAL (MISMATCH PIN)',
+          connectorLabel: conn.connector_code || 'Konektor Belum Terverifikasi',
+          manualSourceVerified: false,
+          manualSourceLabel: '⚠️ DATA WIRING / PINOUT BELUM TERVERIFIKASI',
+          manualSourceSubtitle: `Terdeteksi ketidaksesuaian jumlah pin (${pinCount} vs ${pinsArr.length}) — simulator diblokir demi mencegah salah ukur! Rujuk: ${advice.manual_page_ref || advice.manual_book_section || 'Manual OEM'}.`,
+          wires: [],
+          steps: []
+        };
+      }
+
+      const sortedPins = [...pinsArr].sort((a, b) => Number(a.pin) - Number(b.pin));
+      const layout = String(conn.layout || `1x${pinCount}`);
+      const wires = sortedPins.map((p, idx) => {
+        const st = (p.source_type === 'power' || p.source_type === 'ground') ? p.source_type : 'ecm';
+        const wCol = String(p.wire_color || 'WHT').trim();
+        const ecmPin = String(p.ecm_pin || p.terminal || `Pin ${p.pin}`).slice(0, 11);
+        const termName = String(p.terminal || `Pin ${p.pin}`).slice(0, 15);
+        const fnText = String(p.function || termName);
+        return {
+          sourceType: st,
+          ecmPin,
+          sensorPin: `Pin ${p.pin}`,
+          ecmFunc: termName,
+          rawFunc: fnText,
+          label: `${wCol} (${fnText.slice(0, 30)})`,
+          color: st === 'power' ? (wCol.startsWith('PNK') ? '#ec4899' : '#ef4444') : (st === 'ground' ? '#10b981' : wireHexFromLabel(wCol, idx))
+        };
+      });
+
+      const tpl = (baseKey && WIRING_CIRCUITS[baseKey] && WIRING_CIRCUITS[baseKey].wires && WIRING_CIRCUITS[baseKey].wires.length === pinCount)
+        ? WIRING_CIRCUITS[baseKey]
+        : null;
+
+      let steps = [];
+      if (tpl && Array.isArray(tpl.steps) && tpl.steps.length) {
+        steps = JSON.parse(JSON.stringify(tpl.steps)).map(st => ({
+          ...st,
+          activeWires: (st.activeWires || [0]).filter(i => i >= 0 && i < pinCount),
+          faultWire: Math.min(Math.max(0, Number(st.faultWire) || 0), pinCount - 1),
+          posWire: Math.min(Math.max(0, Number(st.posWire) || 0), pinCount - 1),
+          negWire: Math.min(Math.max(0, Number(st.negWire) || 0), pinCount - 1)
+        }));
+      } else {
+        const isSrsAirbag = /\bB10\d{2}\b|air\s*bag|sdm|initiator|pretensioner/i.test(`${advice.diagnosis_title || ''} ${advice.manual_book_section || ''}`);
+        const gndIdx = wires.findIndex(w => w.sourceType === 'ground');
+        const vehicleTag = 'Suzuki Grand Vitara JB420';
+        steps = wires.slice(0, 4).map((w, idx) => {
+          const mInfo = parseManualPinMeasurementStep(w, w.rawFunc, idx, wires, gndIdx, vehicleTag);
+          if (pinCount === 1) {
+            mInfo.negSide = 'chassis_gnd';
+            mInfo.negWire = 0;
+            mInfo.probeNegLabel = 'Hitam(-): Massa Blok / Bodi Mesin';
+          }
+          if (isSrsAirbag && mInfo.mode === 'OHMMETER (Ω)' && !/ground|massa|g47-20/i.test(`${w.ecmPin} ${w.label} ${w.rawFunc}`)) {
+            mInfo.mode = 'SCANNER SDM (SAFETY)';
+            mInfo.normalVal = '1.8 – 3.5 Ω (Via Scanner)';
+            mInfo.faultVal = 'DILARANG UKUR OHM LANGSUNG!';
+            mInfo.spec = 'WAJIB CABUT AKI ≥ 90 DETIK · Dilarang tusuk Ohmmeter ke inflator Airbag!';
+            mInfo.instruction = `PERINGATAN KESELAMATAN SRS: Jangan ukur tahanan langsung pada ${w.ecmPin}! Cabut negatif aki ≥ 90 detik & baca nilai aman lewat Scanner SDM.`;
+          }
+          return {
+            title: `${idx + 1}. Cek ${w.sensorPin} (${w.ecmPin})`,
+            sub: `${w.ecmFunc} · ${w.label.split('(')[0].trim()}`,
+            activeWires: mInfo.activeWires.filter(i => i >= 0 && i < pinCount),
+            faultWire: idx,
+            posSide: mInfo.posSide,
+            posWire: Math.min(mInfo.posWire, pinCount - 1),
+            negSide: mInfo.negSide,
+            negWire: Math.min(mInfo.negWire, pinCount - 1),
+            mode: mInfo.mode,
+            probePosLabel: mInfo.probePosLabel,
+            probeNegLabel: mInfo.probeNegLabel,
+            normalVal: mInfo.normalVal,
+            faultVal: mInfo.faultVal,
+            spec: mInfo.spec,
+            instruction: mInfo.instruction,
+            normalVerdict: mInfo.normalVerdict,
+            faultVerdict: mInfo.faultVerdict
+          };
+        });
+      }
+
+      const shortTitle = (tpl && tpl.sensorTitle)
+        ? tpl.sensorTitle
+        : String(conn.connector_code || 'KOMPONEN').split('(')[0].trim().slice(0, 14).toUpperCase();
+
+      return {
+        badge: `SOKET ${pinCount}-PIN (${layout} · OEM TERVERIFIKASI)`,
+        connectorLabel: conn.connector_code || `${pinCount}-Pin (${layout})`,
+        connectorLayout: layout,
+        pinCount,
+        ecmHeader: (tpl && tpl.ecmHeader) || 'ECM / MODUL JB420 (OEM)',
+        sensorHeader: (tpl && tpl.sensorHeader) || `SOKET ${shortTitle} (${pinCount}-PIN · ${layout})`,
+        sensorTitle: shortTitle,
+        sensorSub: `${pinCount}-Pin (${layout}) · Data OEM`,
+        manualSourceVerified: true,
+        manualSourceLabel: '✅ PINOUT RESMI: SUZUKI GRAND VITARA JB420 (J20A)',
+        manualSourceSubtitle: `100% Data-Driven (${pinCount} Pin, Layout ${layout}) — ${advice.manual_page_ref || advice.manual_book_section || 'Buku Manual JB420'}.`,
+        wires,
+        steps
+      };
+    }
+
     function detectCircuitKindFromAdvice(advice) {
       // 0. Prioritaskan kunci sirkuit eksplisit dari katalog OEM (ANTI salah arah ke Koil!)
       if (advice && advice.sim_circuit_key) {
@@ -8103,22 +8671,26 @@
         if (/^P044[3-5]$/.test(c)) return 'evap_2w';
         if (/^P0660$/.test(c)) return 'imt_2w';
         if (/^P030[0-8]$|^P035[1-8]$/.test(c)) return 'coil_4w';
-        if (/^P032[5-8]$/.test(c)) return 'knock_2w';
-        if (/^P033[5-9]$/.test(c)) return 'ckp_2w';
-        if (/^P034[0-9]$/.test(c)) return 'cmp_3w';
+        if (/^P032[5-8]$/.test(c)) return 'knock_1w';
+        if (/^P033[5-9]$/.test(c)) return 'ckp_3w';
+        if (/^P034[0-9]$|^B1556$/.test(c)) return 'cmp_3w';
         if (/^P048[0-5]$/.test(c)) return 'fan_4w';
-        if (/^P011[5-9]$|^P012[58]$/.test(c)) return 'ect_2w';
+        if (/^P011[5-9]$|^P012[58]$|^B1561$/.test(c)) return 'ect_2w';
         if (/^P010[5-9]$|^P222[7-9]$/.test(c)) return 'map_3w';
         if (/^P010[0-4]$|^P011[0-4]$/.test(c)) return 'maf_5w';
-        if (/^P003[0-2]$|^P013[0-5]$/.test(c)) return 'af_6w';
+        if (/^P003[0-2]$|^P013[0-5]$/.test(c)) return 'af_4w';
         if (/^P003[6-8]$|^P013[6-9]$|^P014[0-1]$/.test(c)) return 'o2_4w';
+        if (/^P212[2378]$|^P2138$/.test(c)) return 'app_6w';
         if (/^P012[0-4]$|^P022[0-3]$|^P0507$|^P21[0-3][0-9]$/.test(c)) return 'etc_6w';
-        if (/^P061[5-7]$/.test(c)) return 'starter_rly';
-        if (/^P062[056]$|^P150[12]$/.test(c)) return 'gen_elc';
-        if (/^P167[468]$|^P1685$|^U[0-9A-F]{4}$/.test(c)) return 'can_2w';
-        if (/^P017[12]$|^P219[56]$/.test(c)) return 'map_3w';
+        if (/^P061[5-7]$/.test(c)) return 'starter_4w';
+        if (/^P150[12]$/.test(c)) return 'eld_3w';
+        if (/^P062[056]$/.test(c)) return 'gen_2w';
+        if (/^P0504$/.test(c)) return 'brake_4w';
+        if (/^P053[23]$|^B1546$|^B1563$/.test(c)) return 'acpress_3w';
+        if (/^P167[468]$|^P1685$|^P1774$|^B1553$|^U[0-9A-F]{4}$/.test(c)) return 'can_2w';
+        if (/^P017[12]$|^P219[56]$/.test(c)) return 'af_4w';
         if (/^P0420$|^P0430$/.test(c)) return 'o2_4w';
-        if (/^(?:B10|B11|B15|C10|P07|P08|P09|P16|P17|P18|P046|P050|P053|P060|P151)/.test(c)) return 'dynamic';
+        if (/^(?:B10|B11|B15|C10|P07|P08|P09|P16|P17|P18|P046|P050|P060|P151)/.test(c)) return 'dynamic';
       }
 
       // 2. Pencocokan kata kunci ketat pada judul (DILARANG memakai kata tunggal 'coil' karena bentrok dengan EGR stepper coil / SRS contact coil / field coil!)
@@ -8127,18 +8699,22 @@
       if (/\b(egr|exhaust gas recirculation|daur ulang gas buang)\b/i.test(tLow)) return 'egr_6w';
       if (/\b(evap|purge|canister)\b/i.test(tLow)) return 'evap_2w';
       if (/\b(imt|intake manifold tuning)\b/i.test(tLow)) return 'imt_2w';
-      if (/\b(knock)\b/i.test(tLow)) return 'knock_2w';
-      if (/\b(generator|alternator|electric load current)\b/i.test(tLow)) return 'gen_elc';
-      if (/\b(relay starter|starting motor)\b/i.test(tLow)) return 'starter_rly';
+      if (/\b(knock)\b/i.test(tLow)) return 'knock_1w';
+      if (/\b(electric load current|eld)\b/i.test(tLow)) return 'eld_3w';
+      if (/\b(generator|alternator)\b/i.test(tLow)) return 'gen_2w';
+      if (/\b(relay starter|starting motor)\b/i.test(tLow)) return 'starter_4w';
+      if (/\b(switch rem|stop lamp switch|brake switch)\b/i.test(tLow)) return 'brake_4w';
+      if (/\b(refrigerant pressure|tekanan a\/c)\b/i.test(tLow)) return 'acpress_3w';
+      if (/\b(pedal position|pedal gas|app sensor)\b/i.test(tLow)) return 'app_6w';
       if (/\b(komunikasi can|can bus)\b/i.test(tLow)) return 'can_2w';
-      if (/\b(air\s*bag|sdm|srs|abs|wheel speed|tcm|transmisi|solenoid|hvac|bcm|immobilizer|keyless|fuel level|switch rem|refrigerant)\b/i.test(tLow)) return 'dynamic';
+      if (/\b(air\s*bag|sdm|srs|abs|wheel speed|tcm|transmisi|solenoid|hvac|bcm|immobilizer|keyless|fuel level)\b/i.test(tLow)) return 'dynamic';
       if (/\b(kipas|cooling fan|radiator fan)\b/i.test(tLow) || /e23-46|e01-42/.test(cLow)) return 'fan_4w';
-      if (/\b(ckp|crankshaft|poros engkol)\b/i.test(tLow)) return 'ckp_2w';
+      if (/\b(ckp|crankshaft|poros engkol)\b/i.test(tLow)) return 'ckp_3w';
       if (/\b(cmp|camshaft|poros nok)\b/i.test(tLow)) return 'cmp_3w';
       if (/\b(ignition\s*coil|koil\s*pengapian|koil\s*cop|misfire|salah\s*pengapian|busi)\b/i.test(tLow)) return 'coil_4w';
       if (/\b(ho2s-2|sensor 2|belakang)\b/i.test(tLow) && /\b(o2|ho2s|oksigen)\b/i.test(cLow)) return 'o2_4w';
-      if (/\b(a\/f|wideband|ho2s|o2|oksigen|oxygen|lambda)\b/i.test(tLow)) return 'af_6w';
-      if (/\b(throttle|tps|etc|etcs|pedal|app)\b/i.test(tLow)) return 'etc_6w';
+      if (/\b(a\/f|wideband|ho2s|o2|oksigen|oxygen|lambda)\b/i.test(tLow)) return 'af_4w';
+      if (/\b(throttle|tps|etc|etcs)\b/i.test(tLow)) return 'etc_6w';
       if (/\b(maf|mass air flow|intake air temp|iat)\b/i.test(tLow)) return 'maf_5w';
       if (/\b(ect|coolant|suhu air|water temp|thermostat)\b/i.test(tLow) || /c37-24|c01-32/.test(cLow)) return 'ect_2w';
       if (/\b(map|vakum|manifold|barometric)\b/i.test(tLow) || /c37-55|c01-29/.test(cLow)) return 'map_3w';
@@ -8150,7 +8726,7 @@
       const inputDtc = (document.getElementById('input-dtc')?.value || '').trim();
       if (adv.atlas_module_id && typeof selectJb420Module === 'function') {
         switchTab('manuals');
-        selectJb420Module(adv.atlas_module_id, 'photo');
+        selectJb420Module(adv.atlas_module_id, 'photo', Number(adv.atlas_photo_index || 0));
         const el = document.getElementById('jb420-cockpit-atlas');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
@@ -8183,6 +8759,8 @@
 
     function syncWiringSimulatorFromAdvice(advice, appInfo) {
       if (!advice) return;
+      renderDiagInlineOemWiring(advice);
+
       const baseKey = detectCircuitKindFromAdvice(advice);
       const packId = advice.active_pack_id || (appInfo && appInfo.active_pack_id) || 'universal';
       const fuelType = String((appInfo && appInfo.resolved_fuel_type) || 'Bensin').toLowerCase();
@@ -8192,55 +8770,71 @@
       const yearNum = Number((appInfo && appInfo.year) || document.getElementById('input-year')?.value || 0);
       const modelLow = String((appInfo && appInfo.model) || document.getElementById('input-model')?.value || '').toLowerCase();
 
-      // 1. Khusus Koil Pengapian pada kendaraan Bensin yang punya arsitektur EWD OEM resmi -> pakai Builder Koil COP Per Silinder!
-      const coilArchKey = (baseKey === 'coil_4w' && fuelType !== 'diesel') ? resolveCoilArchKey(packId, appInfo) : null;
-      if (isVerified && coilArchKey) {
-        const useAlt = (coilArchKey === 'toyota_yaris_vios_1nzfe_2003_2016' && modelLow.includes('vios'))
-          || (coilArchKey === 'toyota_fortuner_gen1_2005_2015' && yearNum > 0 && yearNum <= 2008);
-        dynamicAutoCircuit = buildOemCoilCircuit(coilArchKey, targetCyl, { useAltConnector: useAlt });
-      } else if (isCustomPack) {
-        const built = buildDynamicCircuitFromPinout(advice, appInfo, baseKey === 'dynamic' ? null : baseKey);
-        if (built) {
-          dynamicAutoCircuit = built;
-        } else {
-          const tplKey = (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) ? baseKey : 'map_3w';
-          dynamicAutoCircuit = JSON.parse(JSON.stringify(WIRING_CIRCUITS[tplKey]));
-          dynamicAutoCircuit.manualSourceVerified = false;
-          dynamicAutoCircuit.manualSourceLabel = '⚠️ ILUSTRASI UMUM (PINOUT TUNGGAL — CEK SOKET FISIK)';
-          dynamicAutoCircuit.manualSourceSubtitle = `Gunakan tabel pinout resmi di atas; diagram di bawah adalah ilustrasi alur ukur prinsip kerja.`;
-        }
-      } else if (isVerified && packId === 'suzuki_jb420_builtin') {
-        if (baseKey === 'coil_4w') {
-          dynamicAutoCircuit = buildOemCoilCircuit('suzuki_jb420_builtin', targetCyl);
-        } else if (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) {
-          dynamicAutoCircuit = JSON.parse(JSON.stringify(WIRING_CIRCUITS[baseKey]));
-          dynamicAutoCircuit.manualSourceVerified = true;
-          dynamicAutoCircuit.manualSourceLabel = '✅ PINOUT RESMI: SUZUKI GRAND VITARA JB420 (J20A)';
-          dynamicAutoCircuit.manualSourceSubtitle = `Menggunakan topologi soket, warna kabel & standar multimeter asli JB420 (${advice.manual_book_section || 'Bab 1A & 9A'}).`;
-        } else {
-          // Bangun dinamis langsung dari pinout ASLI kode DTC tersebut (TCM, ABS, SRS, HVAC, BCM, ICM, Fuel Level, Brake, A/C, dll.) — JANGAN pernah jatuh ke Koil!
-          dynamicAutoCircuit = buildDynamicCircuitFromPinout(advice, appInfo, null) || JSON.parse(JSON.stringify(WIRING_CIRCUITS.map_3w));
-        }
+      // FR-05: Jika status secara eksplisit UNVERIFIED tanpa data konektor valid -> blokir gambar soket tebakan!
+      if (String(advice.verification_status || '').toUpperCase() === 'UNVERIFIED' && !advice.connector && packId === 'suzuki_jb420_builtin') {
+        dynamicAutoCircuit = {
+          unverifiedFallback: true,
+          badge: '⚠️ BELUM TERVERIFIKASI OEM',
+          connectorLabel: 'Lihat Manual Resmi',
+          manualSourceVerified: false,
+          manualSourceLabel: '⚠️ DATA WIRING / PINOUT BELUM TERVERIFIKASI',
+          manualSourceSubtitle: `Data pinout OEM belum terverifikasi. Silakan rujuk ${advice.manual_page_ref || advice.manual_book_section || 'Manual Servis Resmi'}.`,
+          wires: [],
+          steps: []
+        };
       } else {
-        // Mode Universal / Diesel — prioritaskan diagram dinamis dari pinout DTC aktif; JANGAN pernah fallback ke Koil Pengapian untuk DTC non-pengapian!
-        const builtUniv = (baseKey === 'dynamic' || !baseKey) ? buildDynamicCircuitFromPinout(advice, appInfo, null) : null;
-        if (builtUniv) {
-          dynamicAutoCircuit = builtUniv;
+        // 1. Khusus Koil Pengapian pada kendaraan Bensin yang punya arsitektur EWD OEM resmi -> pakai Builder Koil COP Per Silinder!
+        const coilArchKey = (baseKey === 'coil_4w' && fuelType !== 'diesel') ? resolveCoilArchKey(packId, appInfo) : null;
+        if (isVerified && coilArchKey) {
+          const useAlt = (coilArchKey === 'toyota_yaris_vios_1nzfe_2003_2016' && modelLow.includes('vios'))
+            || (coilArchKey === 'toyota_fortuner_gen1_2005_2015' && yearNum > 0 && yearNum <= 2008);
+          dynamicAutoCircuit = buildOemCoilCircuit(coilArchKey, targetCyl, { useAltConnector: useAlt });
+        } else if (isCustomPack) {
+          const built = buildDynamicCircuitFromPinout(advice, appInfo, baseKey === 'dynamic' ? null : baseKey);
+          if (built) {
+            dynamicAutoCircuit = built;
+          } else {
+            const tplKey = (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) ? baseKey : 'map_3w';
+            dynamicAutoCircuit = JSON.parse(JSON.stringify(WIRING_CIRCUITS[tplKey]));
+            dynamicAutoCircuit.manualSourceVerified = false;
+            dynamicAutoCircuit.manualSourceLabel = '⚠️ ILUSTRASI UMUM (PINOUT TUNGGAL — CEK SOKET FISIK)';
+            dynamicAutoCircuit.manualSourceSubtitle = `Gunakan tabel pinout resmi di atas; diagram di bawah adalah ilustrasi alur ukur prinsip kerja.`;
+          }
+        } else if (isVerified && packId === 'suzuki_jb420_builtin') {
+          if (baseKey === 'coil_4w') {
+            dynamicAutoCircuit = buildOemCoilCircuit('suzuki_jb420_builtin', targetCyl);
+          } else if (advice.connector) {
+            // FR-02: 100% Data-Driven langsung dari Single Source of Truth `advice.connector`!
+            dynamicAutoCircuit = buildCircuitFromVerifiedConnector(advice, appInfo, baseKey);
+          } else if (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) {
+            dynamicAutoCircuit = JSON.parse(JSON.stringify(WIRING_CIRCUITS[baseKey]));
+            dynamicAutoCircuit.manualSourceVerified = true;
+            dynamicAutoCircuit.manualSourceLabel = '✅ PINOUT RESMI: SUZUKI GRAND VITARA JB420 (J20A)';
+            dynamicAutoCircuit.manualSourceSubtitle = `Menggunakan topologi soket, warna kabel & standar multimeter asli JB420 (${advice.manual_book_section || 'Bab 1A & 9A'}).`;
+          } else {
+            dynamicAutoCircuit = buildDynamicCircuitFromPinout(advice, appInfo, null) || JSON.parse(JSON.stringify(WIRING_CIRCUITS.map_3w));
+          }
         } else {
-          const tplKey = (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) ? baseKey : (fuelType === 'diesel' ? 'ckp_2w' : 'map_3w');
-          dynamicAutoCircuit = tplKey === 'coil_4w'
-            ? buildOemCoilCircuit('suzuki_jb420_builtin', targetCyl)
-            : JSON.parse(JSON.stringify(WIRING_CIRCUITS[tplKey]));
+          // Mode Universal / Diesel — prioritaskan connector / pinout DTC aktif; JANGAN pernah fallback ke Koil Pengapian!
+          const builtUniv = (baseKey === 'dynamic' || !baseKey) ? buildDynamicCircuitFromPinout(advice, appInfo, null) : null;
+          if (builtUniv) {
+            dynamicAutoCircuit = builtUniv;
+          } else {
+            const tplKey = (baseKey && baseKey !== 'dynamic' && WIRING_CIRCUITS[baseKey]) ? baseKey : (fuelType === 'diesel' ? 'ckp_3w' : 'map_3w');
+            dynamicAutoCircuit = tplKey === 'coil_4w'
+              ? buildOemCoilCircuit('suzuki_jb420_builtin', targetCyl)
+              : JSON.parse(JSON.stringify(WIRING_CIRCUITS[tplKey]));
+          }
+          const vehName = appInfo && (appInfo.brand || appInfo.model)
+            ? `${appInfo.brand || ''} ${appInfo.model || ''} ${appInfo.year || ''}`.trim()
+            : 'Model Ini';
+          dynamicAutoCircuit.ecmHeader = 'FUSE · ECU (ILUSTRASI) · GND';
+          dynamicAutoCircuit.manualSourceVerified = false;
+          dynamicAutoCircuit.manualSourceLabel = fuelType === 'diesel'
+            ? '⚠️ ILUSTRASI UMUM DIESEL (WAJIB CEK SOKET FISIK)'
+            : '⚠️ ILUSTRASI UMUM (REF. JB420 — BUKAN PINOUT ASLI)';
+          dynamicAutoCircuit.manualSourceSubtitle = `Tabel pinout OEM khusus kode ini pada ${vehName} belum tersedia — diagram di bawah adalah ilustrasi prinsip kerja sirkuit. Wajib ukur fisik dengan multitester.`;
         }
-        const vehName = appInfo && (appInfo.brand || appInfo.model)
-          ? `${appInfo.brand || ''} ${appInfo.model || ''} ${appInfo.year || ''}`.trim()
-          : 'Model Ini';
-        dynamicAutoCircuit.ecmHeader = 'FUSE · ECU (ILUSTRASI) · GND';
-        dynamicAutoCircuit.manualSourceVerified = false;
-        dynamicAutoCircuit.manualSourceLabel = fuelType === 'diesel'
-          ? '⚠️ ILUSTRASI UMUM DIESEL (WAJIB CEK SOKET FISIK)'
-          : '⚠️ ILUSTRASI UMUM (REF. JB420 — BUKAN PINOUT ASLI)';
-        dynamicAutoCircuit.manualSourceSubtitle = `Tabel pinout OEM khusus kode ini pada ${vehName} belum tersedia — diagram di bawah adalah ilustrasi prinsip kerja sirkuit. Wajib ukur fisik dengan multitester.`;
       }
 
       currentSimCircuitKey = 'auto';
@@ -8294,21 +8888,35 @@
       const n = c.wires.length;
       const svg = document.getElementById('sim-connector-svg');
       if (!svg) return;
+      const layout = String(c.connectorLayout || `1x${n}`).toLowerCase();
+      const isTwoRow = /^2x\d+$/.test(layout) && n >= 4;
+      const cols = isTwoRow ? Math.ceil(n / 2) : Math.max(n, 1);
+      const rows = isTwoRow ? 2 : 1;
+
+      svg.setAttribute('data-pin-count', String(n));
+      svg.setAttribute('data-connector-layout', layout);
+      svg.setAttribute('viewBox', isTwoRow ? '0 0 220 96' : '0 0 220 62');
+
       const totalW = 180;
-      const pinW = Math.min(28, Math.floor((totalW - (n - 1) * 6) / Math.max(n, 1)));
-      const gap = 6;
-      const realTotalW = n * pinW + (n - 1) * gap;
+      const gapX = isTwoRow ? 8 : 6;
+      const pinW = Math.min(isTwoRow ? 34 : 28, Math.floor((totalW - (cols - 1) * gapX) / cols));
+      const pinH = isTwoRow ? 30 : 34;
+      const gapY = 6;
+      const realTotalW = cols * pinW + (cols - 1) * gapX;
       const offsetX = Math.floor((220 - realTotalW) / 2);
 
       let cavities = '';
       for (let i = 0; i < n; i++) {
         const w = c.wires[i];
-        const x = offsetX + i * (pinW + gap);
+        const r = isTwoRow ? Math.floor(i / cols) : 0;
+        const col = isTwoRow ? (i % cols) : i;
+        const x = offsetX + col * (pinW + gapX);
+        const y = 16 + r * (pinH + gapY);
         if (w.empty) {
           cavities += `
-            <g>
-              <rect x="${x}" y="16" width="${pinW}" height="34" rx="4" fill="#020617" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2"/>
-              <text x="${x + pinW / 2}" y="38" text-anchor="middle" fill="#64748b" font-size="11" font-weight="bold" font-family="monospace">—</text>
+            <g data-pin-index="${i + 1}">
+              <rect x="${x}" y="${y}" width="${pinW}" height="${pinH}" rx="4" fill="#020617" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <text x="${x + pinW / 2}" y="${y + pinH - 10}" text-anchor="middle" fill="#64748b" font-size="11" font-weight="bold" font-family="monospace">—</text>
             </g>
           `;
           continue;
@@ -8319,23 +8927,44 @@
         const stroke = isPos ? '#fecaca' : isNeg ? '#94a3b8' : w.color;
         const badge = isPos ? '+' : isNeg ? '-' : (i + 1);
         cavities += `
-          <g class="cursor-pointer" onclick="selectSimWireByClick(${i})">
-            <rect x="${x}" y="16" width="${pinW}" height="34" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
-            <circle cx="${x + pinW / 2}" cy="28" r="3.5" fill="${w.color}"/>
-            <text x="${x + pinW / 2}" y="45" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace">${badge}</text>
+          <g class="cursor-pointer" data-pin-index="${i + 1}" onclick="selectSimWireByClick(${i})">
+            <rect x="${x}" y="${y}" width="${pinW}" height="${pinH}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+            <circle cx="${x + pinW / 2}" cy="${y + (isTwoRow ? 10 : 12)}" r="3.2" fill="${w.color}"/>
+            <text x="${x + pinW / 2}" y="${y + (isTwoRow ? 25 : 29)}" text-anchor="middle" fill="#f8fafc" font-size="11.5" font-weight="bold" font-family="monospace">${badge}</text>
           </g>
         `;
       }
 
+      const housingH = isTwoRow ? (rows * pinH + gapY + 14) : 46;
       svg.innerHTML = `
         <rect x="92" y="3" width="36" height="8" rx="2" fill="#334155" stroke="#64748b" stroke-width="1.5"/>
-        <rect x="${offsetX - 10}" y="10" width="${realTotalW + 20}" height="46" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+        <rect x="${offsetX - 10}" y="10" width="${realTotalW + 20}" height="${housingH}" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
         ${cavities}
       `;
     }
 
     function renderWiringSimulator() {
       const c = getActiveSimCircuit();
+      const unvBanner = document.getElementById('sim-unverified-banner');
+      const mainGrid = document.getElementById('sim-main-grid');
+      const stepContainer = document.getElementById('sim-step-buttons');
+
+      if (!c || c.unverifiedFallback || !Array.isArray(c.wires) || c.wires.length === 0) {
+        if (unvBanner) {
+          unvBanner.classList.remove('hidden');
+          const ut = document.getElementById('sim-unverified-title');
+          const ud = document.getElementById('sim-unverified-desc');
+          if (ut) ut.textContent = (c && c.manualSourceLabel) || 'Data Wiring / Pinout OEM Belum Terverifikasi';
+          if (ud) ud.textContent = (c && c.manualSourceSubtitle) || 'Sistem memblokir gambar soket perkiraan. Rujuk Buku Pedoman Servis Resmi.';
+        }
+        if (mainGrid) mainGrid.classList.add('hidden');
+        if (stepContainer) stepContainer.innerHTML = '';
+        return;
+      }
+
+      if (unvBanner) unvBanner.classList.add('hidden');
+      if (mainGrid) mainGrid.classList.remove('hidden');
+
       const s = c.steps[currentSimStep] || c.steps[0];
       const n = c.wires.length;
 
@@ -8360,7 +8989,7 @@
       }
       if (srcSub) {
         srcSub.textContent = currentSimCircuitKey !== 'auto'
-          ? 'Mode pilih manual contoh sirkuit resmi Suzuki JB420 (Bab 1A-15 & 1H-2) — kembalikan ke "Otomatis Sesuai Hasil Diagnosa Ini" untuk pinout hasil diagnosa aktif.'
+          ? 'Mode pilih manual contoh sirkuit resmi Suzuki JB420 (Bab 1A & 9A) — kembalikan ke "Otomatis Sesuai Hasil Diagnosa Ini" untuk pinout hasil diagnosa aktif.'
           : (c.manualSourceSubtitle || 'Jumlah jalur kabel, pinout konektor & bentuk soket otomatis mengikuti buku manual aktif model kendaraan.');
       }
 
@@ -8386,7 +9015,6 @@
         }
       }
 
-      const stepContainer = document.getElementById('sim-step-buttons');
       stepContainer.className = `grid grid-cols-1 sm:grid-cols-${Math.min(Math.max(c.steps.length, 1), 4)} gap-2`;
       stepContainer.innerHTML = c.steps.map((st, idx) => {
         const active = idx === currentSimStep;
@@ -8399,12 +9027,11 @@
         </button>`;
       }).join('');
 
-      const needsChassisPad = s.negSide === 'chassis_gnd';
-      const hasPowerTop = c.wires.length > 0 && c.wires[0].sourceType === 'power';
-      const topY = n <= 2 ? 84 : n === 3 ? 64 : n === 4 ? 54 : n === 5 ? 42 : 34;
+      const needsChassisPad = s.negSide === 'chassis_gnd' || n === 1;
+      const topY = n === 1 ? 118 : n === 2 ? 84 : n === 3 ? 64 : n === 4 ? 54 : n === 5 ? 42 : 34;
       const bottomY = needsChassisPad
-        ? (n <= 2 ? 176 : n === 3 ? 190 : n === 4 ? 202 : n === 5 ? 210 : 216)
-        : (n <= 2 ? 190 : n === 3 ? 210 : n === 4 ? 222 : n === 5 ? 230 : 238);
+        ? (n === 1 ? 118 : n === 2 ? 176 : n === 3 ? 190 : n === 4 ? 202 : n === 5 ? 210 : 216)
+        : (n === 1 ? 118 : n === 2 ? 190 : n === 3 ? 210 : n === 4 ? 222 : n === 5 ? 230 : 238);
       const stepY = n > 1 ? (bottomY - topY) / (n - 1) : 0;
       const wireYs = c.wires.map((_, i) => Math.round(topY + i * stepY));
       const pwrHalfH = n >= 6 ? 15 : 19;

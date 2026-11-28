@@ -111,24 +111,24 @@
       id: 'gv_ckp',
       category: 'efi',
       badge: '1A-115 · CKP',
-      title: 'Sensor CKP (Crankshaft Position Sensor)',
-      subtitle: 'Sensor Induktif 2-Pin (PNK & BLU) → ECM C37-36 & C37-51 + Starter Sync',
+      title: 'Sensor CKP (Crankshaft Position Sensor — 3-Pin C20)',
+      subtitle: 'Konektor C20 3-Pin J20A: Pin 1 Shield (BLK), Pin 2 CKP− (PNK C37-36), Pin 3 CKP+ (BLU C37-51)',
       dtcs: ['P0335', 'P0336'],
       isNonWiring: false,
       safetyGuard: 'ohm',
       photos: [
-        { img: 'img/jb420_wiring/v1_ckp_p0335_1a115.webp', label: 'Wiring Diagram P0335 & Pinout E23/C37 (1A-115)', source: 'Vol 1 Bab 1A-115 (DTC P0335 Sirkuit CKP Sensor · S5JB0A1104089)' },
+        { img: 'img/jb420_wiring/v1_ckp_p0335_1a115.webp', label: 'Wiring Diagram P0335 & Pinout E23/C37 (1A-115)', source: 'Vol 1 Bab 1A-115 (DTC P0335 Sirkuit CKP Sensor · Fig I5JB0A110047-02)' },
         { img: 'img/jb420_wiring/v2_a5_ecm_p2_9a44.webp', label: 'A-5 Lembar 2 (9A-44)', source: 'Vol 2 Bab 9A-44 (Diagram A-5 Kontrol Mesin)' }
       ],
       stages: [
         { step: 1, tag: 'POWER', title: 'Prasyarat Power ECM & Sinyal Starter', from: 'Kunci Kontak START → Starter Relay', via: 'BLK/YEL & BLU', to: 'ECM E23-60 (Sinyal Cranking)', wire: 'BLK/YEL', desc: 'P0335 terdeteksi saat ECM melihat sinyal cranking masuk 2 detik namun pulsa CKP kosong.' },
-        { step: 2, tag: 'INPUT', title: 'Sinyal AC Induktif Sensor CKP', from: 'Sensor CKP (Induktif 2-Pin)', via: 'Kabel Terlindung Shield (PNK & BLU)', to: 'ECM C37-36 (PNK) & C37-51 (BLU)', wire: 'PNK', desc: 'Putaran gigi sensor plate kruk as membangkitkan tegangan pulsa AC untuk menentukan RPM & TMA.' },
-        { step: 3, tag: 'GROUND', title: 'Pelindung Shield & Massa ECM', from: 'Pelindung Kabel (Shield) CKP', via: 'Kabel BLK', to: 'Massa Bodi / Blok Mesin', wire: 'BLK', desc: 'Kabel pelindung mencegah gangguan noise pengapian mengacaukan pembacaan RPM.' }
+        { step: 2, tag: 'INPUT', title: 'Sinyal AC Induktif Sensor CKP (Pin 2 & 3)', from: 'Sensor CKP C20 (3-Pin)', via: 'Pin 2 PNK & Pin 3 BLU', to: 'ECM C37-36 (PNK) & C37-51 (BLU)', wire: 'PNK', desc: 'Putaran gigi sensor plate kruk as membangkitkan tegangan pulsa AC antara Pin 2 & Pin 3 untuk menentukan RPM & TMA.' },
+        { step: 3, tag: 'GROUND', title: 'Pin 1 Pelindung Shield & Massa Blok #3', from: 'C20 Pin 1 (Shield CKP)', via: 'Kabel BLK', to: 'Massa Blok Mesin #3', wire: 'BLK', desc: 'Pin 1 kabel pelindung mencegah gangguan noise pengapian mengacaukan pembacaan RPM.' }
       ],
       wires: [
-        { colorCode: 'PNK', from: 'Sensor CKP Pin 1', to: 'ECM Pin C37-36', dir: 'in', role: 'Sinyal pulsa posisi kruk as (+)', func: 'Mengirimkan gelombang pulsa induktif saat kruk as berputar untuk hitung RPM & timing.', keyState: 'Cranking / Idle (AC Volt)', probe: 'Merah (+) C37-36 · Hitam (−) C37-51', spec: '> 0,5 V AC saat cranking · Tahanan kumparan sensor ~1,6–2,5 kΩ', faultHint: 'Bila tahanan OL (putus) saat mesin panas → ganti Sensor CKP.' },
-        { colorCode: 'BLU', from: 'Sensor CKP Pin 2', to: 'ECM Pin C37-51', dir: 'in', role: 'Jalur balik sinyal CKP (−)', func: 'Pasangan diferensial jalur sinyal CKP yang terhubung langsung ke input ECM.', keyState: 'IG OFF (Mode Ohm)', probe: 'Cek kontinuitas soket CKP ↔ C37-51', spec: '< 1 Ω (Tidak boleh short ke ground bodi)', faultHint: 'Pastikan kabel tidak terjepit dekat knalpot/blok mesin.' },
-        { colorCode: 'BLK', from: 'Shield Pelindung CKP', to: 'Massa Bodi', dir: 'ground', role: 'Perisai anti-noise elektromagnetik', func: 'Menyaring gangguan medan magnet dari koil pengapian dan alternator.', keyState: 'IG OFF (Mode Ohm)', probe: 'Shield ↔ Massa Bodi', spec: '< 1 Ω', faultHint: 'Shield putus bisa menimbulkan RPM melompat-lompat saat digas.' }
+        { colorCode: 'BLK', from: 'Sensor CKP C20 Pin 1 (Shield)', to: 'Massa Blok Mesin #3', dir: 'ground', role: 'Perisai anti-noise elektromagnetik (Pin 1 C20)', func: 'Menyaring gangguan medan magnet dari koil pengapian dan alternator.', keyState: 'IG OFF (Mode Ohm)', probe: 'Pin 1 C20 ↔ Massa Bodi', spec: '< 1 Ω (Tidak boleh short ke Pin 2/3)', faultHint: 'Shield putus bisa menimbulkan RPM melompat-lompat saat digas.' },
+        { colorCode: 'PNK', from: 'Sensor CKP C20 Pin 2 (−)', to: 'ECM Pin C37-36', dir: 'in', role: 'Sinyal pulsa posisi kruk as (−)', func: 'Pasangan diferensial jalur sinyal CKP yang terhubung langsung ke input ECM.', keyState: 'IG OFF (Mode Ohm)', probe: 'Tahanan Sensor Pin 2 ↔ Pin 3', spec: '1,68 – 2,52 kΩ @ 20°C · Kontinuitas kabel < 1 Ω', faultHint: 'Bila tahanan OL (putus) saat mesin panas → ganti Sensor CKP.' },
+        { colorCode: 'BLU', from: 'Sensor CKP C20 Pin 3 (+)', to: 'ECM Pin C37-51', dir: 'in', role: 'Sinyal pulsa posisi kruk as (+)', func: 'Mengirimkan gelombang pulsa induktif saat kruk as berputar untuk hitung RPM & timing.', keyState: 'Cranking / Idle (AC Volt)', probe: 'Merah (+) C37-51 · Hitam (−) C37-36', spec: '> 0,5 V AC saat cranking (simetris)', faultHint: 'Pastikan kabel tidak terjepit dekat knalpot/blok mesin.' }
       ]
     },
     {
@@ -158,15 +158,15 @@
     {
       id: 'gv_maf_iat',
       category: 'efi',
-      badge: '1A-65 · MAF & IAT',
+      badge: '1A-62 · MAF & IAT',
       title: 'Sensor MAF (Mass Air Flow) & IAT (Suhu Udara)',
-      subtitle: 'Soket 5-Pin Terpadu · MAF C37-26/27 & IAT C37-25/57',
+      subtitle: 'Soket 5-Pin Terpadu C13 · MAF C37-26/27 & IAT C37-25/57',
       dtcs: ['P0101', 'P0102', 'P0103', 'P0111', 'P0112', 'P0113'],
       isNonWiring: false,
       safetyGuard: 'ohm',
       photos: [
-        { img: 'img/jb420_wiring/v1_maf_p0102_1a65.webp', label: 'Wiring Diagram MAF P0102 (1A-65)', source: 'Vol 1 Bab 1A-65 (DTC P0102 Sirkuit MAF Sensor · S5JB0A1104018)' },
-        { img: 'img/jb420_wiring/v1_iat_p0112_1a77.webp', label: 'Wiring Diagram IAT P0112 (1A-77)', source: 'Vol 1 Bab 1A-77 (DTC P0112 Sirkuit IAT Sensor)' }
+        { img: 'img/jb420_wiring/v1_maf_p0101_1a62.webp', label: 'Wiring Diagram MAF Induk P0101–P0103 (1A-62)', source: 'Vol 1 Bab 1A-62 (Fig I5JB0A110033-01 · DTC P0101/P0102/P0103 MAF Sensor)' },
+        { img: 'img/jb420_wiring/v1_iat_p0111_1a74.webp', label: 'Wiring Diagram IAT Induk P0111–P0113 (1A-74)', source: 'Vol 1 Bab 1A-74 (Fig I5JB0A110036-01 · DTC P0111/P0112/P0113 IAT Sensor)' }
       ],
       stages: [
         { step: 1, tag: 'POWER', title: 'Suplai +12V Pemanas Hot-Wire MAF', from: 'Main Relay', via: 'Kabel BLU/BLK', to: 'Pin Power Soket MAF', wire: 'BLU/BLK', desc: 'Menyuplai +12V untuk memanaskan elemen pengukur massa aliran udara masuk.' },
@@ -184,14 +184,14 @@
     {
       id: 'gv_map',
       category: 'efi',
-      badge: '1A-70 · MAP',
+      badge: '1A-68 · MAP',
       title: 'Sensor MAP (Manifold Absolute Pressure)',
-      subtitle: 'Sensor 3-Pin: Vref +5V (C37-14), Sinyal Vakum (C37-55), Ground (C37-57)',
-      dtcs: ['P0106', 'P0107', 'P0108'],
+      subtitle: 'Sensor 3-Pin C12: Vref +5V (C37-14), Sinyal Vakum (C37-55), Ground (C37-57)',
+      dtcs: ['P0106', 'P0107', 'P0108', 'P2227', 'P2228', 'P2229'],
       isNonWiring: false,
       safetyGuard: 'ohm',
       photos: [
-        { img: 'img/jb420_wiring/v1_map_p0107_1a70.webp', label: 'Wiring Diagram MAP P0107 (1A-70)', source: 'Vol 1 Bab 1A-70 (DTC P0107 Sirkuit MAP Sensor · S5JB0A1104021)' }
+        { img: 'img/jb420_wiring/v1_map_p0106_1a68.webp', label: 'Wiring Diagram MAP Induk P0106–P0108 (1A-68)', source: 'Vol 1 Bab 1A-68 (Fig I5JB0A110034-01 · DTC P0106/P0107/P0108 MAP Sensor)' }
       ],
       stages: [
         { step: 1, tag: 'POWER', title: 'Tegangan Referensi +5V (Vref)', from: 'ECM Pin C37-14', via: 'Jalur +5V Sensor', to: 'Sensor MAP Pin VCC', wire: 'GRY/RED', desc: 'ECM menyediakan tegangan stabil +5V presisi untuk sensor MAP.' },
@@ -207,49 +207,51 @@
     {
       id: 'gv_ect',
       category: 'efi',
-      badge: '1A-85 · ECT',
+      badge: '1A-81 · ECT',
       title: 'Sensor ECT (Engine Coolant Temperature)',
-      subtitle: 'Thermistor NTC 2-Pin · Sinyal C37-56 & Massa Bersama C37-57',
-      dtcs: ['P0116', 'P0117', 'P0118'],
+      subtitle: 'Thermistor NTC 2-Pin C09 · Sinyal C37-24 (PPL/YEL) & Massa Bersama C37-57 (GRY/GRN)',
+      dtcs: ['P0116', 'P0117', 'P0118', 'B1561'],
       isNonWiring: false,
       safetyGuard: 'ohm',
       photos: [
-        { img: 'img/jb420_wiring/v1_ect_p0118_1a85.webp', label: 'Wiring Diagram ECT P0118 (1A-85)', source: 'Vol 1 Bab 1A-85 (DTC P0118 Sirkuit ECT Sensor · S5JB0A1104028)' }
+        { img: 'img/jb420_wiring/v1_ect_p0116_1a81.webp', label: 'Wiring Diagram ECT Induk P0116–P0118 (1A-81)', source: 'Vol 1 Bab 1A-81 (Fig I5JB0A110038-01 · DTC P0116/P0117/P0118 ECT Sensor)' }
       ],
       stages: [
-        { step: 1, tag: 'POWER', title: 'Tegangan Pull-Up +5V dari ECM', from: 'ECM Pin C37-56 (Internal Resistor)', via: 'Kabel Sinyal ECT', to: 'Sensor ECT Pin 1', wire: 'GRN', desc: 'ECM mengalirkan +5V melalui resistor internal untuk membaca perubahan tahanan NTC.' },
-        { step: 2, tag: 'INPUT', title: 'Perubahan Tegangan Sesuai Suhu Coolant', from: 'Thermistor ECT', via: 'Pembagi Tegangan', to: 'ECM Pin C37-56', wire: 'GRN', desc: 'Mesin dingin = tahanan besar (~2,5V); mesin panas 80°C = tahanan kecil (~0,5–0,7V).' },
-        { step: 3, tag: 'GROUND', title: 'Massa Sensor C37-57', from: 'Sensor ECT Pin 2', via: 'Kabel GRY/GRN', to: 'ECM Pin C37-57', wire: 'GRY/GRN', desc: 'Menutup rangkaian pembagi tegangan thermistor kembali ke ECM.' }
+        { step: 1, tag: 'POWER', title: 'Tegangan Pull-Up +5V dari ECM', from: 'ECM Pin C37-24 (Internal Resistor)', via: 'Kabel Sinyal ECT (PPL/YEL)', to: 'Sensor ECT C09 Pin 2', wire: 'PPL/YEL', desc: 'ECM mengalirkan +5V melalui resistor internal untuk membaca perubahan tahanan NTC.' },
+        { step: 2, tag: 'INPUT', title: 'Perubahan Tegangan Sesuai Suhu Coolant', from: 'Thermistor ECT C09', via: 'Pembagi Tegangan', to: 'ECM Pin C37-24', wire: 'PPL/YEL', desc: 'Mesin dingin = tahanan besar (~2,5V); mesin panas 80°C = tahanan kecil (~0,5–0,7V).' },
+        { step: 3, tag: 'GROUND', title: 'Massa Sensor C37-57', from: 'Sensor ECT C09 Pin 1', via: 'Kabel GRY/GRN', to: 'ECM Pin C37-57', wire: 'GRY/GRN', desc: 'Menutup rangkaian pembagi tegangan thermistor kembali ke ECM.' }
       ],
       wires: [
-        { colorCode: 'GRN', from: 'Sensor ECT Pin 1', to: 'ECM Pin C37-56', dir: 'in', role: 'Sinyal suhu air radiator', func: 'Mengatur kekayaan BBM saat start dingin dan titik nyala kipas radiator.', keyState: 'IG ON', probe: 'Merah (+) C37-56 · Hitam (−) C37-57', spec: '~2,5 V @20°C · 0,5–0,7 V @80°C (Tahanan 2,0–3,0 kΩ @20°C / 0,29–0,35 kΩ @80°C)', faultHint: 'Jika ~5V terus (scanner -40°C) → soket lepas/putus (P0118), kipas langsung nyala fail-safe.' },
-        { colorCode: 'GRY/GRN', from: 'Sensor ECT Pin 2', to: 'ECM Pin C37-57', dir: 'ground', role: 'Massa analog sensor', func: 'Jalur balik sensor suhu ke ECM.', keyState: 'IG OFF (Mode Ohm)', probe: 'Pin 2 ECT ↔ C37-57', spec: '< 1 Ω', faultHint: 'Periksa korosi pada soket dekat rumah thermostat.' }
+        { colorCode: 'PPL/YEL', from: 'Sensor ECT C09 Pin 2', to: 'ECM Pin C37-24', dir: 'in', role: 'Sinyal suhu air radiator', func: 'Mengatur kekayaan BBM saat start dingin dan titik nyala kipas radiator.', keyState: 'IG ON', probe: 'Merah (+) C37-24 · Hitam (−) C37-57', spec: '~2,5 V @20°C · 0,5–0,7 V @80°C (Tahanan 2,0–3,0 kΩ @20°C / 0,29–0,35 kΩ @80°C)', faultHint: 'Jika ~5V terus (scanner -40°C) → soket lepas/putus (P0118), kipas langsung nyala fail-safe.' },
+        { colorCode: 'GRY/GRN', from: 'Sensor ECT C09 Pin 1', to: 'ECM Pin C37-57', dir: 'ground', role: 'Massa analog sensor', func: 'Jalur balik sensor suhu ke ECM.', keyState: 'IG OFF (Mode Ohm)', probe: 'Pin 1 ECT ↔ C37-57', spec: '< 1 Ω', faultHint: 'Periksa korosi pada soket dekat rumah thermostat.' }
       ]
     },
     {
       id: 'gv_af_ho2s',
       category: 'efi',
-      badge: '1A-94 · A/F & O2',
-      title: 'Sensor A/F (6-Kabel Depan) & HO2S (Belakang)',
-      subtitle: 'Sensor-1 (C37-32/34/35/37/38) & Sensor-2 Belakang (C37-47/11)',
-      dtcs: ['P0030', 'P0037', 'P0038', 'P0131', 'P0132', 'P0133', 'P0134', 'P0137', 'P0138', 'P0140'],
+      badge: '1A-54 · A/F & O2',
+      title: 'Sensor A/F Depan (4-Pin Upstream) & HO2S-2 Belakang (4-Pin C15)',
+      subtitle: 'Sensor-1 (4-Pin 2x2: O2 HTR RLY PNK, C37-32/38/37) & Sensor-2 Belakang C15 (C37-47/11/57)',
+      dtcs: ['P0030', 'P0031', 'P0032', 'P0037', 'P0038', 'P0131', 'P0132', 'P0133', 'P0134', 'P0137', 'P0138', 'P0140'],
       isNonWiring: false,
       safetyGuard: 'ohm',
       photos: [
-        { img: 'img/jb420_wiring/v1_af_p0131_1a94.webp', label: 'Wiring Diagram O2/A-F Sensor-1 (1A-94)', source: 'Vol 1 Bab 1A-94 (DTC P0131/P0132/P0134 O2/A-F Sensor-1)' },
-        { img: 'img/jb420_wiring/v1_ho2s_p0037_1a59.webp', label: 'Wiring Diagram HO2S-2 Heater P0037 (1A-59)', source: 'Vol 1 Bab 1A-59 (DTC P0037/P0038 HO2S Heater Sensor-2)' },
+        { img: 'img/jb420_wiring/v1_af_heater_p0030_1a54.webp', label: 'Wiring Heater A/F Sensor-1 P0030 (1A-54)', source: 'Vol 1 Bab 1A-54 (Fig I5JB0A110027-02 · DTC P0030/P0031/P0032 Heater A/F Sensor-1)' },
+        { img: 'img/jb420_wiring/v1_af_p0131_1a94.webp', label: 'Wiring Sinyal A/F Sensor-1 P0131 (1A-94)', source: 'Vol 1 Bab 1A-94 (Fig I5JB0A110044-02 · DTC P0131/P0132/P0133/P0134 A/F Sensor-1)' },
+        { img: 'img/jb420_wiring/v1_ho2s_p0037_1a59.webp', label: 'Wiring Heater HO2S-2 P0037 (1A-59)', source: 'Vol 1 Bab 1A-59 (Fig I5JB0A110032-01 · DTC P0037/P0038 Heater HO2S-2)' },
+        { img: 'img/jb420_wiring/v1_ho2s2_p0137_1a97.webp', label: 'Wiring Sinyal HO2S-2 P0137 (1A-97)', source: 'Vol 1 Bab 1A-97 (Fig I5JB0A110045-01 · DTC P0137/P0138/P0140 Sinyal HO2S-2)' },
         { img: 'img/jb420_wiring/v2_a5_ecm_p3_9a45.webp', label: 'A-5 Lembar 3 (9A-45)', source: 'Vol 2 Bab 9A-45 (Diagram A-5 Kontrol Mesin)' }
       ],
       stages: [
-        { step: 1, tag: 'POWER', title: 'Suplai +12V & Kontrol Heater Sensor', from: 'Main Relay (+12V) & ECM C37-32 / C37-47', via: 'Sirkuit Pemanas Keramik', to: 'Heater A/F Sensor-1 & HO2S-2', wire: 'BLU/BLK', desc: 'Heater memanaskan elemen zirkonia hingga > 350°C dalam hitungan detik agar closed-loop cepat aktif.' },
-        { step: 2, tag: 'INPUT', title: 'Sinyal Rasio Udara-BBM (6-Kabel A/F)', from: 'A/F Sensor-1 (Pin WHT & BLK)', via: 'C37-38 & C37-37', to: 'ECM Input Rasio Lambda', wire: 'WHT', desc: 'Membaca perbandingan udara-bahan bakar secara presisi (3,0–3,2V & 2,6–2,8V) untuk koreksi STFT/LTFT.' },
-        { step: 3, tag: 'INPUT', title: 'Monitor Katalis HO2S Sensor-2', from: 'HO2S-2 Belakang (4-Kabel)', via: 'ECM C37-11', to: 'Monitor Efisiensi Katalis', wire: 'WHT/RED', desc: 'Tegangan 0,1–0,9V stabil menandakan katalis sehat; berosilasi cepat menandakan katalis bocor/lemah.' }
+        { step: 1, tag: 'POWER', title: 'Suplai +12V HO2S Heater Relay & Kontrol PWM Heater', from: 'HO2S Heater Relay (#10 20A O2 HTR) & ECM C37-32 / C37-47', via: 'Kabel PNK (+12V) & PNK/BLU (PWM)', to: 'Heater A/F Sensor-1 (4-Pin) & HO2S-2 (C15)', wire: 'PNK', desc: 'HO2S Heater Relay menyuplai +12V ke Pin 1 Heater, sementara ECM memodulasi ground PWM (C37-32/47) agar elemen keramik mencapai > 350°C dengan cepat.' },
+        { step: 2, tag: 'INPUT', title: 'Sinyal Rasio Udara-BBM (4-Pin A/F Sensor-1)', from: 'A/F Sensor-1 (Pin 3 WHT & Pin 4 BLK)', via: 'C37-38 & C37-37', to: 'ECM Input Rasio Lambda', wire: 'WHT', desc: 'Membaca perbandingan udara-bahan bakar secara presisi (3,0–3,2V & 2,6–2,8V) untuk koreksi STFT/LTFT.' },
+        { step: 3, tag: 'INPUT', title: 'Monitor Katalis HO2S Sensor-2 (4-Pin C15)', from: 'HO2S-2 Belakang C15 (Pin 2 RED & Pin 1 GRN)', via: 'ECM C37-11 & C37-57', to: 'Monitor Efisiensi Katalis', wire: 'RED', desc: 'Tegangan 0,1–0,9V stabil menandakan katalis sehat; berosilasi cepat menandakan katalis bocor/lemah.' }
       ],
       wires: [
-        { colorCode: 'WHT', from: 'A/F Sensor-1 (+)', to: 'ECM Pin C37-38', dir: 'in', role: 'Sinyal utama A/F Sensor (+)', func: 'Mengukur arus pemompaan oksigen pada gas buang sebelum katalis.', keyState: 'IG ON / Idle Hangat', probe: 'Merah (+) C37-38 · Hitam (−) Massa', spec: '3,0 – 3,2 V DC', faultHint: 'Jika jatuh < 1V atau > 4,5V → cek korsleting harness/sensor rusak (P0131/P0132).' },
-        { colorCode: 'BLK', from: 'A/F Sensor-1 (−)', to: 'ECM Pin C37-37', dir: 'in', role: 'Sinyal referensi A/F Sensor (−)', func: 'Pasangan tegangan diferensial A/F Sensor-1.', keyState: 'IG ON / Idle Hangat', probe: 'Merah (+) C37-37 · Hitam (−) Massa', spec: '2,6 – 2,8 V DC', faultHint: 'Selisih antara C37-38 dan C37-37 sekitar ~0,4 V pada campuran stoikiometri.' },
-        { colorCode: 'RED/YEL', from: 'Adjusting Resistor A/F', to: 'ECM Pin C37-35', dir: 'in', role: 'Kalibrasi resistor internal A/F Sensor', func: 'Menyesuaikan karakteristik pabrik tiap unit sensor A/F.', keyState: 'IG ON', probe: 'Merah (+) C37-35 · Hitam (−) C37-34', spec: '0,15 – 4,82 V DC', faultHint: 'Soket longgar/basah membuat koreksi kalibrasi error.' },
-        { colorCode: 'BLU/BLK', from: 'Main Relay → Heater', to: 'ECM C37-32 (S1) / C37-47 (S2)', dir: 'out', role: 'Kontrol pemanas (Heater) Sensor-1 & Sensor-2', func: 'ECM memodulasi ground heater agar suhu sensor stabil.', keyState: 'IG OFF (Mode Ohm, Soket Lepas)', probe: 'Ukur 2 pin heater pada soket sensor', spec: 'Sensor-1: 2,3–4,3 Ω · Sensor-2: 5–7 Ω @20°C', faultHint: 'Jika tahanan OL (putus) → muncul P0030 (depan) atau P0037 (belakang).' }
+        { colorCode: 'PNK', from: 'HO2S Heater Relay (Sekring #10 20A O2 HTR)', to: 'Pin 1 Heater A/F Sensor-1 & Pin 4 HO2S-2 (+12V)', dir: 'power', role: 'Suplai +12V elemen pemanas (Heater) Sensor-1 & Sensor-2', func: 'Menyuplai tegangan kerja +12V ke kumparan pemanas keramik saat IG ON.', keyState: 'IG ON', probe: 'Merah (+) Pin 1 PNK · Hitam (−) Massa Bodi', spec: '10,0 – 14,0 V DC', faultHint: 'Jika 0V → periksa Sekring #10 (20A O2 HTR) dan HO2S Heater Relay di kotak relay.' },
+        { colorCode: 'PNK/BLU', from: 'ECM Pin C37-32 (S1) / C37-47 (S2 BLK/RED)', to: 'Pin 2 Heater (−) A/F Sensor-1 / Pin 3 HO2S-2', dir: 'out', role: 'Kontrol Heater PWM Low-Side dari ECM (P0030–P0032)', func: 'ECM memodulasi ground heater agar suhu elemen stabil > 350°C.', keyState: 'IG OFF (Mode Ohm, Soket Lepas)', probe: 'Ukur Pin 1 ↔ Pin 2 pada soket 4-pin sensor', spec: 'Sensor-1: 2,3–4,3 Ω · Sensor-2: 5–7 Ω @20°C', faultHint: 'Jika tahanan OL (putus) → muncul P0030/P0031 (depan) atau P0037 (belakang).' },
+        { colorCode: 'WHT', from: 'A/F Sensor-1 Pin 3 (+)', to: 'ECM Pin C37-38', dir: 'in', role: 'Sinyal utama A/F Sensor (+)', func: 'Mengukur arus pemompaan oksigen pada gas buang sebelum katalis.', keyState: 'IG ON / Idle Hangat', probe: 'Merah (+) C37-38 · Hitam (−) Massa', spec: '3,0 – 3,2 V DC', faultHint: 'Jika jatuh < 1V atau > 4,5V → cek korsleting harness/sensor rusak (P0131/P0132).' },
+        { colorCode: 'BLK', from: 'A/F Sensor-1 Pin 4 (−)', to: 'ECM Pin C37-37', dir: 'in', role: 'Sinyal referensi A/F Sensor (−)', func: 'Pasangan tegangan diferensial A/F Sensor-1 (4-Pin 2x2).', keyState: 'IG ON / Idle Hangat', probe: 'Merah (+) C37-37 · Hitam (−) Massa', spec: '2,6 – 2,8 V DC', faultHint: 'Selisih antara C37-38 dan C37-37 sekitar ~0,4 V pada campuran stoikiometri.' }
       ]
     },
     {
@@ -312,7 +314,8 @@
       safetyGuard: 'ohm',
       photos: [
         { img: 'img/jb420_wiring/v1_fuelpump_1a222.webp', label: 'Sirkuit Fuel Pump & Relay (1A-222)', source: 'Vol 1 Bab 1A-222 (Memeriksa Fuel Pump dan Sirkuitnya · S5JB0A1104066)' },
-        { img: 'img/jb420_wiring/v2_a5_ecm_p1_9a43.webp', label: 'A-5 Lembar 1 Fuel Pump Relay (9A-43)', source: 'Vol 2 Bab 9A-43 (Diagram A-5 Kontrol Mesin)' }
+        { img: 'img/jb420_wiring/v2_a5_ecm_p1_9a43.webp', label: 'A-5 Lembar 1 Fuel Pump Relay (9A-43)', source: 'Vol 2 Bab 9A-43 (Diagram A-5 Kontrol Mesin)' },
+        { img: 'img/jb420_wiring/v1_fuellevel_p0462_1a129.webp', label: 'Wiring Fuel Level Sensor P0462/P0463 (1A-129)', source: 'Vol 1 Bab 1A-129 (Fig I5JB0A110055-02 · DTC P0462/P0463 Fuel Level Sensor)' }
       ],
       stages: [
         { step: 1, tag: 'OUTPUT', title: 'ECM Mengaktifkan Relay Pompa (Priming 2 Detik)', from: 'ECM Kontrol Fuel Pump Relay', via: 'Relay Pompa Bensin', to: 'Kontak Relay +12V', wire: 'PNK/BLK', desc: 'Saat kunci kontak ON, ECM mengaktifkan relay selama 2 detik (priming) lalu aktif kontinu saat CKP berputar.' },
@@ -397,37 +400,36 @@
       id: 'gv_knock',
       category: 'efi',
       badge: '1A-113 · KNOCK',
-      title: 'Knock Sensor (Sensor Detonasi / Ngelitik)',
-      subtitle: 'Sensor Piezoelektrik Blok Mesin · Terlindung Shield → ECM C37',
+      title: 'Knock Sensor (Sensor Detonasi / Ngelitik — 1-Pin C26)',
+      subtitle: 'Sensor Piezoelektrik 1-Pin C26 (WHT C37-56) + Massa Langsung Bodi Baut Blok Mesin',
       dtcs: ['P0327', 'P0328'],
       isNonWiring: false,
       safetyGuard: 'ohm',
       photos: [
-        { img: 'img/jb420_wiring/v1_knock_p0327_1a113.webp', label: 'Wiring Diagram Knock Sensor P0327 (1A-113)', source: 'Vol 1 Bab 1A-113 (DTC P0327/P0328 Knock Sensor · S5JB0A1104039)' }
+        { img: 'img/jb420_wiring/v1_knock_p0327_1a113.webp', label: 'Wiring Diagram Knock Sensor P0327 (1A-113)', source: 'Vol 1 Bab 1A-113 (Fig I5JB0A110046-01 · DTC P0327/P0328 Knock Sensor)' }
       ],
       stages: [
-        { step: 1, tag: 'INPUT', title: 'Deteksi Getaran Detonasi Blok Mesin', from: 'Elemen Piezoelektrik Knock Sensor', via: 'Kabel Shielded', to: 'ECM Input Knock', wire: 'WHT', desc: 'Menghasilkan tegangan AC kecil bila terjadi pembakaran ngelitik (knocking) agar ECM memundurkan timing.' },
-        { step: 2, tag: 'GROUND', title: 'Jalur Referensi & Shield Pelindung', from: 'Pin Return & Shield Knock Sensor', via: 'Harness Mesin', to: 'ECM Ground', wire: 'BLK', desc: 'Melindungi sinyal frekuensi tinggi knock dari noise pengapian.' },
-        { step: 3, tag: 'INPUT', title: 'Cek Tahanan Internal Resistor 560 kΩ', from: 'Soket Knock Sensor (IG OFF)', via: 'Ukur Tahanan Pin 1 ↔ Pin 2', to: 'Multimeter Skala MΩ', wire: 'WHT', desc: 'Resistor internal digunakan ECM untuk mendeteksi sirkuit putus (P0327) atau short (P0328).' }
+        { step: 1, tag: 'INPUT', title: 'Deteksi Getaran Detonasi Blok Mesin (1-Pin C26)', from: 'Elemen Piezoelektrik Knock Sensor C26 Pin 1', via: 'Kabel WHT Berpelindung Shield', to: 'ECM Input Knock C37-56', wire: 'WHT', desc: 'Menghasilkan tegangan AC kecil bila terjadi pembakaran ngelitik (knocking) agar ECM memundurkan timing.' },
+        { step: 2, tag: 'GROUND', title: 'Massa Langsung Bodi Baut (23 N·m) & Shield', from: 'Bodi Sensor (Baut Blok) & Shield Kabel', via: 'Blok Mesin & Ground ECM', to: 'Massa Blok Mesin', wire: 'BLK', desc: 'Soket C26 hanya memiliki 1 pin sinyal; jalur massa sensor langsung melalui baut pengikat ke blok silinder.' },
+        { step: 3, tag: 'INPUT', title: 'Cek Tahanan Internal Resistor 500–620 kΩ', from: 'Soket 1-Pin C26 (IG OFF)', via: 'Ukur Tahanan Pin 1 ↔ Bodi Sensor', to: 'Multimeter Skala MΩ', wire: 'WHT', desc: 'Resistor internal digunakan ECM untuk mendeteksi sirkuit putus (P0327) atau short (P0328).' }
       ],
       wires: [
-        { colorCode: 'WHT', from: 'Knock Sensor Pin 1', to: 'ECM Input Knock', dir: 'in', role: 'Sinyal getaran detonasi mesin (P0327/P0328)', func: 'Mencegah kerusakan piston akibat pembakaran terlalu cepat/BBM oktan rendah.', keyState: 'IG OFF (Mode Ohm)', probe: 'Pin 1 ↔ Pin 2 pada Sensor Knock', spec: '500 – 620 kΩ (nominal ~560 kΩ @20°C)', faultHint: 'Pastikan kekencangan baut sensor sesuai torsi manual; kabel sering getas karena panas blok.' },
-        { colorCode: 'BLK', from: 'Knock Sensor Pin 2 & Shield', to: 'ECM Ground / Massa Blok', dir: 'ground', role: 'Jalur balik & perisai anti-noise sinyal knock', func: 'Menjaga referensi 0V dan melindungi sinyal frekuensi tinggi knock dari gangguan koil.', keyState: 'IG OFF (Mode Ohm)', probe: 'Pin 2 (sisi harness) ↔ Massa Bodi', spec: '< 1 Ω (Kontinyu)', faultHint: 'Shield putus membuat ECM salah mendeteksi ngelitik dan memundurkan timing pengapian.' }
+        { colorCode: 'WHT', from: 'Knock Sensor C26 Pin 1', to: 'ECM Pin C37-56', dir: 'in', role: 'Sinyal getaran detonasi mesin 1-Pin (P0327/P0328)', func: 'Mencegah kerusakan piston akibat pembakaran terlalu cepat/BBM oktan rendah.', keyState: 'IG OFF (Mode Ohm) / IG ON (Bias 2–3V)', probe: 'Pin 1 C26 ↔ Bodi Logam Sensor Knock', spec: '500 – 620 kΩ (nominal ~560 kΩ @20°C) · Bias 2,0–3,0 V', faultHint: 'Kencangkan baut pengikat tepat 23 N·m karena bodi baut sekaligus menjadi massa sensor.' }
       ]
     },
     {
       id: 'gv_egr_evap_imtv',
       category: 'efi',
-      badge: '1A-123 · EMISI & IMTV',
+      badge: '1A-120 · EMISI & IMTV',
       title: 'Katup EGR, EVAP Purge Valve & IMTV (Intake Tuning)',
       subtitle: 'Kontrol Emisi Gas Buang (P0401–P0403), Uap Tangki (P0443) & IMTV (P0660)',
       dtcs: ['P0401', 'P0402', 'P0403', 'P0443', 'P0660'],
       isNonWiring: false,
       safetyGuard: 'ohm',
       photos: [
-        { img: 'img/jb420_wiring/v1_egr_p0403_1a123.webp', label: 'Wiring EGR P0403 (1A-123)', source: 'Vol 1 Bab 1A-123 (DTC P0403 Sirkuit EGR Control · S5JB0A1104043)' },
-        { img: 'img/jb420_wiring/v1_evap_p0443_1a127.webp', label: 'Wiring EVAP Purge P0443 (1A-127)', source: 'Vol 1 Bab 1A-127 (DTC P0443 Sirkuit EVAP Purge Control Valve)' },
-        { img: 'img/jb420_wiring/v1_imtv_p0660_1a152.webp', label: 'Wiring IMTV P0660 (1A-152)', source: 'Vol 1 Bab 1A-152 (DTC P0660 Sirkuit Intake Manifold Tuning Valve)' }
+        { img: 'img/jb420_wiring/v1_egr_p0401_1a120.webp', label: 'Wiring EGR Induk P0401–P0403 (1A-120)', source: 'Vol 1 Bab 1A-120 (Fig I5JB0A110051-01 · DTC P0401/P0402/P0403 Katup EGR C10)' },
+        { img: 'img/jb420_wiring/v1_evap_p0443_1a127.webp', label: 'Wiring EVAP Purge P0443 (1A-127)', source: 'Vol 1 Bab 1A-127 (Fig I5JB0A110054-02 · DTC P0443 EVAP Purge Control Valve)' },
+        { img: 'img/jb420_wiring/v1_imtv_p0660_1a152.webp', label: 'Wiring IMTV P0660 (1A-152)', source: 'Vol 1 Bab 1A-152 (Fig I5JB0A110064-02 · DTC P0660 Intake Manifold Tuning Valve)' }
       ],
       stages: [
         { step: 1, tag: 'POWER', title: 'Suplai +12V Aktuator Emisi dari Main Relay', from: 'Main Relay (+12V)', via: 'Kabel BLU/BLK', to: 'Stepper EGR, EVAP Solenoid & IMTV', wire: 'BLU/BLK', desc: 'Ketiga aktuator emisi menerima suplai +12V bersama dari Main Relay saat IG ON.' },
@@ -526,7 +528,8 @@
       relatedIds: ['gv_af_ho2s', 'gv_ign_coil', 'gv_nonwiring_p0171'],
       safetyGuard: 'none',
       photos: [
-        { img: 'img/jb420_wiring/v1_af_p0131_1a94.webp', label: 'Referensi Sirkuit Sensor-1/2 (1A-94)', source: 'Vol 1 Bab 1A-125 & 1A-94 (Diagnosa Efisiensi Catalyst & Sensor O2)' }
+        { img: 'img/jb420_wiring/v1_cat_p0420_1a125.webp', label: 'Diagram Sistem Katalis P0420 (1A-125)', source: 'Vol 1 Bab 1A-125 (Fig I5JB0A110053-02 · DTC P0420 Efisiensi Catalyst & Sensor O2)' },
+        { img: 'img/jb420_wiring/v1_ho2s2_p0137_1a97.webp', label: 'Wiring Sinyal HO2S-2 Belakang (1A-97)', source: 'Vol 1 Bab 1A-97 (Fig I5JB0A110045-01 · Monitor HO2S-2)' }
       ],
       stages: [],
       wires: []

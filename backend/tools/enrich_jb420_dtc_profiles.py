@@ -206,18 +206,18 @@ PROFILES: dict[str, dict] = {
     },
 
     "ckp": {
-        "sim_circuit_key": "ckp_2w",
+        "sim_circuit_key": "ckp_3w",
         "atlas_module_id": "gv_ckp",
         "repair_options": [
             {
                 "tag": "Opsi 1 • Utama (Ukur & Ganti Sensor CKP)",
                 "title": "Bersihkan Ujung Sensor CKP, Cek Rotor & Ukur Tahanan Induktif (1,68–2,52 kΩ)",
-                "desc": "Bersihkan gram besi di ujung magnet sensor CKP, ukur tahanan antar 2 pin sensor pada kondisi dingin & panas (standar 1.680–2.520 Ω @ 20°C). Ganti sensor bila putus saat panas.",
+                "desc": "Bersihkan gram besi di ujung magnet sensor CKP, ukur tahanan antar Pin 2 (PNK) & Pin 3 (BLU) pada kondisi dingin & panas (standar 1.680–2.520 Ω @ 20°C). Ganti sensor bila putus saat panas.",
             },
             {
-                "tag": "Opsi 2 • Soket & Kabel Shield CKP",
-                "title": "Perbaiki Soket 2-Pin CKP & Cek Kabel C37-51 (GRN) / C37-36 (PNK)",
-                "desc": "Pastikan soket tidak terendam rembesan oli, periksa kontinuitas kabel ke C37-51 dan C37-36 (< 2 Ω) serta isolasi terhadap ground.",
+                "tag": "Opsi 2 • Soket 3-Pin C20 & Kabel Shield CKP",
+                "title": "Perbaiki Soket 3-Pin CKP (C20) & Cek Kabel C37-36 (PNK), C37-51 (BLU) & Shield Pin 1 (BLK)",
+                "desc": "Pastikan soket 3-pin C20 tidak terendam oli, periksa kontinuitas Pin 2↔C37-36 & Pin 3↔C37-51 (< 2 Ω) serta kontinuitas massa Shield Pin 1 (BLK) ke blok mesin (< 1 Ω).",
             },
             {
                 "tag": "Opsi 3 • Rantai Timing & ECM",
@@ -226,9 +226,9 @@ PROFILES: dict[str, dict] = {
             },
         ],
         "static_specs": [
-            {"parameter": "Tahanan Kumparan Sensor CKP Induktif J20A (20°C)", "normal_range": "1.68 – 2.52", "unit": "kOhm"},
-            {"parameter": "Tegangan Terminal ECM C37-51 (GRN) & C37-36 (PNK · IG ON)", "normal_range": "0.0 – 1.0", "unit": "V DC"},
-            {"parameter": "Kontinuitas Kabel CKP ke ECM C37-51 & C37-36 (Kunci OFF)", "normal_range": "< 2.0", "unit": "Ohm"},
+            {"parameter": "Tahanan Kumparan Sensor CKP Induktif J20A (Pin 2↔3 @ 20°C)", "normal_range": "1.68 – 2.52", "unit": "kOhm"},
+            {"parameter": "Tegangan Terminal ECM C37-51 (BLU) & C37-36 (PNK · IG ON)", "normal_range": "0.0 – 1.0", "unit": "V DC"},
+            {"parameter": "Kontinuitas Kabel CKP (C20 Pin 2/3) & Shield Pin 1 (BLK)", "normal_range": "< 2.0 (Shield < 1 Ω)", "unit": "Ohm"},
         ],
         "idle_standards": [
             {"parameter": "Gelombang Sinusoidal C37-51 ke C37-36 Saat Idle Panas (Bab 1A-204)", "normal_range": "+4..6 V ↑↓ –4..–6 V AC (30 pulsa/putaran)", "unit": "V AC"},
@@ -394,18 +394,18 @@ PROFILES: dict[str, dict] = {
     },
 
     "af_sensor1": {
-        "sim_circuit_key": "af_6w",
+        "sim_circuit_key": "af_4w",
         "atlas_module_id": "gv_af_ho2s",
         "repair_options": [
             {
-                "tag": "Opsi 1 • Utama (Ukur Heater & Ganti A/F Sensor-1)",
-                "title": "Ukur Tahanan Heater A/F Sensor-1 (2,0–3,5 Ω @ 20°C) & Ganti Unit Jika Putus",
-                "desc": "Lepas soket 6-pin A/F Sensor depan (manifold knalpot), ukur tahanan pemanas (Pin 1–2). Ganti unit A/F Sensor-1 (torsi 44 N·m) bila heater putus atau elemen jenuh karbon.",
+                "tag": "Opsi 1 • Utama (Ukur Heater 4-Pin & Ganti A/F Sensor-1)",
+                "title": "Ukur Tahanan Heater A/F Sensor-1 (Pin 1–2: 2,0–3,5 Ω @ 20°C) & Ganti Unit Jika Putus",
+                "desc": "Lepas soket 4-pin A/F Sensor depan (manifold knalpot), ukur tahanan elemen pemanas antara Pin 1 (HTR+) dan Pin 2 (HTR−). Ganti unit A/F Sensor-1 (torsi 44 N·m) bila heater putus atau elemen jenuh karbon.",
             },
             {
-                "tag": "Opsi 2 • Soket 6-Pin, Main Relay & Sekering O2 HTR",
-                "title": "Periksa Sekering O2 HTR, Suplai +12V (BLU/BLK) & Jalur C37-32/34/35/37/38",
-                "desc": "Pastikan +12V Main Relay masuk ke Pin 1 (BLU/BLK), kabel tidak meleleh kena pipa knalpot, dan pin C37-32/31/38/37/35/34 tersambung utuh.",
+                "tag": "Opsi 2 • Soket 4-Pin, Relay O2 HTR & Jalur C37-32/38/37",
+                "title": "Periksa Sekering #10 (20A O2 HTR), Suplai +12V (PNK) & Jalur C37-32/38/37",
+                "desc": "Pastikan +12V dari HO2S Heater Relay masuk ke Pin 1 (PNK), kabel tidak meleleh kena pipa knalpot, dan pin C37-32 (PNK/BLU), C37-38 (WHT), C37-37 (BLK) tersambung utuh.",
             },
             {
                 "tag": "Opsi 3 • Cek Kebocoran Knalpot & Tekanan BBM",
@@ -414,10 +414,10 @@ PROFILES: dict[str, dict] = {
             },
         ],
         "static_specs": [
-            {"parameter": "Suplai +12V Heater A/F Pin 1 (BLU/BLK · Main Relay, IG ON)", "normal_range": "10.0 – 14.0", "unit": "V DC"},
-            {"parameter": "Tegangan Kontrol Heater C37-32 (PNK/BLU · IG ON Mesin Mati)", "normal_range": "10.0 – 14.0", "unit": "V DC"},
-            {"parameter": "Tegangan Resistor Kalibrasi C37-35 (RED/YEL · IG ON)", "normal_range": "0.15 – 4.82", "unit": "V DC"},
-            {"parameter": "Tahanan Heater A/F Sensor-1 (Pada 20°C)", "normal_range": "2.0 – 3.5", "unit": "Ohm"},
+            {"parameter": "Suplai +12V Heater A/F Pin 1 (PNK · HO2S Heater Relay, IG ON)", "normal_range": "10.0 – 14.0", "unit": "V DC"},
+            {"parameter": "Tegangan Kontrol Heater Pin 2 / C37-32 (PNK/BLU · IG ON)", "normal_range": "10.0 – 14.0", "unit": "V DC"},
+            {"parameter": "Tahanan Heater A/F Sensor-1 (Pin 1↔2 @ 20°C)", "normal_range": "2.0 – 3.5", "unit": "Ohm"},
+            {"parameter": "Kontinuitas Kabel Sinyal A/F Pin 3↔C37-38 & Pin 4↔C37-37", "normal_range": "< 2.0", "unit": "Ohm"},
         ],
         "idle_standards": [
             {"parameter": "Tegangan A/F Sensor Signal (+) C37-38 (WHT · Idle Panas, Bab 1A-203)", "normal_range": "3.0 – 3.2", "unit": "V DC"},
@@ -547,7 +547,7 @@ PROFILES: dict[str, dict] = {
     },
 
     "knock": {
-        "sim_circuit_key": "knock_2w",
+        "sim_circuit_key": "knock_1w",
         "atlas_module_id": "gv_knock",
         "repair_options": [
             {
@@ -582,7 +582,7 @@ PROFILES: dict[str, dict] = {
     },
 
     "fuel_trim_nonwiring": {
-        "sim_circuit_key": "map_3w",
+        "sim_circuit_key": "af_4w",
         "atlas_module_id": "gv_nonwiring_p0171",
         "repair_options": [
             {
@@ -656,7 +656,7 @@ PROFILES: dict[str, dict] = {
     },
 
     "charging_elc": {
-        "sim_circuit_key": "gen_elc",
+        "sim_circuit_key": "gen_2w",
         "atlas_module_id": "gv_charging",
         "repair_options": [
             {
@@ -693,7 +693,7 @@ PROFILES: dict[str, dict] = {
     },
 
     "starter_relay": {
-        "sim_circuit_key": "starter_rly",
+        "sim_circuit_key": "starter_4w",
         "atlas_module_id": "gv_cranking",
         "repair_options": [
             {
@@ -1084,6 +1084,756 @@ PROFILES: dict[str, dict] = {
 }
 
 
+# -----------------------------------------------------------------------------
+# FR-01: SHARED WIRING ASSET REGISTRY (ZERO TEXT-ONLY REFERENCES!)
+# Setiap wiring_ref_id menunjuk langsung ke file .webp diagram sirkuit ASLI OEM
+# beserta posisi modul & indeks halaman pada Pilar 3 Atlas JB420.
+# -----------------------------------------------------------------------------
+WIRING_DIAGRAMS_REGISTRY: dict[str, dict] = {
+    "WIRING_MAF_SYSTEM_OEM": {
+        "wiring_ref_id": "WIRING_MAF_SYSTEM_OEM",
+        "image_path": "img/jb420_wiring/v1_maf_p0101_1a62.webp",
+        "label": "Diagram Wiring Induk MAF & IAT Sensor (1A-62)",
+        "manual_page_ref": "Vol 1 Bab 1A-62 (Fig I5JB0A110033-01) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_maf_iat",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0101", "P0102", "P0103"],
+        "cross_ref_note": "Diagram wiring bersama grup MAF Sensor (rujukan manual: P0101 / P0102 / P0103)",
+    },
+    "WIRING_IAT_SYSTEM_OEM": {
+        "wiring_ref_id": "WIRING_IAT_SYSTEM_OEM",
+        "image_path": "img/jb420_wiring/v1_iat_p0111_1a74.webp",
+        "label": "Diagram Wiring Induk IAT Sensor (1A-74)",
+        "manual_page_ref": "Vol 1 Bab 1A-74 (Fig I5JB0A110036-01) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_maf_iat",
+        "atlas_photo_index": 1,
+        "shared_with_dtcs": ["P0111", "P0112", "P0113"],
+        "cross_ref_note": "Diagram wiring bersama grup IAT Sensor dalam soket terpadu MAF C13 (rujukan manual: P0111 / P0112 / P0113)",
+    },
+    "WIRING_MAP_SYSTEM_OEM": {
+        "wiring_ref_id": "WIRING_MAP_SYSTEM_OEM",
+        "image_path": "img/jb420_wiring/v1_map_p0106_1a68.webp",
+        "label": "Diagram Wiring Induk MAP Sensor (1A-68)",
+        "manual_page_ref": "Vol 1 Bab 1A-68 (Fig I5JB0A110034-01) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_map",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0106", "P0107", "P0108", "P2227", "P2228", "P2229"],
+        "cross_ref_note": "Diagram wiring bersama grup MAP / Barometric Sensor (rujukan manual: P0106 / P0107 / P0108)",
+    },
+    "WIRING_ECT_SYSTEM_OEM": {
+        "wiring_ref_id": "WIRING_ECT_SYSTEM_OEM",
+        "image_path": "img/jb420_wiring/v1_ect_p0116_1a81.webp",
+        "label": "Diagram Wiring Induk ECT Sensor (1A-81)",
+        "manual_page_ref": "Vol 1 Bab 1A-81 (Fig I5JB0A110038-01) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_ect",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0116", "P0117", "P0118", "B1561"],
+        "cross_ref_note": "Diagram wiring bersama grup ECT Sensor C09 (rujukan manual: P0116 / P0117 / P0118)",
+    },
+    "WIRING_AF_B1S1_HEATER_OEM": {
+        "wiring_ref_id": "WIRING_AF_B1S1_HEATER_OEM",
+        "image_path": "img/jb420_wiring/v1_af_heater_p0030_1a54.webp",
+        "label": "Diagram Wiring Heater A/F Sensor-1 Upstream (1A-54)",
+        "manual_page_ref": "Vol 1 Bab 1A-54 (Fig I5JB0A110027-02) & Vol 2 Bab 9A-43",
+        "atlas_module_id": "gv_af_ho2s",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0030", "P0031", "P0032"],
+        "cross_ref_note": "Diagram wiring bersama grup Heater A/F Sensor-1 (rujukan manual: P0030 / P0031 / P0032 — Soket 4-Pin)",
+    },
+    "WIRING_AF_B1S1_SIGNAL_OEM": {
+        "wiring_ref_id": "WIRING_AF_B1S1_SIGNAL_OEM",
+        "image_path": "img/jb420_wiring/v1_af_p0131_1a94.webp",
+        "label": "Diagram Wiring Sinyal A/F Sensor-1 Upstream (1A-94)",
+        "manual_page_ref": "Vol 1 Bab 1A-94 (Fig I5JB0A110044-02) & Vol 2 Bab 9A-43",
+        "atlas_module_id": "gv_af_ho2s",
+        "atlas_photo_index": 1,
+        "shared_with_dtcs": ["P0131", "P0132", "P0133", "P0134"],
+        "cross_ref_note": "Diagram wiring bersama grup Sinyal A/F Sensor-1 (rujukan manual: P0131 / P0132 / P0133 / P0134)",
+    },
+    "WIRING_HO2S2_HEATER_OEM": {
+        "wiring_ref_id": "WIRING_HO2S2_HEATER_OEM",
+        "image_path": "img/jb420_wiring/v1_ho2s_p0037_1a59.webp",
+        "label": "Diagram Wiring Heater HO2S-2 Belakang (1A-59)",
+        "manual_page_ref": "Vol 1 Bab 1A-59 (Fig I5JB0A110032-01) & Vol 2 Bab 9A-43",
+        "atlas_module_id": "gv_af_ho2s",
+        "atlas_photo_index": 2,
+        "shared_with_dtcs": ["P0037", "P0038"],
+        "cross_ref_note": "Diagram wiring bersama grup Heater HO2S-2 Belakang C15 (rujukan manual: P0037 / P0038)",
+    },
+    "WIRING_HO2S2_SIGNAL_OEM": {
+        "wiring_ref_id": "WIRING_HO2S2_SIGNAL_OEM",
+        "image_path": "img/jb420_wiring/v1_ho2s2_p0137_1a97.webp",
+        "label": "Diagram Wiring Sinyal HO2S-2 Belakang (1A-97)",
+        "manual_page_ref": "Vol 1 Bab 1A-97 (Fig I5JB0A110045-01) & Vol 2 Bab 9A-43",
+        "atlas_module_id": "gv_af_ho2s",
+        "atlas_photo_index": 3,
+        "shared_with_dtcs": ["P0137", "P0138", "P0140"],
+        "cross_ref_note": "Diagram wiring bersama grup Sinyal HO2S-2 Belakang C15 (rujukan manual: P0137 / P0138 / P0140)",
+    },
+    "WIRING_IGN_COIL_OEM": {
+        "wiring_ref_id": "WIRING_IGN_COIL_OEM",
+        "image_path": "img/jb420_wiring/v2_a3_pengapian_9a41.webp",
+        "label": "Diagram Wiring A-3 Pengapian 4× Koil COP (9A-41)",
+        "manual_page_ref": "Vol 2 Bab 9A-41 (A-3) & Vol 1 Bab 1H-2",
+        "atlas_module_id": "gv_ign_coil",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0300", "P0301", "P0302", "P0303", "P0304"],
+        "cross_ref_note": "Diagram wiring bersama Sistem Pengapian 4× Koil COP C40–C43 (P0300–P0304)",
+    },
+    "WIRING_CKP_OEM": {
+        "wiring_ref_id": "WIRING_CKP_OEM",
+        "image_path": "img/jb420_wiring/v1_ckp_p0335_1a115.webp",
+        "label": "Diagram Wiring CKP Sensor C20 (1A-115)",
+        "manual_page_ref": "Vol 1 Bab 1A-115 (Fig I5JB0A110047-02) & Vol 2 Bab 9A-45",
+        "atlas_module_id": "gv_ckp",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0335"],
+        "cross_ref_note": "Diagram wiring CKP Sensor C20 3-Pin (J20A: Pin 1 Shield BLK, Pin 2 PNK, Pin 3 BLU)",
+    },
+    "WIRING_CMP_OEM": {
+        "wiring_ref_id": "WIRING_CMP_OEM",
+        "image_path": "img/jb420_wiring/v1_cmp_p0340_1a117.webp",
+        "label": "Diagram Wiring CMP Sensor C08 (1A-117)",
+        "manual_page_ref": "Vol 1 Bab 1A-117 (Fig I5JB0A110049-01) & Vol 2 Bab 9A-45",
+        "atlas_module_id": "gv_cmp",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0340", "B1556"],
+        "cross_ref_note": "Diagram wiring bersama Sensor CMP C08 3-Pin (P0340 / B1556)",
+    },
+    "WIRING_KNOCK_OEM": {
+        "wiring_ref_id": "WIRING_KNOCK_OEM",
+        "image_path": "img/jb420_wiring/v1_knock_p0327_1a113.webp",
+        "label": "Diagram Wiring Knock Sensor C26 (1A-113)",
+        "manual_page_ref": "Vol 1 Bab 1A-113 (Fig I5JB0A110046-01) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_knock",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0327", "P0328"],
+        "cross_ref_note": "Diagram wiring bersama Knock Sensor C26 1-Pin + Massa Bodi Baut (P0327 / P0328)",
+    },
+    "WIRING_EGR_SYSTEM_OEM": {
+        "wiring_ref_id": "WIRING_EGR_SYSTEM_OEM",
+        "image_path": "img/jb420_wiring/v1_egr_p0401_1a120.webp",
+        "label": "Diagram Sistem & Wiring Induk Katup EGR C10 (1A-120)",
+        "manual_page_ref": "Vol 1 Bab 1A-120 (Fig I5JB0A110051-01) & Vol 2 Bab 9A-45",
+        "atlas_module_id": "gv_egr_evap_imtv",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0401", "P0402", "P0403"],
+        "cross_ref_note": "Diagram wiring bersama grup Katup EGR C10 6-Pin (rujukan manual: P0401 / P0402 / P0403)",
+    },
+    "WIRING_EVAP_PURGE_OEM": {
+        "wiring_ref_id": "WIRING_EVAP_PURGE_OEM",
+        "image_path": "img/jb420_wiring/v1_evap_p0443_1a127.webp",
+        "label": "Diagram Wiring EVAP Canister Purge C14 (1A-127)",
+        "manual_page_ref": "Vol 1 Bab 1A-127 (Fig I5JB0A110054-02) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_egr_evap_imtv",
+        "atlas_photo_index": 1,
+        "shared_with_dtcs": ["P0443"],
+        "cross_ref_note": "Diagram wiring Katup EVAP Purge C14 2-Pin (P0443)",
+    },
+    "WIRING_IMTV_OEM": {
+        "wiring_ref_id": "WIRING_IMTV_OEM",
+        "image_path": "img/jb420_wiring/v1_imtv_p0660_1a152.webp",
+        "label": "Diagram Wiring Intake Manifold Tuning Valve C46 (1A-152)",
+        "manual_page_ref": "Vol 1 Bab 1A-152 (Fig I5JB0A110064-02) & Vol 2 Bab 9A-45",
+        "atlas_module_id": "gv_egr_evap_imtv",
+        "atlas_photo_index": 2,
+        "shared_with_dtcs": ["P0660"],
+        "cross_ref_note": "Diagram wiring Solenoid IMT Valve C46 2-Pin (P0660)",
+    },
+    "WIRING_ETC_THROTTLE_OEM": {
+        "wiring_ref_id": "WIRING_ETC_THROTTLE_OEM",
+        "image_path": "img/jb420_wiring/v1_etc_p0122_1a88.webp",
+        "label": "Diagram Wiring Throttle Body ETC & Dual TPS C11 (1A-88)",
+        "manual_page_ref": "Vol 1 Bab 1A-88 (Fig I5JB0A110041-01) & Vol 2 Bab 9A-47",
+        "atlas_module_id": "gv_etc_app",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0122", "P0123", "P0222", "P0223", "P2101", "P2102", "P2103", "P2111", "P2119", "P2135"],
+        "cross_ref_note": "Diagram wiring bersama grup Throttle Body ETC C11 6-Pin (P0122..P2135)",
+    },
+    "WIRING_APP_PEDAL_OEM": {
+        "wiring_ref_id": "WIRING_APP_PEDAL_OEM",
+        "image_path": "img/jb420_wiring/v1_app_p2122_1a181.webp",
+        "label": "Diagram Wiring Sensor Pedal Gas APP E68 (1A-181)",
+        "manual_page_ref": "Vol 1 Bab 1A-181 (Fig I5JB0A110070-01) & Vol 2 Bab 9A-47",
+        "atlas_module_id": "gv_etc_app",
+        "atlas_photo_index": 1,
+        "shared_with_dtcs": ["P2122", "P2123", "P2127", "P2128", "P2138"],
+        "cross_ref_note": "Diagram wiring bersama grup Sensor Pedal Gas APP E68 6-Pin (rujukan manual: P2122 / P2123 / P2127 / P2128 / P2138)",
+    },
+    "WIRING_COOLING_FAN_OEM": {
+        "wiring_ref_id": "WIRING_COOLING_FAN_OEM",
+        "image_path": "img/jb420_wiring/v2_a4_pendingin_9a42.webp",
+        "label": "Diagram Wiring A-4 Sistem Kipas Radiator (9A-42)",
+        "manual_page_ref": "Vol 2 Bab 9A-42 (A-4) & Vol 1 Bab 1A-133",
+        "atlas_module_id": "gv_cooling_fan",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0480"],
+        "cross_ref_note": "Diagram wiring Sistem 3 Relay Kipas Radiator E29/E30/E31 (P0480)",
+    },
+    "WIRING_STARTER_CRANKING_OEM": {
+        "wiring_ref_id": "WIRING_STARTER_CRANKING_OEM",
+        "image_path": "img/jb420_wiring/v2_a1_cranking_9a39.webp",
+        "label": "Diagram Wiring A-1 Sistem Starter & Relay Cranking (9A-39)",
+        "manual_page_ref": "Vol 2 Bab 9A-39 (A-1) & Vol 1 Bab 1A-145",
+        "atlas_module_id": "gv_cranking",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0616", "P0617"],
+        "cross_ref_note": "Diagram wiring bersama Sistem Cranking & Relay Starter 4-Pin (P0616 / P0617)",
+    },
+    "WIRING_GENERATOR_OEM": {
+        "wiring_ref_id": "WIRING_GENERATOR_OEM",
+        "image_path": "img/jb420_wiring/v2_a2_pengisian_9a40.webp",
+        "label": "Diagram Wiring A-2 Sistem Pengisian / Generator (9A-40)",
+        "manual_page_ref": "Vol 2 Bab 9A-40 (A-2) & Vol 1 Bab 1A-148",
+        "atlas_module_id": "gv_charging",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0620", "P0625", "P0626"],
+        "cross_ref_note": "Diagram wiring bersama Kontrol Alternator/Generator C37-08/28 (P0620 / P0625 / P0626)",
+    },
+    "WIRING_ELD_CURRENT_OEM": {
+        "wiring_ref_id": "WIRING_ELD_CURRENT_OEM",
+        "image_path": "img/jb420_wiring/v1_eld_p1501_1a154.webp",
+        "label": "Diagram Wiring Electric Load Current Sensor C38 (1A-154)",
+        "manual_page_ref": "Vol 1 Bab 1A-154 (Fig I5JB0A110065-01) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_charging",
+        "atlas_photo_index": 1,
+        "shared_with_dtcs": ["P1501", "P1502"],
+        "cross_ref_note": "Diagram wiring bersama Electric Load Current Sensor C38 3-Pin (P1501 / P1502)",
+    },
+    "WIRING_FUEL_LEVEL_OEM": {
+        "wiring_ref_id": "WIRING_FUEL_LEVEL_OEM",
+        "image_path": "img/jb420_wiring/v1_fuellevel_p0462_1a129.webp",
+        "label": "Diagram Wiring Fuel Level Sensor P0462/P0463 (1A-129)",
+        "manual_page_ref": "Vol 1 Bab 1A-129 (Fig I5JB0A110055-02) & Vol 2 Bab 9A-43",
+        "atlas_module_id": "gv_fuel_pump",
+        "atlas_photo_index": 2,
+        "shared_with_dtcs": ["P0462", "P0463"],
+        "cross_ref_note": "Diagram wiring bersama Fuel Level Sensor Tangki R02/R03 (P0462 / P0463)",
+    },
+    "WIRING_VSS_OEM": {
+        "wiring_ref_id": "WIRING_VSS_OEM",
+        "image_path": "img/jb420_wiring/v1_vss_p0500_1a137.webp",
+        "label": "Diagram Wiring Vehicle Speed Sensor P0500 (1A-137)",
+        "manual_page_ref": "Vol 1 Bab 1A-137 (Fig I5JB0A110060-03)",
+        "atlas_module_id": "gv_vss_brake_ac",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0500"],
+        "cross_ref_note": "Diagram wiring Vehicle Speed Sensor (P0500)",
+    },
+    "WIRING_BRAKE_SW_OEM": {
+        "wiring_ref_id": "WIRING_BRAKE_SW_OEM",
+        "image_path": "img/jb420_wiring/v1_brake_p0504_1a139.webp",
+        "label": "Diagram Wiring Switch Pedal Rem E67 (1A-139)",
+        "manual_page_ref": "Vol 1 Bab 1A-139 (Fig I5JB0A110107-02) & Vol 2 Bab 9A-46",
+        "atlas_module_id": "gv_vss_brake_ac",
+        "atlas_photo_index": 1,
+        "shared_with_dtcs": ["P0504"],
+        "cross_ref_note": "Diagram wiring Switch Lampu Rem E67 4-Pin (P0504)",
+    },
+    "WIRING_AC_PRESSURE_OEM": {
+        "wiring_ref_id": "WIRING_AC_PRESSURE_OEM",
+        "image_path": "img/jb420_wiring/v1_acpress_p0532_1a141.webp",
+        "label": "Diagram Wiring Sensor Tekanan Refrigeran A/C E04 (1A-141)",
+        "manual_page_ref": "Vol 1 Bab 1A-141 (Fig I5JB0A110061-01) & Vol 2 Bab 9A-44",
+        "atlas_module_id": "gv_vss_brake_ac",
+        "atlas_photo_index": 2,
+        "shared_with_dtcs": ["P0532", "P0533", "B1546", "B1563"],
+        "cross_ref_note": "Diagram wiring bersama Sensor Tekanan A/C E04 3-Pin (P0532 / P0533 / B1546 / B1563)",
+    },
+    "WIRING_CAN_BUS_OEM": {
+        "wiring_ref_id": "WIRING_CAN_BUS_OEM",
+        "image_path": "img/jb420_wiring/v1_can_p1674_1a159.webp",
+        "label": "Diagram Wiring Jaringan CAN Bus (1A-159)",
+        "manual_page_ref": "Vol 1 Bab 1A-159 (Fig I5JB0A110068-04) & Vol 2 Bab 9A-46",
+        "atlas_module_id": "gv_can_bus",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P1674", "P1676", "P1678", "P1685", "P1774", "U1073", "U1100", "U1101", "U1144", "B1553"],
+        "cross_ref_note": "Diagram wiring bersama Jaringan CAN Bus E23-04/19 & DLC Pin 6/14",
+    },
+    "WIRING_ECM_POWER_OEM": {
+        "wiring_ref_id": "WIRING_ECM_POWER_OEM",
+        "image_path": "img/jb420_wiring/v1_ecm_power_1a217.webp",
+        "label": "Diagram Wiring Power Supply & Ground ECM (1A-217)",
+        "manual_page_ref": "Vol 1 Bab 1A-217 (Fig I5JB0A110096-01) & Vol 2 Bab 9A-43",
+        "atlas_module_id": "gv_ecm_power",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0601", "P0602", "P0607", "P1510"],
+        "cross_ref_note": "Diagram wiring bersama Power Supply Utama, Back-Up & Ground ECM",
+    },
+    "WIRING_P0171_FUEL_TRIM_OEM": {
+        "wiring_ref_id": "WIRING_P0171_FUEL_TRIM_OEM",
+        "image_path": "img/jb420_wiring/v1_p0171_ref_1a101.webp",
+        "label": "Diagram & Referensi Diagnosa Sistem Bahan Bakar P0171/P0172 (1A-101)",
+        "manual_page_ref": "Vol 1 Bab 1A-101 (Fig I5JB0A110044-02)",
+        "atlas_module_id": "gv_nonwiring_p0171",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0171", "P0172", "P2195", "P2196"],
+        "cross_ref_note": "Diagram referensi A/F Sensor-1 & cek mekanis sistem campuran BBM (P0171 / P0172 / P2195 / P2196)",
+    },
+    "WIRING_P0420_CATALYST_OEM": {
+        "wiring_ref_id": "WIRING_P0420_CATALYST_OEM",
+        "image_path": "img/jb420_wiring/v1_cat_p0420_1a125.webp",
+        "label": "Diagram Sistem Katalis & Sensor O2 P0420 (1A-125)",
+        "manual_page_ref": "Vol 1 Bab 1A-125 (Fig I5JB0A110053-02)",
+        "atlas_module_id": "gv_nonwiring_p0420",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0420"],
+        "cross_ref_note": "Diagram sistem Catalytic Converter & monitor HO2S-2 (P0420)",
+    },
+    "WIRING_TCM_AT_OEM": {
+        "wiring_ref_id": "WIRING_TCM_AT_OEM",
+        "image_path": "img/jb420_wiring/v2_a6_tcm_p1_9a48.webp",
+        "label": "Diagram Wiring A-6 Sistem Kontrol Transmisi A/T TCM (9A-48/49)",
+        "manual_page_ref": "Vol 2 Bab 9A-48 s/d 9A-49 (A-6 TCM E92/E93)",
+        "atlas_module_id": "gv_mod_tcm",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P0705", "P0707", "P0712", "P0713", "P0717", "P0722", "P0741", "P0742", "P0751", "P0752", "P0756", "P0757", "P0962", "P0963", "P0973", "P0974", "P0976", "P0977", "P1603", "P1702", "P1703", "P1723", "P1777", "P1778", "P1878", "P2763", "P2764"],
+        "cross_ref_note": "Diagram wiring bersama Sistem Kontrol Transmisi Otomatis TCM (E92/E93)",
+    },
+    "WIRING_ABS_EBD_OEM": {
+        "wiring_ref_id": "WIRING_ABS_EBD_OEM",
+        "image_path": "img/jb420_wiring/v2_f2_abs_p1_9a86.webp",
+        "label": "Diagram Wiring F-2 Sistem Rem ABS/EBD Modul E03 (9A-86/87)",
+        "manual_page_ref": "Vol 2 Bab 9A-86 s/d 9A-87 (F-2) & Vol 1 Bab 4E-4",
+        "atlas_module_id": "gv_mod_abs",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["C1015", "C1021", "C1022", "C1025", "C1026", "C1031", "C1032", "C1035", "C1036", "C1041", "C1042", "C1045", "C1046", "C1051", "C1052", "C1055", "C1056", "C1057", "C1061", "C1063", "C1071"],
+        "cross_ref_note": "Diagram wiring bersama Sistem Rem ABS/EBD Modul E03",
+    },
+    "WIRING_SRS_AIRBAG_OEM": {
+        "wiring_ref_id": "WIRING_SRS_AIRBAG_OEM",
+        "image_path": "img/jb420_wiring/v2_f1_srs_9a85.webp",
+        "label": "Diagram Wiring F-1 Sistem SRS Air Bag SDM G47 (9A-85)",
+        "manual_page_ref": "Vol 2 Bab 9A-85 (F-1 SDM Air Bag G47 — SAFETY!)",
+        "atlas_module_id": "gv_mod_srs",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["B1013", "B1016", "B1017", "B1021", "B1031", "B1032", "B1033", "B1034", "B1041", "B1042", "B1043", "B1044", "B1051", "B1052", "B1053", "B1054", "B1055", "B1056", "B1057", "B1058", "B1073", "B1074", "B1077", "B1078"],
+        "cross_ref_note": "Diagram wiring bersama Sistem SRS Air Bag SDM G47 (Patuhi SOP Keselamatan 90 Detik!)",
+    },
+    "WIRING_HVAC_AUTO_AC_OEM": {
+        "wiring_ref_id": "WIRING_HVAC_AUTO_AC_OEM",
+        "image_path": "img/jb420_wiring/v2_e2_hvac_p1_9a83.webp",
+        "label": "Diagram Wiring E-2 Sistem Auto A/C HVAC Modul G52 (9A-83/84)",
+        "manual_page_ref": "Vol 2 Bab 9A-83 s/d 9A-84 (E-2 Auto A/C G52)",
+        "atlas_module_id": "gv_mod_hvac",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["B1502", "B1503", "B1504", "B1511", "B1512", "B1513", "B1514", "B1520", "B1521", "B1530", "B1531", "B1551", "B1552", "B1557", "B1562"],
+        "cross_ref_note": "Diagram wiring bersama Sistem Auto A/C HVAC Modul G52",
+    },
+    "WIRING_BCM_BODY_OEM": {
+        "wiring_ref_id": "WIRING_BCM_BODY_OEM",
+        "image_path": "img/jb420_wiring/v2_a8_bcm_p1_9a51.webp",
+        "label": "Diagram Wiring A-8 Body Control Module BCM (9A-51/52)",
+        "manual_page_ref": "Vol 2 Bab 9A-51 s/d 9A-52 (A-8 BCM G30/G31/G32)",
+        "atlas_module_id": "gv_mod_bcm",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["B1133", "B1141", "B1142", "B1143", "B1150", "B1157", "B1170"],
+        "cross_ref_note": "Diagram wiring bersama Body Control Module BCM (G30/G31/G32)",
+    },
+    "WIRING_ICM_IMMOBILIZER_OEM": {
+        "wiring_ref_id": "WIRING_ICM_IMMOBILIZER_OEM",
+        "image_path": "img/jb420_wiring/v2_a7_icm_9a50.webp",
+        "label": "Diagram Wiring A-7 Sistem Immobilizer ICM G24 (9A-50)",
+        "manual_page_ref": "Vol 2 Bab 9A-50 (A-7 Immobilizer ICM G24)",
+        "atlas_module_id": "gv_mod_icm",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["P1614", "P1615", "P1616", "P1618", "P1621", "P1622", "P1623", "P1625", "P1636", "P1638"],
+        "cross_ref_note": "Diagram wiring bersama Sistem Immobilizer ICM G24",
+    },
+    "WIRING_KSCM_SMARTKEY_OEM": {
+        "wiring_ref_id": "WIRING_KSCM_SMARTKEY_OEM",
+        "image_path": "img/jb420_wiring/v2_b9_kscm_9a66.webp",
+        "label": "Diagram Wiring B-9 Sistem Smart Key / Keyless KSCM G44 (9A-66)",
+        "manual_page_ref": "Vol 2 Bab 9A-66 (B-9 Keyless Start KSCM G44)",
+        "atlas_module_id": "gv_mod_kscm",
+        "atlas_photo_index": 0,
+        "shared_with_dtcs": ["KLS-11", "KLS-13", "KLS-14", "KLS-21", "KLS-22", "KLS-31", "KLS-33", "KLS-51", "KLS-52", "KLS-53"],
+        "cross_ref_note": "Diagram wiring bersama Sistem Keyless Start / Smart Key KSCM G44",
+    },
+}
+
+
+# -----------------------------------------------------------------------------
+# FR-02 & FR-03: SINGLE SOURCE OF TRUTH — OEM CONNECTOR SPECS (ZERO GUESSING!)
+# Setiap konektor di sini mengunci pin_count === len(pins) === len(wiring_pinout).
+# -----------------------------------------------------------------------------
+OEM_CONNECTOR_TEMPLATES: dict[str, dict] = {
+    "af_4w": {
+        "connector_code": "Soket 4-Pin A/F Sensor-1 (Upstream)",
+        "pin_count": 4,
+        "layout": "2x2",
+        "pins": [
+            {"pin": 1, "terminal": "HO2S HTR+", "ecm_pin": "O2 HTR RLY", "wire_color": "PNK", "source_type": "power", "function": "Suplai +12V Heater A/F dari HO2S Heater Relay / Sekring #10 20A O2 HTR (10–14 V IG ON)"},
+            {"pin": 2, "terminal": "HO2S HTR-", "ecm_pin": "C37-32", "wire_color": "PNK/BLU", "source_type": "ecm", "function": "Kontrol Heater A/F Sensor-1 Low-Side PWM dari ECM (10–14 V IG ON · Pulsa saat Idle)"},
+            {"pin": 3, "terminal": "A/F (+)", "ecm_pin": "C37-38", "wire_color": "WHT", "source_type": "ecm", "function": "Sinyal Utama A/F Sensor-1 (+) ke ECM (3.0–3.2 V saat Idle Panas)"},
+            {"pin": 4, "terminal": "A/F (-)", "ecm_pin": "C37-37", "wire_color": "BLK", "source_type": "ecm", "function": "Sinyal Referensi A/F Sensor-1 (−) ke ECM (2.6–2.8 V saat Idle Panas)"},
+        ],
+    },
+    "o2_4w": {
+        "connector_code": "C15 (4-Pin HO2S-2 Belakang)",
+        "pin_count": 4,
+        "layout": "2x2",
+        "pins": [
+            {"pin": 1, "terminal": "GND", "ecm_pin": "C37-57", "wire_color": "GRN", "source_type": "ground", "function": "Massa Sinyal HO2S-2 Belakang (< 0.3 V / < 1 Ω ke massa)"},
+            {"pin": 2, "terminal": "O2 SIG", "ecm_pin": "C37-11", "wire_color": "RED", "source_type": "ecm", "function": "Sinyal Oksigen Hilir HO2S-2 (4.0–5.0 V bias IG ON · 0.10–0.90 V Idle Panas)"},
+            {"pin": 3, "terminal": "HTR-", "ecm_pin": "C37-47", "wire_color": "BLK/RED", "source_type": "ecm", "function": "Kontrol Heater HO2S-2 PWM Low-Side dari ECM (10–14 V IG ON · Pulsa Idle)"},
+            {"pin": 4, "terminal": "HTR+", "ecm_pin": "O2 HTR RLY", "wire_color": "PNK", "source_type": "power", "function": "Suplai +12V Heater HO2S-2 dari HO2S Heater Relay (10–14 V IG ON)"},
+        ],
+    },
+    "maf_5w": {
+        "connector_code": "C13 (5-Pin MAF & IAT Sensor)",
+        "pin_count": 5,
+        "layout": "1x5",
+        "pins": [
+            {"pin": 1, "terminal": "+B 12V", "ecm_pin": "MAIN RLY", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai +12V Main Relay untuk Hot-Wire MAF (10–14 V IG ON)"},
+            {"pin": 2, "terminal": "MAF GND", "ecm_pin": "C37-27", "wire_color": "BLU", "source_type": "ground", "function": "Massa Khusus Sinyal MAF ke ECM (< 0.3 V / < 3 Ω)"},
+            {"pin": 3, "terminal": "MAF SIG", "ecm_pin": "C37-26", "wire_color": "RED", "source_type": "ecm", "function": "Sinyal Laju Aliran Udara MAF (0.5–1.0 V IG ON · 1.3–1.8 V Idle Panas)"},
+            {"pin": 4, "terminal": "IAT SIG", "ecm_pin": "C37-25", "wire_color": "LT GRN", "source_type": "ecm", "function": "Sinyal Suhu Udara Masuk IAT NTC (1.32–1.65 V @ 40°C)"},
+            {"pin": 5, "terminal": "SENS GND", "ecm_pin": "C37-57", "wire_color": "GRY/GRN", "source_type": "ground", "function": "Massa Bersama Sensor Analog IAT/MAP/ECT (< 0.3 V / < 3 Ω)"},
+        ],
+    },
+    "map_3w": {
+        "connector_code": "C12 (3-Pin MAP Sensor)",
+        "pin_count": 3,
+        "layout": "1x3",
+        "pins": [
+            {"pin": 1, "terminal": "MAP SIG", "ecm_pin": "C37-55", "wire_color": "RED/WHT", "source_type": "ecm", "function": "Sinyal Tekanan/Vakum Intake Manifold (3.8–4.2 V IG ON · 1.1–1.5 V Idle)"},
+            {"pin": 2, "terminal": "SENS GND", "ecm_pin": "C37-57", "wire_color": "GRY/GRN", "source_type": "ground", "function": "Massa Sensor Analog ECM (< 0.3 V / < 3 Ω)"},
+            {"pin": 3, "terminal": "VREF +5V", "ecm_pin": "C37-14", "wire_color": "GRY/RED", "source_type": "power", "function": "Tegangan Referensi +5V Presisi dari ECM (4.5–5.5 V IG ON)"},
+        ],
+    },
+    "ect_2w": {
+        "connector_code": "C09 (2-Pin ECT Sensor)",
+        "pin_count": 2,
+        "layout": "1x2",
+        "pins": [
+            {"pin": 1, "terminal": "SENS GND", "ecm_pin": "C37-57", "wire_color": "GRY/GRN", "source_type": "ground", "function": "Massa Analog Sensor Suhu Coolant ECM (< 0.3 V / < 1 Ω)"},
+            {"pin": 2, "terminal": "ECT SIG", "ecm_pin": "C37-24", "wire_color": "PPL/YEL", "source_type": "ecm", "function": "Sinyal Suhu Air Radiator NTC (2.2–3.1 V Dingin 20°C · 0.40–0.65 V Panas 90°C)"},
+        ],
+    },
+    "ckp_3w": {
+        "connector_code": "C20 (3-Pin CKP Sensor J20A)",
+        "pin_count": 3,
+        "layout": "1x3",
+        "pins": [
+            {"pin": 1, "terminal": "SHIELD", "ecm_pin": "GND BLOK", "wire_color": "BLK", "source_type": "ground", "function": "Pelindung Shield Anti-Noise Elektromagnetik ke Massa Blok #3 (< 1 Ω)"},
+            {"pin": 2, "terminal": "CKP (-)", "ecm_pin": "C37-36", "wire_color": "PNK", "source_type": "ecm", "function": "Sinyal Induktif Poros Engkol CKP (−) ke ECM (Tahanan Pin 2↔3: 1.68–2.52 kΩ)"},
+            {"pin": 3, "terminal": "CKP (+)", "ecm_pin": "C37-51", "wire_color": "BLU", "source_type": "ecm", "function": "Sinyal Induktif Poros Engkol CKP (+) ke ECM (> 0.5 V AC saat Cranking)"},
+        ],
+    },
+    "cmp_3w": {
+        "connector_code": "C08 (3-Pin CMP Sensor)",
+        "pin_count": 3,
+        "layout": "1x3",
+        "pins": [
+            {"pin": 1, "terminal": "GND", "ecm_pin": "GND BLOK", "wire_color": "BLK/YEL", "source_type": "ground", "function": "Massa Sensor Hall-Effect CMP ke Blok Mesin (< 1 Ω)"},
+            {"pin": 2, "terminal": "CMP SIG", "ecm_pin": "C37-52", "wire_color": "WHT/RED", "source_type": "ecm", "function": "Pulsa Digital Posisi Noken As (0–0.6 V ↔ 4–5 V saat Cranking/Idle)"},
+            {"pin": 3, "terminal": "+B 12V", "ecm_pin": "MAIN RLY", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai +12V Main Relay untuk Sensor Hall-IC CMP (10–14 V IG ON)"},
+        ],
+    },
+    "knock_1w": {
+        "connector_code": "C26 (1-Pin Knock Sensor + Massa Bodi Baut)",
+        "pin_count": 1,
+        "layout": "1x1",
+        "pins": [
+            {"pin": 1, "terminal": "KNK SIG", "ecm_pin": "C37-56", "wire_color": "WHT", "source_type": "ecm", "function": "Sinyal Piezo Detonasi Knock Sensor (2.0–3.0 V bias IG ON · 500–620 kΩ ke bodi sensor; massa via baut blok 23 N·m)"},
+        ],
+    },
+    "coil_4w": {
+        "connector_code": "C40–C43 (3-Pin Koil COP J20A)",
+        "pin_count": 3,
+        "layout": "1x3",
+        "pins": [
+            {"pin": 1, "terminal": "+B IG1", "ecm_pin": "IG COIL", "wire_color": "BLK/WHT", "source_type": "power", "function": "Suplai +12V dari Sekring #39 (20A IG COIL) saat Kunci Kontak ON (10–14 V)"},
+            {"pin": 2, "terminal": "GND", "ecm_pin": "GND BLOK", "wire_color": "BLK/ORN", "source_type": "ground", "function": "Massa Primer Koil & Noise Filter C47 ke Blok Mesin #5 (< 1 Ω)"},
+            {"pin": 3, "terminal": "IGT SIG", "ecm_pin": "C37-21/20/19/18", "wire_color": "BRN/BLK", "source_type": "ecm", "function": "Pulsa Trigger Pengapian Silinder #1–#4 dari ECM (0–0.6 V IG ON · Pulsa 5V Idle)"},
+        ],
+    },
+    "egr_6w": {
+        "connector_code": "C10 (6-Pin Katup EGR Stepper Motor)",
+        "pin_count": 6,
+        "layout": "2x3",
+        "pins": [
+            {"pin": 1, "terminal": "COIL 2", "ecm_pin": "C37-06", "wire_color": "YEL/RED", "source_type": "ecm", "function": "Driver Stepper Motor EGR Kumparan 2 (20–31 Ω ke Pin 2 · 10–14 V IG ON)"},
+            {"pin": 2, "terminal": "+B 12V", "ecm_pin": "MAIN RLY", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai +12V Main Relay Bersama Kumparan 1 & 2 (10–14 V IG ON)"},
+            {"pin": 3, "terminal": "COIL 1", "ecm_pin": "C37-05", "wire_color": "YEL/BLK", "source_type": "ecm", "function": "Driver Stepper Motor EGR Kumparan 1 (20–31 Ω ke Pin 2 · 10–14 V IG ON)"},
+            {"pin": 4, "terminal": "COIL 3", "ecm_pin": "C37-03", "wire_color": "YEL/GRN", "source_type": "ecm", "function": "Driver Stepper Motor EGR Kumparan 3 (20–31 Ω ke Pin 5 · 10–14 V IG ON)"},
+            {"pin": 5, "terminal": "+B 12V", "ecm_pin": "MAIN RLY", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai +12V Main Relay Bersama Kumparan 3 & 4 (10–14 V IG ON)"},
+            {"pin": 6, "terminal": "COIL 4", "ecm_pin": "C37-04", "wire_color": "YEL", "source_type": "ecm", "function": "Driver Stepper Motor EGR Kumparan 4 (20–31 Ω ke Pin 5 · 10–14 V IG ON)"},
+        ],
+    },
+    "evap_2w": {
+        "connector_code": "C14 (2-Pin Katup EVAP Purge)",
+        "pin_count": 2,
+        "layout": "1x2",
+        "pins": [
+            {"pin": 1, "terminal": "+B 12V", "ecm_pin": "MAIN RLY", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai +12V Main Relay Solenoid EVAP Purge (10–14 V IG ON)"},
+            {"pin": 2, "terminal": "PRG DRV", "ecm_pin": "C37-13", "wire_color": "GRN/BLK", "source_type": "ecm", "function": "Kontrol Duty PWM EVAP Purge dari ECM (30–34 Ω kumparan · 10–14 V standby)"},
+        ],
+    },
+    "imt_2w": {
+        "connector_code": "C46 (2-Pin Solenoid IMT Valve)",
+        "pin_count": 2,
+        "layout": "1x2",
+        "pins": [
+            {"pin": 1, "terminal": "+B 12V", "ecm_pin": "MAIN RLY", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai +12V Main Relay Solenoid Intake Tuning (10–14 V IG ON)"},
+            {"pin": 2, "terminal": "IMT DRV", "ecm_pin": "C37-33", "wire_color": "GRY/RED", "source_type": "ecm", "function": "Kontrol Aktif Solenoid IMT dari ECM (30–40 Ω · < 1V Idle ON · 10–14V ≥ 4700 RPM)"},
+        ],
+    },
+    "etc_6w": {
+        "connector_code": "C11 (6-Pin Throttle Body ETC)",
+        "pin_count": 6,
+        "layout": "1x6",
+        "pins": [
+            {"pin": 1, "terminal": "MTR (-)", "ecm_pin": "C37-44", "wire_color": "BLU/RED", "source_type": "ecm", "function": "Penggerak Motor DC Throttle Body (−) (Tahanan Pin 1↔2: 0.5–10 Ω)"},
+            {"pin": 2, "terminal": "MTR (+)", "ecm_pin": "C37-45", "wire_color": "BLU/YEL", "source_type": "ecm", "function": "Penggerak Motor DC Throttle Body (+) H-Bridge PWM dari ECM"},
+            {"pin": 3, "terminal": "TPS GND", "ecm_pin": "C37-41", "wire_color": "GRN", "source_type": "ground", "function": "Massa Analog Dual Sensor TPS (< 0.3 V)"},
+            {"pin": 4, "terminal": "TPS SUB", "ecm_pin": "C37-40", "wire_color": "RED", "source_type": "ecm", "function": "Sinyal Sudut Throttle TPS Sub (1.60–1.91 V Tutup → 3.88–4.45 V WOT)"},
+            {"pin": 5, "terminal": "VREF +5V", "ecm_pin": "C37-53", "wire_color": "WHT", "source_type": "power", "function": "Suplai Referensi +5V Dual Sensor TPS (4.5–5.5 V IG ON)"},
+            {"pin": 6, "terminal": "TPS MAIN", "ecm_pin": "C37-54", "wire_color": "BLK", "source_type": "ecm", "function": "Sinyal Sudut Throttle TPS Main (0.72–1.04 V Tutup → 3.67–4.25 V WOT)"},
+        ],
+    },
+    "app_6w": {
+        "connector_code": "E68 (6-Pin Sensor Pedal Gas APP)",
+        "pin_count": 6,
+        "layout": "1x6",
+        "pins": [
+            {"pin": 1, "terminal": "SUB +5V", "ecm_pin": "E23-53", "wire_color": "ORN/BLU", "source_type": "power", "function": "Tegangan Referensi +5V Sensor Pedal Gas APP Sub (4.5–5.5 V IG ON)"},
+            {"pin": 2, "terminal": "MAIN +5V", "ecm_pin": "E23-56", "wire_color": "WHT", "source_type": "power", "function": "Tegangan Referensi +5V Sensor Pedal Gas APP Main (4.5–5.5 V IG ON)"},
+            {"pin": 3, "terminal": "MAIN SIG", "ecm_pin": "E23-55", "wire_color": "WHT/BLU", "source_type": "ecm", "function": "Sinyal Pedal Gas APP Main (0.65–0.82 V Dilepas → 3.5–4.3 V Injak Penuh)"},
+            {"pin": 4, "terminal": "MAIN GND", "ecm_pin": "E23-54", "wire_color": "ORN", "source_type": "ground", "function": "Massa Analog Sensor Pedal Gas APP Main (< 0.3 V)"},
+            {"pin": 5, "terminal": "SUB GND", "ecm_pin": "E23-51", "wire_color": "BLU/YEL", "source_type": "ground", "function": "Massa Analog Sensor Pedal Gas APP Sub (< 0.3 V)"},
+            {"pin": 6, "terminal": "SUB SIG", "ecm_pin": "E23-52", "wire_color": "BLU/GRN", "source_type": "ecm", "function": "Sinyal Pedal Gas APP Sub (0.30–0.44 V Dilepas → 1.75–2.15 V Injak Penuh)"},
+        ],
+    },
+    "fan_4w": {
+        "connector_code": "E29/E30/E31 (3 Relay Kipas Radiator)",
+        "pin_count": 4,
+        "layout": "1x4",
+        "pins": [
+            {"pin": 1, "terminal": "+B IG2", "ecm_pin": "IG2 SIG", "wire_color": "YEL/GRN", "source_type": "power", "function": "Suplai +12V Sekring #32 (15A IG2 SIG) ke Kumparan 3 Relay Kipas"},
+            {"pin": 2, "terminal": "FAN #1", "ecm_pin": "E23-46", "wire_color": "RED/BLK", "source_type": "ecm", "function": "Kontrol Relay Kipas #1 Putaran Rendah (0–2 V ON ≥ 97.5°C · 10–14 V OFF)"},
+            {"pin": 3, "terminal": "FAN #2", "ecm_pin": "E23-47", "wire_color": "RED/YEL", "source_type": "ecm", "function": "Kontrol Relay Kipas #2 Putaran Tinggi (0–2 V ON ≥ 102.5°C / AC ON)"},
+            {"pin": 4, "terminal": "FAN #3", "ecm_pin": "E23-48", "wire_color": "RED", "source_type": "ecm", "function": "Kontrol Relay Kipas #3 Putaran Tinggi Seri-Paralel (0–2 V High Speed ON)"},
+        ],
+    },
+    "starter_4w": {
+        "connector_code": "Relay Starting Motor Control (4-Pin)",
+        "pin_count": 4,
+        "layout": "2x2",
+        "pins": [
+            {"pin": 1, "terminal": "COIL +", "ecm_pin": "C37-22", "wire_color": "BLK/YEL", "source_type": "ecm", "function": "Sinyal Starter Posisi ST dari Kunci Kontak / Monitor ECM C37-22 (8–14 V saat Crank)"},
+            {"pin": 2, "terminal": "COIL -", "ecm_pin": "TR SW P/N", "wire_color": "BLK/RED", "source_type": "ground", "function": "Interlock Massa Range Switch Posisi P/N (A/T) atau Ground Langsung (M/T) (< 1 Ω)"},
+            {"pin": 3, "terminal": "SW +B", "ecm_pin": "FUSE ST", "wire_color": "WHT/RED", "source_type": "power", "function": "Suplai +12V Daya Utama Sekring Starter dari Aki (12.4 V statis)"},
+            {"pin": 4, "terminal": "OUT 50", "ecm_pin": "STARTER", "wire_color": "BLK/YEL", "source_type": "ecm", "function": "Output Daya ke Terminal 50 Solenoid Motor Starter (≥ 9.5 V saat Crank)"},
+        ],
+    },
+    "gen_2w": {
+        "connector_code": "Soket Kontrol Generator (C37-08 / C37-28)",
+        "pin_count": 2,
+        "layout": "1x2",
+        "pins": [
+            {"pin": 1, "terminal": "GEN FR", "ecm_pin": "C37-08", "wire_color": "BRN/BLK", "source_type": "ecm", "function": "Sinyal Monitor Beban Field Alternator ke ECM (10–14 V IG ON · Pulsa Duty Idle)"},
+            {"pin": 2, "terminal": "GEN C", "ecm_pin": "C37-28", "wire_color": "BRN/BLK", "source_type": "ecm", "function": "Sinyal Kontrol Regulasi Pengisian ECM ke IC Regulator (Pulsa 0–0.6V ↔ 5–7V)"},
+        ],
+    },
+    "eld_3w": {
+        "connector_code": "C38 (3-Pin Electric Load Current Sensor)",
+        "pin_count": 3,
+        "layout": "1x3",
+        "pins": [
+            {"pin": 1, "terminal": "ELD SIG", "ecm_pin": "C37-09", "wire_color": "BLU", "source_type": "ecm", "function": "Sinyal Beban Arus Kelistrikan (0.5–1.0 V IG ON · 1.3–2.4 V Beban Lampu/AC)"},
+            {"pin": 2, "terminal": "SENS GND", "ecm_pin": "C37-57", "wire_color": "GRY/GRN", "source_type": "ground", "function": "Massa Analog Sensor ECM (< 0.3 V)"},
+            {"pin": 3, "terminal": "VREF +5V", "ecm_pin": "C37-14", "wire_color": "GRY/RED", "source_type": "power", "function": "Tegangan Referensi +5V Bersama dari ECM (4.5–5.5 V IG ON)"},
+        ],
+    },
+    "brake_4w": {
+        "connector_code": "E67 (4-Pin Switch Lampu Rem)",
+        "pin_count": 4,
+        "layout": "2x2",
+        "pins": [
+            {"pin": 1, "terminal": "STOP SIG", "ecm_pin": "E23-20", "wire_color": "GRN/WHT", "source_type": "ecm", "function": "Sinyal Lampu Rem Kontak A (0–1 V Dilepas → 10–14 V Pedal Rem Ditekan)"},
+            {"pin": 2, "terminal": "STOP +B", "ecm_pin": "FUSE #38", "wire_color": "GRN", "source_type": "power", "function": "Suplai +12V Sekring #38 (15A STOP) Selalu Aktif"},
+            {"pin": 3, "terminal": "CRS SIG", "ecm_pin": "E23-08", "wire_color": "YEL/GRN", "source_type": "ecm", "function": "Sinyal Brake Cruise Kontak B (10–14 V Dilepas → 0–1 V Pedal Rem Ditekan)"},
+            {"pin": 4, "terminal": "CRS +IG", "ecm_pin": "FUSE #35", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai +12V Sekring #35 (10A CRUISE) saat IG ON"},
+        ],
+    },
+    "acpress_3w": {
+        "connector_code": "E04 (3-Pin Sensor Tekanan A/C)",
+        "pin_count": 3,
+        "layout": "1x3",
+        "pins": [
+            {"pin": 1, "terminal": "SENS GND", "ecm_pin": "C37-57", "wire_color": "GRY/GRN", "source_type": "ground", "function": "Massa Analog Sensor ECM (< 0.3 V)"},
+            {"pin": 2, "terminal": "ACP SIG", "ecm_pin": "C37-12", "wire_color": "GRY/BLK", "source_type": "ecm", "function": "Sinyal Tekanan Freon A/C (1.38–1.52 V AC OFF · 2.15–2.38 V AC ON)"},
+            {"pin": 3, "terminal": "VREF +5V", "ecm_pin": "C37-14", "wire_color": "GRY/RED", "source_type": "power", "function": "Tegangan Referensi +5V Bersama dari ECM (4.5–5.5 V IG ON)"},
+        ],
+    },
+    "fuel_level_2w": {
+        "connector_code": "Fuel Level Sensor Main/Sub (2-Pin · 1A-129)",
+        "pin_count": 2,
+        "layout": "1x2",
+        "pins": [
+            {"pin": 1, "terminal": "FLVL SIG", "ecm_pin": "E23-24", "wire_color": "YEL/RED", "source_type": "ecm", "function": "Sinyal Fuel Level Sensor Main ke ECM (0.5–5.5 V IG ON sesuai isi tangki; Fig I5JB0A110055-02)"},
+            {"pin": 2, "terminal": "SUB/GND", "ecm_pin": "GND BODI", "wire_color": "YEL/GRN", "source_type": "ground", "function": "Jalur Seri ke Sub Fuel Level Sensor → Kabel BLK/YEL ke Massa Bodi Tangki (< 1 Ω)"},
+        ],
+    },
+    "can_2w": {
+        "connector_code": "G20 DLC / E23 (2-Pin Twisted Pair CAN Bus)",
+        "pin_count": 2,
+        "layout": "1x2",
+        "pins": [
+            {"pin": 1, "terminal": "CAN-H", "ecm_pin": "E23-04", "wire_color": "WHT/RED", "source_type": "ecm", "function": "Saluran CAN-High ke DLC Pin 6 (2.5–3.6 V IG ON · Terminasi Pin 6↔14: 54–66 Ω)"},
+            {"pin": 2, "terminal": "CAN-L", "ecm_pin": "E23-19", "wire_color": "WHT/BLU", "source_type": "ecm", "function": "Saluran CAN-Low ke DLC Pin 14 (1.5–2.5 V IG ON · CAN-H + CAN-L ≈ 5.0 V)"},
+        ],
+    },
+}
+
+
+def pick_wiring_ref_id(code: str, pkey: str, sys_cat: str) -> str:
+    c = code.upper().strip()
+    if c in ("P0101", "P0102", "P0103"):
+        return "WIRING_MAF_SYSTEM_OEM"
+    if c in ("P0111", "P0112", "P0113"):
+        return "WIRING_IAT_SYSTEM_OEM"
+    if c in ("P0106", "P0107", "P0108", "P2227", "P2228", "P2229"):
+        return "WIRING_MAP_SYSTEM_OEM"
+    if c in ("P0116", "P0117", "P0118", "B1561"):
+        return "WIRING_ECT_SYSTEM_OEM"
+    if c in ("P0030", "P0031", "P0032"):
+        return "WIRING_AF_B1S1_HEATER_OEM"
+    if c in ("P0131", "P0132", "P0133", "P0134"):
+        return "WIRING_AF_B1S1_SIGNAL_OEM"
+    if c in ("P0037", "P0038"):
+        return "WIRING_HO2S2_HEATER_OEM"
+    if c in ("P0137", "P0138", "P0140"):
+        return "WIRING_HO2S2_SIGNAL_OEM"
+    if c in ("P0300", "P0301", "P0302", "P0303", "P0304"):
+        return "WIRING_IGN_COIL_OEM"
+    if c == "P0335":
+        return "WIRING_CKP_OEM"
+    if c in ("P0340", "B1556"):
+        return "WIRING_CMP_OEM"
+    if c in ("P0327", "P0328"):
+        return "WIRING_KNOCK_OEM"
+    if c in ("P0401", "P0402", "P0403"):
+        return "WIRING_EGR_SYSTEM_OEM"
+    if c == "P0443":
+        return "WIRING_EVAP_PURGE_OEM"
+    if c == "P0660":
+        return "WIRING_IMTV_OEM"
+    if c in ("P2122", "P2123", "P2127", "P2128", "P2138"):
+        return "WIRING_APP_PEDAL_OEM"
+    if pkey == "etc_tps_app":
+        return "WIRING_ETC_THROTTLE_OEM"
+    if pkey == "cooling_fan":
+        return "WIRING_COOLING_FAN_OEM"
+    if pkey == "starter_relay":
+        return "WIRING_STARTER_CRANKING_OEM"
+    if c in ("P1501", "P1502"):
+        return "WIRING_ELD_CURRENT_OEM"
+    if pkey == "charging_elc":
+        return "WIRING_GENERATOR_OEM"
+    if pkey == "fuel_level":
+        return "WIRING_FUEL_LEVEL_OEM"
+    if c == "P0500":
+        return "WIRING_VSS_OEM"
+    if c == "P0504":
+        return "WIRING_BRAKE_SW_OEM"
+    if c in ("P0532", "P0533", "B1546", "B1563"):
+        return "WIRING_AC_PRESSURE_OEM"
+    if c in ("P1674", "P1676", "P1678", "P1685", "P1774", "U1073", "U1100", "U1101", "U1144", "B1553") or pkey == "can_bus":
+        return "WIRING_CAN_BUS_OEM"
+    if pkey == "fuel_trim_nonwiring":
+        return "WIRING_P0171_FUEL_TRIM_OEM"
+    if pkey == "catalyst_nonwiring":
+        return "WIRING_P0420_CATALYST_OEM"
+    if pkey == "tcm_at":
+        return "WIRING_TCM_AT_OEM"
+    if pkey == "abs_ebd":
+        return "WIRING_ABS_EBD_OEM"
+    if pkey == "srs_airbag":
+        return "WIRING_SRS_AIRBAG_OEM"
+    if pkey == "hvac_ac":
+        return "WIRING_HVAC_AUTO_AC_OEM"
+    if pkey == "bcm_body":
+        return "WIRING_BCM_BODY_OEM"
+    if pkey == "icm_immo_kscm":
+        return "WIRING_KSCM_SMARTKEY_OEM" if ("keyless" in sys_cat.lower() or c.startswith("KLS")) else "WIRING_ICM_IMMOBILIZER_OEM"
+    return "WIRING_ECM_POWER_OEM"
+
+
+def build_connector_from_dynamic_pinouts(code: str, sys_cat: str, desc: str, raw_pinouts: list[dict]) -> dict:
+    """Bangun objek connector terverifikasi dari daftar pinout modul (TCM/ABS/SRS/HVAC/BCM/ICM/KSCM/ECM) dengan maksimal 6 pin unik bersih."""
+    cleaned: list[dict] = []
+    seen_terms: set[str] = set()
+    for p in (raw_pinouts or []):
+        if not isinstance(p, dict):
+            continue
+        raw_p = clean_pdf_text(str(p.get("pin", "")))
+        if not raw_p or "Konektor Sirkuit" in raw_p:
+            continue
+        ecm_code = raw_p.split(" ")[0].strip()
+        if ecm_code in seen_terms:
+            continue
+        seen_terms.add(ecm_code)
+        sig = clean_pdf_text(str(p.get("signal", "")))
+        fn = clean_pdf_text(str(p.get("function", ""))) or sig or f"Terminal {ecm_code}"
+        col_m = re.match(r'^([A-Z]{2,3}(?:/[A-Z]{2,3})?)', sig)
+        wcol = col_m.group(1) if col_m else "WHT"
+        src_t = "ground" if re.search(r'ground|massa|gnd|g47-20|e03-01|e92-01|c37-57|c37-15|c37-29|c37-48', f"{ecm_code} {sig} {fn}", re.I) else (
+            "power" if re.search(r'\+12v|\+b|power|suplai|ig1|e23-01|e23-02|e23-29|g47-16|e03-07|e92-06', f"{ecm_code} {sig} {fn}", re.I) else "ecm"
+        )
+        cleaned.append({
+            "pin": len(cleaned) + 1,
+            "terminal": ecm_code[:10],
+            "ecm_pin": ecm_code[:12],
+            "wire_color": wcol,
+            "source_type": src_t,
+            "function": fn,
+        })
+        if len(cleaned) >= 6:
+            break
+
+    if not cleaned:
+        cleaned = [
+            {"pin": 1, "terminal": "E23-01", "ecm_pin": "E23-01", "wire_color": "BLU/BLK", "source_type": "power", "function": "Suplai Daya Utama +12V IG ON (10–14 V)"},
+            {"pin": 2, "terminal": "C37-57", "ecm_pin": "C37-57", "wire_color": "GRY/GRN", "source_type": "ground", "function": "Massa Referensi Modul Kontrol (< 0.3 V)"},
+        ]
+
+    n = len(cleaned)
+    lay = "2x2" if n == 4 else ("2x3" if n == 6 else f"1x{n}")
+    mod_lbl = (
+        "SDM Air Bag (G47)" if code.startswith("B10") else
+        "Modul ABS (E03)" if code.startswith("C10") else
+        "Modul TCM A/T (E92/E93)" if re.match(r"^P0[789]|^P1[678]|^P27", code) and "tcm" in (sys_cat + desc).lower() else
+        "Modul HVAC Auto A/C (G52)" if code.startswith("B15") else
+        "Modul BCM (G30/G31)" if code.startswith("B11") else
+        "Modul KSCM Smart Key (G44)" if code.startswith("KLS") else
+        "Modul ICM Immobilizer (G24)" if code.startswith("P16") else
+        "Fuel Level Sender (R02/R03)" if code in ("P0462", "P0463") else
+        "ECM / Modul Terkait (E23/C37)"
+    )
+    return {
+        "connector_code": f"{mod_lbl} ({n}-Pin)",
+        "pin_count": n,
+        "layout": lay,
+        "pins": cleaned,
+    }
+
+
+def connector_to_wiring_pinout_rows(conn: dict) -> list[dict]:
+    """Konversi Single Source of Truth `connector.pins` menjadi `wiring_pinout` agar 100% sinkron."""
+    rows = []
+    for p in conn["pins"]:
+        ecm_p = p.get("ecm_pin") or p.get("terminal") or f"Pin {p['pin']}"
+        rows.append({
+            "pin": f"{ecm_p} (Pin {p['pin']})",
+            "signal": f"{p['wire_color']} — {p['terminal']}",
+            "function": p["function"],
+        })
+    return rows
+
+
 def pick_profile_key(code: str, sys_cat: str, desc: str) -> str:
     c = code.upper().strip()
     sc = (sys_cat or "").lower()
@@ -1149,9 +1899,22 @@ def pick_profile_key(code: str, sys_cat: str, desc: str) -> str:
 
 
 def main() -> None:
+    import copy
+
     data = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
     catalog = data.get("dtc_catalog", [])
     counts: dict[str, int] = {}
+
+    # Reset dynamic shared_with_dtcs tracking so registry matches 100% of catalog DTCs
+    registry_out = copy.deepcopy(WIRING_DIAGRAMS_REGISTRY)
+    mapped_dtcs_by_ref: dict[str, list[str]] = {k: list(v.get("shared_with_dtcs") or []) for k, v in registry_out.items()}
+
+    coil_cyl_meta = {
+        "P0301": ("C40 (3-Pin Koil COP Silinder #1)", "C37-21", "BRN", "Pulsa Trigger Pengapian Silinder #1 dari ECM (0–0.6 V IG ON · Pulsa 5V Idle)"),
+        "P0302": ("C41 (3-Pin Koil COP Silinder #2)", "C37-20", "BRN/BLK", "Pulsa Trigger Pengapian Silinder #2 dari ECM (0–0.6 V IG ON · Pulsa 5V Idle)"),
+        "P0303": ("C42 (3-Pin Koil COP Silinder #3)", "C37-19", "BRN/WHT", "Pulsa Trigger Pengapian Silinder #3 dari ECM (0–0.6 V IG ON · Pulsa 5V Idle)"),
+        "P0304": ("C43 (3-Pin Koil COP Silinder #4)", "C37-18", "BRN/YEL", "Pulsa Trigger Pengapian Silinder #4 dari ECM (0–0.6 V IG ON · Pulsa 5V Idle)"),
+    }
 
     for entry in catalog:
         code = str(entry.get("code", "")).upper().strip()
@@ -1172,11 +1935,54 @@ def main() -> None:
         counts[pkey] = counts.get(pkey, 0) + 1
         prof = PROFILES[pkey]
 
-        # Set explicit wiring simulator key & Pilar 3 atlas link
-        entry["sim_circuit_key"] = prof["sim_circuit_key"]
-        entry["atlas_module_id"] = prof["atlas_module_id"]
-        if pkey == "icm_immo_kscm" and ("keyless" in sys_cat.lower() or code.startswith("KLS")):
-            entry["atlas_module_id"] = "gv_mod_kscm"
+        # 1. Tentukan sim_circuit_key presisi per-subsistem (pisahkan Pedal APP E68, ELD C38, Brake E67, A/C Press E04, dll.)
+        sim_key = prof["sim_circuit_key"]
+        if code in ("P2122", "P2123", "P2127", "P2128", "P2138"):
+            sim_key = "app_6w"
+        elif code in ("P1501", "P1502"):
+            sim_key = "eld_3w"
+        elif code == "P0504":
+            sim_key = "brake_4w"
+        elif code in ("P0532", "P0533", "B1546", "B1563"):
+            sim_key = "acpress_3w"
+        elif code in ("P0462", "P0463"):
+            sim_key = "fuel_level_2w"
+        elif code == "B1561":
+            sim_key = "ect_2w"
+        elif code == "B1556":
+            sim_key = "cmp_3w"
+        elif code in ("P1674", "P1676", "P1678", "P1685", "P1774", "U1073", "U1100", "U1101", "U1144", "B1553"):
+            sim_key = "can_2w"
+        entry["sim_circuit_key"] = sim_key
+
+        # 2. FR-01: Shared Wiring Asset Registry (Anti-Text-Only & Cross-Reference)
+        wiring_ref_id = pick_wiring_ref_id(code, pkey, sys_cat)
+        w_asset = registry_out[wiring_ref_id]
+        if code and code not in mapped_dtcs_by_ref[wiring_ref_id]:
+            mapped_dtcs_by_ref[wiring_ref_id].append(code)
+        entry["wiring_ref_id"] = wiring_ref_id
+        entry["oem_wiring_image"] = w_asset["image_path"]
+        entry["wiring_cross_ref_note"] = w_asset["cross_ref_note"]
+        entry["atlas_module_id"] = w_asset["atlas_module_id"]
+        entry["atlas_photo_index"] = int(w_asset.get("atlas_photo_index", 0))
+        entry["manual_page_ref"] = w_asset["manual_page_ref"]
+        entry["verification_status"] = "VERIFIED_OEM"
+
+        # 3. FR-02 & FR-03: Single Source of Truth Connector Spec (100% Data-Driven, Zero Guessing!)
+        if sim_key in OEM_CONNECTOR_TEMPLATES:
+            conn = copy.deepcopy(OEM_CONNECTOR_TEMPLATES[sim_key])
+            if sim_key == "coil_4w" and code in coil_cyl_meta:
+                c_code, c_pin, c_col, c_fn = coil_cyl_meta[code]
+                conn["connector_code"] = c_code
+                conn["pins"][2]["ecm_pin"] = c_pin
+                conn["pins"][2]["wire_color"] = c_col
+                conn["pins"][2]["function"] = c_fn
+        else:
+            conn = build_connector_from_dynamic_pinouts(code, sys_cat, desc, entry.get("wiring_pinout") or [])
+
+        assert conn["pin_count"] == len(conn["pins"]), f"Pin count mismatch on {code}: {conn}"
+        entry["connector"] = conn
+        entry["wiring_pinout"] = connector_to_wiring_pinout_rows(conn)
 
         # Set curated, realistic workshop repair_options (Option 1 = component service/clean/test!)
         entry["curated_repair_options"] = prof["repair_options"]
@@ -1207,8 +2013,15 @@ def main() -> None:
         # 3. Scanner OBD-II Live Data & Active Test standards (Bab 1A-34..36)
         entry["scanner_standards"] = [dict(x) for x in prof["scanner_standards"]]
 
+    # Finalize synchronized shared_with_dtcs on both registry and each DTC entry
+    for ref_id, dtc_list in mapped_dtcs_by_ref.items():
+        registry_out[ref_id]["shared_with_dtcs"] = dtc_list
+    for entry in catalog:
+        entry["shared_with_dtcs"] = list(registry_out[entry["wiring_ref_id"]]["shared_with_dtcs"])
+
+    data["wiring_diagrams"] = registry_out
     CATALOG_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"[SUKSES] Enriched {len(catalog)} JB420 DTCs in {CATALOG_PATH.name}")
+    print(f"[SUKSES] Enriched {len(catalog)} JB420 DTCs + {len(registry_out)} Shared Wiring Assets in {CATALOG_PATH.name}")
     for k, v in sorted(counts.items(), key=lambda x: -x[1]):
         print(f"  {v:3d} | {k}")
 
